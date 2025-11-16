@@ -176,7 +176,7 @@ export default function IdlePage() {
     // Validate inputs
     if (!start || !goal) {
       console.log('  ❌ INVALID INPUT - Returning default position');
-      return [start || { x: 15, y: 15 }];
+      return [start || { x: 50, y: 50 }];
     }
 
     const distance = Math.sqrt(Math.pow(goal.x - start.x, 2) + Math.pow(goal.y - start.y, 2));
@@ -377,8 +377,8 @@ export default function IdlePage() {
       }
       attempts++;
     }
-    // Fallback to safe position in top-left area (away from walls at 25, 50, 75)
-    return { x: 15, y: 15 };
+    // Fallback to center position (safe in open box)
+    return { x: 50, y: 50 };
   }, [isInsideObstacle]);
 
   // Initialize - Only runs once on mount
@@ -432,117 +432,7 @@ export default function IdlePage() {
     });
 
     // Create maze corridors - vertical and horizontal walls with gaps
-    const corridorWidth = 2;
-    const gapSize = 20; // Size of openings in walls - increased for easier navigation
-
-    // Vertical walls creating corridors
-    const verticalWalls = [25, 50, 75];
-    verticalWalls.forEach((xPos, index) => {
-      // Each vertical wall has gaps at different heights
-      const gapPositions = [
-        { start: 20, end: 20 + gapSize },
-        { start: 50, end: 50 + gapSize },
-        { start: 80, end: 80 + gapSize }
-      ];
-
-      // Shuffle gaps for variety
-      const selectedGap = gapPositions[(index * 2) % gapPositions.length];
-      const selectedGap2 = gapPositions[(index * 2 + 1) % gapPositions.length];
-
-      let currentY = wallThickness + 2;
-
-      // First segment (before first gap)
-      if (currentY < selectedGap.start) {
-        initialObstacles.push({
-          id: obstacleIdRef.current++,
-          x: xPos,
-          y: currentY,
-          width: corridorWidth,
-          height: selectedGap.start - currentY,
-          color: obstacleColors[Math.floor(Math.random() * obstacleColors.length)]
-        });
-      }
-      currentY = selectedGap.end;
-
-      // Second segment (between gaps)
-      if (selectedGap2.start > selectedGap.end && currentY < selectedGap2.start) {
-        initialObstacles.push({
-          id: obstacleIdRef.current++,
-          x: xPos,
-          y: currentY,
-          width: corridorWidth,
-          height: selectedGap2.start - currentY,
-          color: obstacleColors[Math.floor(Math.random() * obstacleColors.length)]
-        });
-      }
-      currentY = selectedGap2.end;
-
-      // Third segment (after second gap to bottom)
-      if (currentY < 98 - wallThickness - 2) {
-        initialObstacles.push({
-          id: obstacleIdRef.current++,
-          x: xPos,
-          y: currentY,
-          width: corridorWidth,
-          height: 98 - wallThickness - 2 - currentY,
-          color: obstacleColors[Math.floor(Math.random() * obstacleColors.length)]
-        });
-      }
-    });
-
-    // Horizontal walls creating corridors
-    const horizontalWalls = [25, 50, 75];
-    horizontalWalls.forEach((yPos, index) => {
-      // Each horizontal wall has gaps at different positions
-      const gapPositions = [
-        { start: 15, end: 15 + gapSize },
-        { start: 45, end: 45 + gapSize },
-        { start: 75, end: 75 + gapSize }
-      ];
-
-      const selectedGap = gapPositions[(index * 2 + 1) % gapPositions.length];
-      const selectedGap2 = gapPositions[(index * 2) % gapPositions.length];
-
-      let currentX = wallThickness + 2;
-
-      // First segment
-      if (currentX < selectedGap.start) {
-        initialObstacles.push({
-          id: obstacleIdRef.current++,
-          x: currentX,
-          y: yPos,
-          width: selectedGap.start - currentX,
-          height: corridorWidth,
-          color: obstacleColors[Math.floor(Math.random() * obstacleColors.length)]
-        });
-      }
-      currentX = selectedGap.end;
-
-      // Second segment
-      if (selectedGap2.start > selectedGap.end && currentX < selectedGap2.start) {
-        initialObstacles.push({
-          id: obstacleIdRef.current++,
-          x: currentX,
-          y: yPos,
-          width: selectedGap2.start - currentX,
-          height: corridorWidth,
-          color: obstacleColors[Math.floor(Math.random() * obstacleColors.length)]
-        });
-      }
-      currentX = selectedGap2.end;
-
-      // Third segment
-      if (currentX < 98 - wallThickness - 2) {
-        initialObstacles.push({
-          id: obstacleIdRef.current++,
-          x: currentX,
-          y: yPos,
-          width: 98 - wallThickness - 2 - currentX,
-          height: corridorWidth,
-          color: obstacleColors[Math.floor(Math.random() * obstacleColors.length)]
-        });
-      }
-    });
+    // REMOVED: Now using simple open box design with only outer walls
 
     setObstacles(initialObstacles);
     obstaclesRef.current = initialObstacles;
@@ -571,8 +461,8 @@ export default function IdlePage() {
         }
         attempts++;
       }
-      // Fallback to safe position in top-left area (away from walls at 25, 50, 75)
-      return { x: 15, y: 15 };
+      // Fallback to center position (safe in open box)
+      return { x: 50, y: 50 };
     };
 
     const initialCakes: Cake[] = [];
@@ -613,6 +503,12 @@ export default function IdlePage() {
     }
     setGhosts(initialGhosts);
     ghostsRef.current = initialGhosts; // Sync ref immediately to prevent race condition
+
+    // Set Pacman to a random valid position
+    const pacmanStartPos = getValidPos();
+    setPacmanPosition(pacmanStartPos);
+    pacmanPosRef.current = pacmanStartPos;
+    lastPacmanPos.current = pacmanStartPos;
   }, []); // Only run once on mount
 
   // Mouth animation
