@@ -3,6 +3,8 @@ import { AuthRequest } from '../models/types';
 import { query, callProcedure } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
+import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
+import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
 
 // Get all available menu items for kiosk
 export const getMenuItems = async (req: AuthRequest, res: Response) => {
@@ -80,7 +82,7 @@ export const getCategories = async (req: AuthRequest, res: Response) => {
 export const getItemDetails = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
-  const [item] = await query(
+  const item = getFirstRow<any>(await query(
     `SELECT mi.*,
       (SELECT price FROM menu_item_price
        WHERE menu_item_id = mi.menu_item_id
@@ -91,7 +93,7 @@ export const getItemDetails = async (req: AuthRequest, res: Response) => {
      FROM menu_item mi
      WHERE mi.menu_item_id = ? AND mi.is_deleted = FALSE`,
     [id]
-  );
+  ));
 
   if (!item) {
     throw new AppError('Item not found', 404);

@@ -3,6 +3,8 @@ import { AuthRequest } from '../models/types';
 import { query, callProcedure } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
+import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
+import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
 
 // ==== PROMOTION ASSIGNMENT ====
 
@@ -11,10 +13,10 @@ export const assignItemsToPromotion = async (req: AuthRequest, res: Response) =>
   const { promotion_id, menu_item_ids } = req.body;
 
   // Verify promotion exists
-  const [promotion] = await query(
+  const promotion = getFirstRow<any>(await query(
     'SELECT * FROM promotion_rules WHERE promotion_id = ?',
     [promotion_id]
-  );
+  ));
 
   if (!promotion) {
     throw new AppError('Promotion not found', 404);
@@ -45,10 +47,10 @@ export const assignCategoriesToPromotion = async (req: AuthRequest, res: Respons
   const { promotion_id, category_ids } = req.body;
 
   // Verify promotion exists
-  const [promotion] = await query(
+  const promotion = getFirstRow<any>(await query(
     'SELECT * FROM promotion_rules WHERE promotion_id = ?',
     [promotion_id]
-  );
+  ));
 
   if (!promotion) {
     throw new AppError('Promotion not found', 404);

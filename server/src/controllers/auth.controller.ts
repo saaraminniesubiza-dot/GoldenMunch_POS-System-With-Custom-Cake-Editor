@@ -4,19 +4,21 @@ import jwt from 'jsonwebtoken';
 import { query } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
+import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
+import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
 import { JwtPayload } from '../models/types';
 
 // Admin login
 export const adminLogin = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
-  const [admin] = await query(
+  const admin = getFirstRow<any>(await query(
     `SELECT a.*, r.role_name
      FROM admin a
      JOIN roles r ON a.role_id = r.role_id
      WHERE a.username = ? AND a.is_active = TRUE`,
     [username]
-  );
+  ));
 
   if (!admin) {
     throw new AppError('Invalid credentials', 401);
@@ -42,13 +44,10 @@ export const adminLogin = async (req: Request, res: Response) => {
     type: 'admin',
   };
 
-  const token = jwt.sign(
-    payload,
-    process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET || 'secret',
-    {
-      expiresIn: process.env.ADMIN_JWT_EXPIRES_IN || '8h',
-    }
-  );
+  const secret = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET || 'secret';
+  const token = jwt.sign(payload, secret, {
+    expiresIn: process.env.ADMIN_JWT_EXPIRES_IN || '8h',
+  } as jwt.SignOptions);
 
   res.json(
     successResponse('Login successful', {
@@ -68,10 +67,10 @@ export const adminLogin = async (req: Request, res: Response) => {
 export const cashierLogin = async (req: Request, res: Response) => {
   const { cashier_code, pin } = req.body;
 
-  const [cashier] = await query(
+  const cashier = getFirstRow<any>(await query(
     'SELECT * FROM cashier WHERE cashier_code = ? AND is_active = TRUE',
     [cashier_code]
-  );
+  ));
 
   if (!cashier) {
     throw new AppError('Invalid credentials', 401);
@@ -90,13 +89,10 @@ export const cashierLogin = async (req: Request, res: Response) => {
     type: 'cashier',
   };
 
-  const token = jwt.sign(
-    payload,
-    process.env.CASHIER_JWT_SECRET || process.env.JWT_SECRET || 'secret',
-    {
-      expiresIn: process.env.CASHIER_JWT_EXPIRES_IN || '12h',
-    }
-  );
+  const secret = process.env.CASHIER_JWT_SECRET || process.env.JWT_SECRET || 'secret';
+  const token = jwt.sign(payload, secret, {
+    expiresIn: process.env.CASHIER_JWT_EXPIRES_IN || '12h',
+  } as jwt.SignOptions);
 
   res.json(
     successResponse('Login successful', {

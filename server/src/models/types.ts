@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 // Enums based on database schema
 export enum ItemType {
   CAKE = 'cake',
@@ -641,5 +643,5 @@ export interface JwtPayload {
 export interface AuthRequest extends Request {
   user?: JwtPayload;
   file?: Express.Multer.File;
-  files?: Express.Multer.File[];
+  files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
 }

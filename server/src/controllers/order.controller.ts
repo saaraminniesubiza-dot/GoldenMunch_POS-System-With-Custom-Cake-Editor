@@ -3,6 +3,8 @@ import { AuthRequest, CreateOrderRequest, OrderItemRequest } from '../models/typ
 import { query, transaction, callProcedure } from '../config/database';
 import { successResponse, calculateOrderTotal, generateSessionId } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
+import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
+import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
 import { PoolConnection } from 'mysql2/promise';
 
 // Create order (from kiosk or cashier)
@@ -64,35 +66,38 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
 
         // Get theme cost if applicable
         if (item.custom_cake_design.theme_id) {
-          const [theme] = await conn.query(
+          const [themeRows] = await conn.query(
             'SELECT base_additional_cost FROM custom_cake_theme WHERE theme_id = ?',
             [item.custom_cake_design.theme_id]
           );
-          if (Array.isArray(theme) && theme.length > 0) {
-            designCost += theme[0].base_additional_cost || 0;
+          if (Array.isArray(themeRows) && themeRows.length > 0) {
+            const theme = themeRows[0] as any;
+            designCost += theme.base_additional_cost || 0;
           }
         }
       }
 
       // Get flavor cost
       if (item.flavor_id) {
-        const [flavor] = await conn.query(
+        const [flavorRows] = await conn.query(
           'SELECT additional_cost FROM cake_flavors WHERE flavor_id = ?',
           [item.flavor_id]
         );
-        if (Array.isArray(flavor) && flavor.length > 0) {
-          flavorCost = flavor[0].additional_cost || 0;
+        if (Array.isArray(flavorRows) && flavorRows.length > 0) {
+          const flavor = flavorRows[0] as any;
+          flavorCost = flavor.additional_cost || 0;
         }
       }
 
       // Get size multiplier
       if (item.size_id) {
-        const [size] = await conn.query(
+        const [sizeRows] = await conn.query(
           'SELECT size_multiplier FROM cake_sizes WHERE size_id = ?',
           [item.size_id]
         );
-        if (Array.isArray(size) && size.length > 0) {
-          sizeMultiplier = size[0].size_multiplier || 1;
+        if (Array.isArray(sizeRows) && sizeRows.length > 0) {
+          const size = sizeRows[0] as any;
+          sizeMultiplier = size.size_multiplier || 1;
         }
       }
 
@@ -116,7 +121,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     }
 
     // Get applicable tax
-    const [taxRule] = await conn.query(
+    const [taxRuleRows] = await conn.query(
       `SELECT * FROM tax_rules
        WHERE is_active = TRUE
        AND effective_date <= CURDATE()
@@ -124,7 +129,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
        LIMIT 1`
     );
 
-    const taxRate = Array.isArray(taxRule) && taxRule.length > 0 ? taxRule[0].tax_rate : 0;
+    const taxRate = Array.isArray(taxRuleRows) && taxRuleRows.length > 0 ? (taxRuleRows[0] as any).tax_rate : 0;
 
     const totals = calculateOrderTotal(subtotal, taxRate, 0);
 
@@ -155,13 +160,13 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     const orderId = (orderResult as any).insertId;
 
     // Get the generated verification code and order number
-    const [orderInfo] = await conn.query(
+    const [orderInfoRows] = await conn.query(
       'SELECT order_number, verification_code FROM customer_order WHERE order_id = ?',
       [orderId]
     );
 
-    const orderNumber = Array.isArray(orderInfo) && orderInfo.length > 0 ? orderInfo[0].order_number : '';
-    const verificationCode = Array.isArray(orderInfo) && orderInfo.length > 0 ? orderInfo[0].verification_code : '';
+    const orderNumber = Array.isArray(orderInfoRows) && orderInfoRows.length > 0 ? (orderInfoRows[0] as any).order_number : '';
+    const verificationCode = Array.isArray(orderInfoRows) && orderInfoRows.length > 0 ? (orderInfoRows[0] as any).verification_code : '';
 
     // Insert order items
     for (const orderItem of orderItems) {
@@ -204,13 +209,13 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
 export const getOrderByVerificationCode = async (req: AuthRequest, res: Response) => {
   const { code } = req.params;
 
-  const [order] = await query(
+  const order = getFirstRow<any>(await query(
     `SELECT * FROM customer_order
      WHERE verification_code = ?
      AND DATE(order_datetime) = CURDATE()
      AND is_deleted = FALSE`,
     [code]
-  );
+  ));
 
   if (!order) {
     throw new AppError('Order not found', 404);
@@ -270,10 +275,10 @@ export const verifyOrder = async (req: AuthRequest, res: Response) => {
 export const getOrderDetails = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
-  const [order] = await query(
+  const order = getFirstRow<any>(await query(
     'SELECT * FROM customer_order WHERE order_id = ? AND is_deleted = FALSE',
     [id]
-  );
+  ));
 
   if (!order) {
     throw new AppError('Order not found', 404);

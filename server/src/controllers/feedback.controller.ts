@@ -3,6 +3,8 @@ import { AuthRequest } from '../models/types';
 import { query } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
+import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
+import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
 
 // ==== CUSTOMER FEEDBACK ====
 
@@ -20,10 +22,10 @@ export const submitFeedback = async (req: AuthRequest, res: Response) => {
   } = req.body;
 
   // Verify order exists
-  const [order] = await query(
+  const order = getFirstRow<any>(await query(
     'SELECT * FROM customer_order WHERE order_id = ?',
     [order_id]
-  );
+  ));
 
   if (!order) {
     throw new AppError('Order not found', 404);
@@ -38,7 +40,7 @@ export const submitFeedback = async (req: AuthRequest, res: Response) => {
   }
 
   // Create feedback
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO customer_feedback
      (order_id, customer_id, rating, service_rating, food_rating, cleanliness_rating,
       feedback_text, feedback_type, is_anonymous)
@@ -57,7 +59,7 @@ export const submitFeedback = async (req: AuthRequest, res: Response) => {
   );
 
   res.status(201).json(
-    successResponse('Feedback submitted', { id: (result as any).insertId })
+    successResponse('Feedback submitted', { id: getInsertId(result) })
   );
 };
 
@@ -81,7 +83,7 @@ export const getFeedbackStats = async (req: AuthRequest, res: Response) => {
   const stats = await query(sql, [date_from, date_to]);
 
   // Get overall stats
-  const [overall] = await query(
+  const overall = getFirstRow<any>(await query(
     `SELECT
        COUNT(*) as total_feedback,
        AVG(rating) as overall_rating,
@@ -91,7 +93,7 @@ export const getFeedbackStats = async (req: AuthRequest, res: Response) => {
      FROM customer_feedback
      WHERE DATE(created_at) BETWEEN ? AND ?`,
     [date_from, date_to]
-  );
+  ));
 
   res.json(
     successResponse('Feedback statistics retrieved', {

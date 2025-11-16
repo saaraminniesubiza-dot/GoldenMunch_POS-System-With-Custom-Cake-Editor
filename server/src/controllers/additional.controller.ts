@@ -3,24 +3,34 @@ import { AuthRequest } from '../models/types';
 import { query } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
+import { getFirstRow, getAllRows, getInsertId, parseQueryNumber, parseQueryString, parseQueryBoolean } from '../utils/typeGuards';
 import bcrypt from 'bcrypt';
 
 // ==== CUSTOMER MANAGEMENT ====
 
 export const createCustomer = async (req: AuthRequest, res: Response) => {
-  const { first_name, last_name, phone, email, date_of_birth } = req.body;
+  const { first_name, last_name, phone, email, date_of_birth } = req.body as {
+    first_name: string;
+    last_name: string;
+    phone: string;
+    email?: string;
+    date_of_birth?: string;
+  };
 
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO customer (first_name, last_name, phone, email, date_of_birth)
      VALUES (?, ?, ?, ?, ?)`,
     [first_name, last_name, phone, email || null, date_of_birth || null]
   );
 
-  res.status(201).json(successResponse('Customer created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Customer created', { id: getInsertId(result) }));
 };
 
 export const getCustomers = async (req: AuthRequest, res: Response) => {
-  const { search, is_active, page = 1, limit = 20 } = req.query;
+  const search = parseQueryString(req.query.search);
+  const is_active = req.query.is_active;
+  const page = parseQueryNumber(req.query.page, 1);
+  const limit = parseQueryNumber(req.query.limit, 20);
 
   let sql = 'SELECT * FROM customer WHERE 1=1';
   const params: any[] = [];
@@ -32,13 +42,14 @@ export const getCustomers = async (req: AuthRequest, res: Response) => {
 
   if (is_active !== undefined) {
     sql += ' AND is_active = ?';
-    params.push(is_active === 'true');
+    params.push(parseQueryBoolean(is_active));
   }
 
   sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-  params.push(Number(limit), (Number(page) - 1) * Number(limit));
+  params.push(limit, (page - 1) * limit);
 
-  const customers = await query(sql, params);
+  const result = await query(sql, params);
+  const customers = getAllRows(result);
 
   res.json(successResponse('Customers retrieved', customers));
 };
@@ -46,14 +57,14 @@ export const getCustomers = async (req: AuthRequest, res: Response) => {
 export const getCustomer = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
-  const [customer] = await query(
+  const customer = getFirstRow<any>(await query(
     `SELECT c.*, COUNT(DISTINCT co.order_id) as order_count
      FROM customer c
      LEFT JOIN customer_order co ON c.customer_id = co.customer_id
      WHERE c.customer_id = ?
      GROUP BY c.customer_id`,
     [id]
-  );
+  ));
 
   if (!customer) {
     throw new AppError('Customer not found', 404);
@@ -91,13 +102,13 @@ export const updateCustomer = async (req: AuthRequest, res: Response) => {
 export const createSupplier = async (req: AuthRequest, res: Response) => {
   const { supplier_name, contact_person, phone, email, address } = req.body;
 
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO suppliers (supplier_name, contact_person, phone, email, address)
      VALUES (?, ?, ?, ?, ?)`,
     [supplier_name, contact_person || null, phone || null, email || null, address || null]
   );
 
-  res.status(201).json(successResponse('Supplier created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Supplier created', { id: getInsertId(result) }));
 };
 
 export const getSuppliers = async (req: AuthRequest, res: Response) => {
@@ -148,13 +159,13 @@ export const createCashier = async (req: AuthRequest, res: Response) => {
   // Hash PIN
   const pin_hash = await bcrypt.hash(pin, 10);
 
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO cashier (name, cashier_code, pin_hash, phone, email, hourly_rate)
      VALUES (?, ?, ?, ?, ?, ?)`,
     [name, cashier_code, pin_hash, phone || null, email || null, hourly_rate || null]
   );
 
-  res.status(201).json(successResponse('Cashier created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Cashier created', { id: getInsertId(result) }));
 };
 
 export const getCashiers = async (req: AuthRequest, res: Response) => {
@@ -208,13 +219,13 @@ export const createTaxRule = async (req: AuthRequest, res: Response) => {
   const { tax_name, tax_type, tax_rate, fixed_amount, is_inclusive, effective_date } = req.body;
   const admin_id = req.user?.id;
 
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO tax_rules (tax_name, tax_type, tax_rate, fixed_amount, is_inclusive, effective_date, created_by)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [tax_name, tax_type, tax_rate || 0, fixed_amount || 0, is_inclusive || false, effective_date, admin_id]
   );
 
-  res.status(201).json(successResponse('Tax rule created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Tax rule created', { id: getInsertId(result) }));
 };
 
 export const getTaxRules = async (req: AuthRequest, res: Response) => {
@@ -256,12 +267,12 @@ export const createFlavor = async (req: AuthRequest, res: Response) => {
   const { flavor_name, description, additional_cost, display_order } = req.body;
   const image_url = req.file ? `/uploads/products/${req.file.filename}` : null;
 
-  const [result] = await query(
+  const result = await query(
     'INSERT INTO cake_flavors (flavor_name, description, image_url, additional_cost, display_order) VALUES (?, ?, ?, ?, ?)',
     [flavor_name, description || null, image_url, additional_cost || 0, display_order || 0]
   );
 
-  res.status(201).json(successResponse('Flavor created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Flavor created', { id: getInsertId(result) }));
 };
 
 export const getFlavors = async (req: AuthRequest, res: Response) => {
@@ -291,13 +302,13 @@ export const updateFlavor = async (req: AuthRequest, res: Response) => {
 export const createSize = async (req: AuthRequest, res: Response) => {
   const { size_name, description, serves_people, diameter_inches, size_multiplier, display_order } = req.body;
 
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO cake_sizes (size_name, description, serves_people, diameter_inches, size_multiplier, display_order)
      VALUES (?, ?, ?, ?, ?, ?)`,
     [size_name, description || null, serves_people || null, diameter_inches || null, size_multiplier || 1, display_order || 0]
   );
 
-  res.status(201).json(successResponse('Size created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Size created', { id: getInsertId(result) }));
 };
 
 export const getSizes = async (req: AuthRequest, res: Response) => {
@@ -324,13 +335,13 @@ export const createTheme = async (req: AuthRequest, res: Response) => {
   const { theme_name, description, base_additional_cost, preparation_days, display_order } = req.body;
   const theme_image_url = req.file ? `/uploads/products/${req.file.filename}` : null;
 
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO custom_cake_theme (theme_name, description, theme_image_url, base_additional_cost, preparation_days, display_order)
      VALUES (?, ?, ?, ?, ?, ?)`,
     [theme_name, description || null, theme_image_url, base_additional_cost || 0, preparation_days || 3, display_order || 0]
   );
 
-  res.status(201).json(successResponse('Theme created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Theme created', { id: getInsertId(result) }));
 };
 
 export const getThemes = async (req: AuthRequest, res: Response) => {
@@ -380,12 +391,12 @@ export const createKioskSetting = async (req: AuthRequest, res: Response) => {
   const { setting_key, setting_value, setting_type, description } = req.body;
   const admin_id = req.user?.id;
 
-  const [result] = await query(
+  const result = await query(
     'INSERT INTO kiosk_settings (setting_key, setting_value, setting_type, description, updated_by) VALUES (?, ?, ?, ?, ?)',
     [setting_key, setting_value, setting_type || 'string', description || null, admin_id]
   );
 
-  res.status(201).json(successResponse('Kiosk setting created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Kiosk setting created', { id: getInsertId(result) }));
 };
 
 // ==== STOCK ADJUSTMENT REASONS ====
@@ -398,12 +409,12 @@ export const getStockReasons = async (req: AuthRequest, res: Response) => {
 export const createStockReason = async (req: AuthRequest, res: Response) => {
   const { reason_code, reason_description } = req.body;
 
-  const [result] = await query(
+  const result = await query(
     'INSERT INTO stock_adjustment_reason (reason_code, reason_description) VALUES (?, ?)',
     [reason_code, reason_description]
   );
 
-  res.status(201).json(successResponse('Stock reason created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Stock reason created', { id: getInsertId(result) }));
 };
 
 // ==== ORDER TIMELINE ====

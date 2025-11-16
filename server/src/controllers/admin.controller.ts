@@ -3,6 +3,8 @@ import { AuthRequest } from '../models/types';
 import { query, callProcedure } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
+import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
+import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
 
 // ==== MENU MANAGEMENT ====
 
@@ -11,7 +13,7 @@ export const createMenuItem = async (req: AuthRequest, res: Response) => {
   const itemData = req.body;
   const admin_id = req.user?.id;
 
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO menu_item
      (name, description, item_type, unit_of_measure, stock_quantity,
       is_infinite_stock, min_stock_level, can_customize, can_preorder,
@@ -37,7 +39,7 @@ export const createMenuItem = async (req: AuthRequest, res: Response) => {
     ]
   );
 
-  res.status(201).json(successResponse('Menu item created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Menu item created', { id: getInsertId(result) }));
 };
 
 // Update menu item
@@ -125,10 +127,10 @@ export const adjustInventory = async (req: AuthRequest, res: Response) => {
   const admin_id = req.user?.id;
 
   // Get current quantity
-  const [item] = await query(
+  const item = getFirstRow<any>(await query(
     'SELECT stock_quantity FROM menu_item WHERE menu_item_id = ?',
     [menu_item_id]
-  );
+  ));
 
   if (!item) {
     throw new AppError('Menu item not found', 404);
@@ -217,7 +219,7 @@ export const createPromotion = async (req: AuthRequest, res: Response) => {
   const promoData = req.body;
   const admin_id = req.user?.id;
 
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO promotion_rules
      (promotion_name, description, promotion_type, discount_percentage,
       discount_amount, min_purchase_amount, start_date, end_date,
@@ -239,7 +241,7 @@ export const createPromotion = async (req: AuthRequest, res: Response) => {
     ]
   );
 
-  res.status(201).json(successResponse('Promotion created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Promotion created', { id: getInsertId(result) }));
 };
 
 // Get all promotions
@@ -269,12 +271,12 @@ export const createCategory = async (req: AuthRequest, res: Response) => {
   const admin_id = req.user?.id;
   const image_url = req.file ? `/uploads/products/${req.file.filename}` : null;
 
-  const [result] = await query(
+  const result = await query(
     'INSERT INTO category (name, description, image_url, display_order, admin_id) VALUES (?, ?, ?, ?, ?)',
     [name, description, image_url, display_order || 0, admin_id]
   );
 
-  res.status(201).json(successResponse('Category created', { id: (result as any).insertId }));
+  res.status(201).json(successResponse('Category created', { id: getInsertId(result) }));
 };
 
 // Update category

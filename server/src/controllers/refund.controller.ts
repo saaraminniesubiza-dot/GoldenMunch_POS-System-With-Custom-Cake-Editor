@@ -3,6 +3,8 @@ import { AuthRequest } from '../models/types';
 import { query } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
+import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
+import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
 
 // ==== REFUND MANAGEMENT ====
 
@@ -20,17 +22,17 @@ export const createRefundRequest = async (req: AuthRequest, res: Response) => {
   const cashier_id = req.user?.id;
 
   // Verify order exists
-  const [order] = await query(
+  const order = getFirstRow<any>(await query(
     'SELECT * FROM customer_order WHERE order_id = ?',
     [order_id]
-  );
+  ));
 
   if (!order) {
     throw new AppError('Order not found', 404);
   }
 
   // Create refund request
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO refund_request
      (order_id, order_item_id, refund_type, refund_amount, refund_reason,
       reason_details, refund_method, requested_by)
@@ -48,7 +50,7 @@ export const createRefundRequest = async (req: AuthRequest, res: Response) => {
   );
 
   res.status(201).json(
-    successResponse('Refund request created', { id: (result as any).insertId })
+    successResponse('Refund request created', { id: getInsertId(result) })
   );
 };
 
@@ -93,7 +95,7 @@ export const getRefundRequests = async (req: AuthRequest, res: Response) => {
 export const getRefundDetails = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
-  const [refund] = await query(
+  const refund = getFirstRow<any>(await query(
     `SELECT rr.*, co.order_number, co.order_datetime,
             c.name as requested_by_name, a.name as approved_by_name
      FROM refund_request rr
@@ -102,7 +104,7 @@ export const getRefundDetails = async (req: AuthRequest, res: Response) => {
      LEFT JOIN admin a ON rr.approved_by = a.admin_id
      WHERE rr.refund_id = ?`,
     [id]
-  );
+  ));
 
   if (!refund) {
     throw new AppError('Refund request not found', 404);
@@ -157,10 +159,10 @@ export const completeRefund = async (req: AuthRequest, res: Response) => {
   const admin_id = req.user?.id;
 
   // Get refund details
-  const [refund] = await query(
+  const refund = getFirstRow<any>(await query(
     'SELECT * FROM refund_request WHERE refund_id = ?',
     [id]
-  );
+  ));
 
   if (!refund) {
     throw new AppError('Refund request not found', 404);

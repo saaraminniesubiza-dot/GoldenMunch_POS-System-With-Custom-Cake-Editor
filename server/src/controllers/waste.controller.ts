@@ -3,6 +3,8 @@ import { AuthRequest } from '../models/types';
 import { query } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
+import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
+import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
 
 // ==== WASTE TRACKING ====
 
@@ -19,17 +21,17 @@ export const createWasteEntry = async (req: AuthRequest, res: Response) => {
   const cashier_id = req.user?.id;
 
   // Verify menu item exists
-  const [item] = await query(
+  const item = getFirstRow<any>(await query(
     'SELECT * FROM menu_item WHERE menu_item_id = ?',
     [menu_item_id]
-  );
+  ));
 
   if (!item) {
     throw new AppError('Menu item not found', 404);
   }
 
   // Create waste entry
-  const [result] = await query(
+  const result = await query(
     `INSERT INTO waste_tracking
      (menu_item_id, quantity_wasted, waste_reason, waste_cost, reason_details, reported_by, waste_date)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -53,10 +55,10 @@ export const createWasteEntry = async (req: AuthRequest, res: Response) => {
   );
 
   // Record inventory transaction
-  const [currentStock] = await query(
+  const currentStock = getFirstRow<any>(await query(
     'SELECT stock_quantity FROM menu_item WHERE menu_item_id = ?',
     [menu_item_id]
-  );
+  ));
 
   await query(
     `INSERT INTO inventory_transaction
@@ -74,7 +76,7 @@ export const createWasteEntry = async (req: AuthRequest, res: Response) => {
   );
 
   res.status(201).json(
-    successResponse('Waste entry created', { id: (result as any).insertId })
+    successResponse('Waste entry created', { id: getInsertId(result) })
   );
 };
 
