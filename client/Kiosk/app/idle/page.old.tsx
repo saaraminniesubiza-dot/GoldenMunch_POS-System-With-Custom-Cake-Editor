@@ -1,16 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Card } from '@heroui/card';
-import { Chip } from '@heroui/chip';
 
 const messages = [
-  "Welcome to Golden Munch! 🍰",
-  "Fresh Bakes Daily ✨",
-  "Sweet Treats Await 🎂",
-  "Discover New Flavors 🧁",
-  "Handcrafted with Love ❤️",
-  "Tap Anywhere to Start Ordering! 🛒"
+  "Welcome to Golden Munch",
+  "Fresh Bakes Daily",
+  "Sweet Treats Await",
+  "Discover New Flavors",
+  "Handcrafted with Love",
+  "Click to Start Ordering"
 ];
 
 interface Cake {
@@ -38,15 +36,11 @@ interface Position {
   y: number;
 }
 
-interface Particle {
-  id: number;
+interface Wall {
   x: number;
   y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  color: string;
-  emoji?: string;
+  width: number;
+  height: number;
 }
 
 export default function IdlePage() {
@@ -63,91 +57,98 @@ export default function IdlePage() {
   const [powerMode, setPowerMode] = useState(false);
   const [powerTimeLeft, setPowerTimeLeft] = useState(0);
   const [pacmanStuckCounter, setPacmanStuckCounter] = useState(0);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const [highScore, setHighScore] = useState(0);
-  const [showStartOverlay, setShowStartOverlay] = useState(true);
-
+  
   const cakeIdRef = useRef(0);
   const ghostIdRef = useRef(0);
-  const particleIdRef = useRef(0);
   const lastPacmanPos = useRef<Position>({ x: 50, y: 50 });
   const cakeEmojis = ['🎂', '🧁', '🍰', '🍪', '🍩', '🥧'];
-  const specialCakeEmoji = '⭐';
+  const specialCakeEmoji = '🌟';
   const ghostColors = ['#FF69B4', '#00CED1', '#FF6347', '#98FB98'];
 
-  // Create particles
-  const createParticles = (x: number, y: number, color: string, count: number = 8, emoji?: string) => {
-    const newParticles: Particle[] = [];
-    for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * 2 * i) / count;
-      newParticles.push({
-        id: particleIdRef.current++,
-        x,
-        y,
-        vx: Math.cos(angle) * (2 + Math.random()),
-        vy: Math.sin(angle) * (2 + Math.random()),
-        life: 1,
-        color,
-        emoji
-      });
+  // Define walls
+  const walls: Wall[] = [
+    // Horizontal walls
+    // { x: 20, y: 20, width: 20, height: 3 },
+    // { x: 60, y: 20, width: 20, height: 3 },
+    // { x: 10, y: 40, width: 15, height: 3 },
+    // { x: 75, y: 40, width: 15, height: 3 },
+    // { x: 30, y: 60, width: 40, height: 3 },
+    // { x: 20, y: 80, width: 20, height: 3 },
+    // { x: 60, y: 80, width: 20, height: 3 },
+    
+    // // Vertical walls
+    // { x: 25, y: 25, width: 3, height: 15 },
+    // { x: 72, y: 25, width: 3, height: 15 },
+    // { x: 45, y: 30, width: 3, height: 20 },
+    // { x: 55, y: 30, width: 3, height: 20 },
+    // { x: 35, y: 65, width: 3, height: 15 },
+    // { x: 65, y: 65, width: 3, height: 15 },
+  ];
+
+  // Check if a position collides with walls
+  const checkWallCollision = (x: number, y: number, size: number = 3): boolean => {
+    for (const wall of walls) {
+      if (
+        x + size > wall.x &&
+        x - size < wall.x + wall.width &&
+        y + size > wall.y &&
+        y - size < wall.y + wall.height
+      ) {
+        return true;
+      }
     }
-    setParticles(prev => [...prev, ...newParticles]);
+    return false;
   };
 
-  // Update particles
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setParticles(prev =>
-        prev
-          .map(p => ({
-            ...p,
-            x: p.x + p.vx,
-            y: p.y + p.vy,
-            vy: p.vy + 0.2, // gravity
-            life: p.life - 0.02
-          }))
-          .filter(p => p.life > 0 && p.x > 0 && p.x < 100 && p.y > 0 && p.y < 100)
-      );
-    }, 30);
-    return () => clearInterval(interval);
-  }, []);
-
-  const findValidPosition = (): Position => {
-    return {
-      x: Math.random() * 80 + 10,
-      y: Math.random() * 80 + 10
-    };
-  };
-
-  const getAvailableDirections = (x: number, y: number): Position[] => {
+  // Get available directions from a position
+  const getAvailableDirections = (x: number, y: number, size: number = 3): Position[] => {
     const directions: Position[] = [];
+    const testDistance = 5;
+    
+    // Test 8 directions
     const tests = [
-      { x: 1, y: 0 },
-      { x: -1, y: 0 },
-      { x: 0, y: 1 },
-      { x: 0, y: -1 },
-      { x: 0.7, y: 0.7 },
-      { x: -0.7, y: 0.7 },
-      { x: 0.7, y: -0.7 },
-      { x: -0.7, y: -0.7 },
+      { x: 1, y: 0 },   // right
+      { x: -1, y: 0 },  // left
+      { x: 0, y: 1 },   // down
+      { x: 0, y: -1 },  // up
+      { x: 0.7, y: 0.7 },   // down-right
+      { x: -0.7, y: 0.7 },  // down-left
+      { x: 0.7, y: -0.7 },  // up-right
+      { x: -0.7, y: -0.7 }, // up-left
     ];
-
+    
     for (const dir of tests) {
-      const testX = x + dir.x * 5;
-      const testY = y + dir.y * 5;
-
-      if (testX > 5 && testX < 95 && testY > 5 && testY < 95) {
+      const testX = x + dir.x * testDistance;
+      const testY = y + dir.y * testDistance;
+      
+      if (!checkWallCollision(testX, testY, size) && 
+          testX > 5 && testX < 95 && 
+          testY > 5 && testY < 95) {
         directions.push(dir);
       }
     }
-
+    
     return directions;
   };
 
-  // Initialize
+  // Find a valid spawn position
+  const findValidPosition = (): Position => {
+    let attempts = 0;
+    while (attempts < 100) {
+      const x = Math.random() * 80 + 10;
+      const y = Math.random() * 80 + 10;
+      if (!checkWallCollision(x, y, 5)) {
+        return { x, y };
+      }
+      attempts++;
+    }
+    return { x: 50, y: 10 }; // Fallback
+  };
+
+  // Initialize cakes and ghosts
   useEffect(() => {
     const initialCakes: Cake[] = [];
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 10; i++) {
       const pos = findValidPosition();
       initialCakes.push({
         id: cakeIdRef.current++,
@@ -159,16 +160,16 @@ export default function IdlePage() {
     }
     setCakes(initialCakes);
 
+    // Initialize ghosts
     const initialGhosts: Ghost[] = [];
     const ghostStartPositions = [
       { x: 15, y: 15 },
       { x: 85, y: 15 },
-      { x: 85, y: 85 },
-      { x: 15, y: 85 }
+      { x: 50, y: 85 }
     ];
-
-    for (let i = 0; i < 4; i++) {
-      const pos = ghostStartPositions[i];
+    
+    for (let i = 0; i < 3; i++) {
+      const pos = ghostStartPositions[i] || findValidPosition();
       initialGhosts.push({
         id: ghostIdRef.current++,
         x: pos.x,
@@ -182,15 +183,9 @@ export default function IdlePage() {
       });
     }
     setGhosts(initialGhosts);
-
-    // Load high score
-    const savedHighScore = localStorage.getItem('pacman_high_score');
-    if (savedHighScore) {
-      setHighScore(parseInt(savedHighScore));
-    }
   }, []);
 
-  // Mouth animation
+  // Pacman mouth animation
   useEffect(() => {
     const interval = setInterval(() => {
       setMouthOpen(prev => !prev);
@@ -211,11 +206,11 @@ export default function IdlePage() {
     }
   }, [powerMode, powerTimeLeft]);
 
-  // Spawn cakes
+  // Spawn new cakes
   useEffect(() => {
     const spawnCake = () => {
-      if (cakes.length < 15) {
-        const isSpecial = Math.random() < 0.15;
+      if (cakes.length < 10) {
+        const isSpecial = Math.random() < 0.1;
         const pos = findValidPosition();
         const newCake: Cake = {
           id: cakeIdRef.current++,
@@ -228,11 +223,11 @@ export default function IdlePage() {
       }
     };
 
-    const interval = setInterval(spawnCake, 1500);
+    const interval = setInterval(spawnCake, 2000);
     return () => clearInterval(interval);
   }, [cakes.length]);
 
-  // Ghost movement
+  // Ghost movement with improved AI
   useEffect(() => {
     const moveGhosts = () => {
       setGhosts(prev => prev.map(ghost => {
@@ -241,88 +236,118 @@ export default function IdlePage() {
         let newDirection = { ...ghost.direction };
         let newMode = ghost.mode;
         let newModeTimer = ghost.modeTimer - 1;
+        let newStuckCounter = ghost.stuckCounter;
 
+        // Update mode based on timer
         if (newModeTimer <= 0) {
           if (ghost.scared) {
             newMode = 'flee';
             newModeTimer = 100;
           } else {
-            newMode = Math.random() < 0.3 ? 'chase' : 'random';
+            // 25% chance to chase, 75% random
+            newMode = Math.random() < 0.25 ? 'chase' : 'random';
             newModeTimer = newMode === 'chase' ? 80 + Math.random() * 60 : 100 + Math.random() * 100;
           }
         }
 
-        const availableDirections = getAvailableDirections(ghost.x, ghost.y);
-
-        if (availableDirections.length > 0 && Math.random() < 0.05) {
+        // Get available directions
+        const availableDirections = getAvailableDirections(ghost.x, ghost.y, 3);
+        
+        // If stuck or need new direction
+        if (availableDirections.length > 0 && (newStuckCounter > 10 || Math.random() < 0.1)) {
           const randomDir = availableDirections[Math.floor(Math.random() * availableDirections.length)];
           newDirection = randomDir;
+          newStuckCounter = 0;
         }
 
-        const baseSpeed = ghost.scared ? 0.4 : 0.7;
-
+        // Calculate movement based on mode
+        const baseSpeed = ghost.scared ? 0.3 : 0.6;
+        
         if (newMode === 'chase' && !ghost.scared) {
+          // Chase Pacman with pathfinding
           const dx = pacmanPosition.x - ghost.x;
           const dy = pacmanPosition.y - ghost.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance > 5 && distance < 45) {
+          
+          if (distance > 5 && distance < 40) {
+            // Find best direction towards Pacman
             let bestDir = newDirection;
             let bestScore = Infinity;
-
+            
             for (const dir of availableDirections) {
               const futureX = ghost.x + dir.x * 5;
               const futureY = ghost.y + dir.y * 5;
               const futureDist = Math.sqrt(
-                Math.pow(pacmanPosition.x - futureX, 2) +
+                Math.pow(pacmanPosition.x - futureX, 2) + 
                 Math.pow(pacmanPosition.y - futureY, 2)
               );
-
+              
               if (futureDist < bestScore) {
                 bestScore = futureDist;
                 bestDir = dir;
               }
             }
-
+            
             newDirection = {
-              x: newDirection.x * 0.6 + bestDir.x * 0.4,
-              y: newDirection.y * 0.6 + bestDir.y * 0.4
+              x: newDirection.x * 0.7 + bestDir.x * 0.3,
+              y: newDirection.y * 0.7 + bestDir.y * 0.3
             };
           }
         } else if (newMode === 'flee' || ghost.scared) {
+          // Flee from Pacman
           const dx = ghost.x - pacmanPosition.x;
           const dy = ghost.y - pacmanPosition.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 35) {
+          
+          if (distance < 30 && availableDirections.length > 0) {
+            // Find direction away from Pacman
             let bestDir = newDirection;
             let bestScore = 0;
-
+            
             for (const dir of availableDirections) {
               const futureX = ghost.x + dir.x * 5;
               const futureY = ghost.y + dir.y * 5;
               const futureDist = Math.sqrt(
-                Math.pow(pacmanPosition.x - futureX, 2) +
+                Math.pow(pacmanPosition.x - futureX, 2) + 
                 Math.pow(pacmanPosition.y - futureY, 2)
               );
-
+              
               if (futureDist > bestScore) {
                 bestScore = futureDist;
                 bestDir = dir;
               }
             }
-
+            
             newDirection = bestDir;
           }
         }
 
+        // Apply movement
         const speed = baseSpeed * (1 + Math.random() * 0.2);
         const testX = ghost.x + newDirection.x * speed;
         const testY = ghost.y + newDirection.y * speed;
 
-        if (testX > 5 && testX < 95 && testY > 5 && testY < 95) {
+        // Move if no collision
+        const oldX = newX;
+        const oldY = newY;
+        
+        if (!checkWallCollision(testX, testY, 2) && testX > 5 && testX < 95 && testY > 5 && testY < 95) {
           newX = testX;
           newY = testY;
+        } else {
+          // Hit a wall, pick a new direction
+          newStuckCounter++;
+          if (availableDirections.length > 0) {
+            const randomDir = availableDirections[Math.floor(Math.random() * availableDirections.length)];
+            newDirection = randomDir;
+          }
+        }
+
+        // Check if ghost is stuck
+        if (Math.abs(oldX - newX) < 0.1 && Math.abs(oldY - newY) < 0.1) {
+          newStuckCounter++;
+        } else {
+          newStuckCounter = 0;
         }
 
         return {
@@ -331,7 +356,8 @@ export default function IdlePage() {
           y: newY,
           direction: newDirection,
           mode: newMode,
-          modeTimer: newModeTimer
+          modeTimer: newModeTimer,
+          stuckCounter: newStuckCounter
         };
       }));
     };
@@ -340,30 +366,34 @@ export default function IdlePage() {
     return () => clearInterval(interval);
   }, [pacmanPosition]);
 
-  // Pacman movement
+  // Improved Pacman movement with pathfinding
   useEffect(() => {
     const movePacman = () => {
       setPacmanPosition(prev => {
         let newX = prev.x;
         let newY = prev.y;
-
-        if (Math.abs(prev.x - lastPacmanPos.current.x) < 0.1 &&
+        
+        // Check if Pacman is stuck
+        if (Math.abs(prev.x - lastPacmanPos.current.x) < 0.1 && 
             Math.abs(prev.y - lastPacmanPos.current.y) < 0.1) {
           setPacmanStuckCounter(c => c + 1);
         } else {
           setPacmanStuckCounter(0);
         }
-
+        
         lastPacmanPos.current = { x: prev.x, y: prev.y };
-
-        const availableDirections = getAvailableDirections(prev.x, prev.y);
-
+        
+        // Get available directions
+        const availableDirections = getAvailableDirections(prev.x, prev.y, 3);
+        
+        // If stuck, pick a new random direction
         if (pacmanStuckCounter > 10 && availableDirections.length > 0) {
           const randomDir = availableDirections[Math.floor(Math.random() * availableDirections.length)];
           setPacmanDirection(randomDir);
           setPacmanStuckCounter(0);
         }
-
+        
+        // Find targets
         const targets: any[] = cakes.map(c => ({ ...c, type: 'cake' }));
         if (powerMode) {
           ghosts.filter(g => g.scared).forEach(g => {
@@ -371,90 +401,104 @@ export default function IdlePage() {
           });
         }
 
+        // Find nearest target
         let targetDir = null;
         if (targets.length > 0) {
           const nearest = targets.reduce((nearest, target) => {
             const distance = Math.sqrt(Math.pow(target.x - prev.x, 2) + Math.pow(target.y - prev.y, 2));
-            const priority = target.isSpecial ? distance * 0.4 : target.isGhost ? distance * 0.6 : distance;
+            const priority = target.isSpecial ? distance * 0.5 : target.isGhost ? distance * 0.7 : distance;
             return priority < nearest.distance ? { target, distance: priority } : nearest;
           }, { target: null, distance: Infinity });
 
           if (nearest.target && nearest.distance < 50) {
+            // Use pathfinding to reach target
             let bestDir = pacmanDirection;
             let bestScore = Infinity;
-
+            
             for (const dir of availableDirections) {
               const futureX = prev.x + dir.x * 5;
               const futureY = prev.y + dir.y * 5;
               const futureDist = Math.sqrt(
-                Math.pow(nearest.target.x - futureX, 2) +
+                Math.pow(nearest.target.x - futureX, 2) + 
                 Math.pow(nearest.target.y - futureY, 2)
               );
-
+              
               if (futureDist < bestScore) {
                 bestScore = futureDist;
                 bestDir = dir;
               }
             }
-
+            
             targetDir = bestDir;
           }
         }
 
+        // Avoid non-scared ghosts
         const dangerGhosts = ghosts.filter(g => !g.scared);
         let avoidDir = null;
-
+        
         for (const ghost of dangerGhosts) {
           const distance = Math.sqrt(Math.pow(ghost.x - prev.x, 2) + Math.pow(ghost.y - prev.y, 2));
-
-          if (distance < 25) {
+          
+          if (distance < 20) {
+            // Find direction away from ghost
             let bestDir = pacmanDirection;
             let bestScore = 0;
-
+            
             for (const dir of availableDirections) {
               const futureX = prev.x + dir.x * 5;
               const futureY = prev.y + dir.y * 5;
               const futureDist = Math.sqrt(
-                Math.pow(ghost.x - futureX, 2) +
+                Math.pow(ghost.x - futureX, 2) + 
                 Math.pow(ghost.y - futureY, 2)
               );
-
+              
               if (futureDist > bestScore) {
                 bestScore = futureDist;
                 bestDir = dir;
               }
             }
-
+            
             avoidDir = bestDir;
             break;
           }
         }
 
+        // Choose direction priority: avoid danger > reach target > current direction
         let chosenDir = pacmanDirection;
         if (avoidDir && !powerMode) {
           chosenDir = avoidDir;
         } else if (targetDir) {
           chosenDir = targetDir;
         }
-
+        
+        // Smooth direction change
         setPacmanDirection(dir => ({
           x: dir.x * 0.6 + chosenDir.x * 0.4,
           y: dir.y * 0.6 + chosenDir.y * 0.4
         }));
 
-        const speed = powerMode ? 1.6 : 1.3;
+        // Apply movement
+        const speed = powerMode ? 1.5 : 1.2;
         const testX = prev.x + pacmanDirection.x * speed;
         const testY = prev.y + pacmanDirection.y * speed;
 
-        if (testX > 5 && testX < 95 && testY > 5 && testY < 95) {
+        // Check collision before moving
+        if (!checkWallCollision(testX, testY, 3) && testX > 5 && testX < 95 && testY > 5 && testY < 95) {
           newX = testX;
           newY = testY;
         } else {
-          if (testX > 5 && testX < 95) {
+          // Hit a wall, try to slide along it
+          if (!checkWallCollision(testX, prev.y, 3) && testX > 5 && testX < 95) {
             newX = testX;
-          }
-          if (testY > 5 && testY < 95) {
+          } else if (!checkWallCollision(prev.x, testY, 3) && testY > 5 && testY < 95) {
             newY = testY;
+          } else {
+            // Can't move, pick new direction
+            if (availableDirections.length > 0) {
+              const randomDir = availableDirections[Math.floor(Math.random() * availableDirections.length)];
+              setPacmanDirection(randomDir);
+            }
           }
         }
 
@@ -462,29 +506,27 @@ export default function IdlePage() {
       });
     };
 
-    const interval = setInterval(movePacman, 35);
+    const interval = setInterval(movePacman, 40);
     return () => clearInterval(interval);
   }, [pacmanDirection, cakes, ghosts, powerMode, pacmanStuckCounter]);
 
-  // Collision detection - cakes
+  // Collision detection for cakes
   useEffect(() => {
     setCakes(prevCakes => {
       const remainingCakes = prevCakes.filter(cake => {
         const distance = Math.sqrt(
-          Math.pow(cake.x - pacmanPosition.x, 2) +
+          Math.pow(cake.x - pacmanPosition.x, 2) + 
           Math.pow(cake.y - pacmanPosition.y, 2)
         );
-
+        
         if (distance < 5) {
           if (cake.isSpecial) {
             setScore(prev => prev + 50);
             setPowerMode(true);
-            setPowerTimeLeft(10);
-            setGhosts(prev => prev.map(ghost => ({ ...ghost, scared: true, mode: 'flee', modeTimer: 120 })));
-            createParticles(cake.x, cake.y, '#FFD700', 12, '✨');
+            setPowerTimeLeft(8);
+            setGhosts(prev => prev.map(ghost => ({ ...ghost, scared: true, mode: 'flee', modeTimer: 100 })));
           } else {
             setScore(prev => prev + 10);
-            createParticles(cake.x, cake.y, '#F9A03F', 6);
           }
           setIsEating(true);
           setTimeout(() => setIsEating(false), 200);
@@ -492,27 +534,27 @@ export default function IdlePage() {
         }
         return true;
       });
-
+      
       return remainingCakes;
     });
   }, [pacmanPosition]);
 
-  // Collision detection - ghosts
+  // Collision detection for ghosts
   useEffect(() => {
     if (powerMode) {
       setGhosts(prevGhosts => {
         const remainingGhosts = prevGhosts.filter(ghost => {
           const distance = Math.sqrt(
-            Math.pow(ghost.x - pacmanPosition.x, 2) +
+            Math.pow(ghost.x - pacmanPosition.x, 2) + 
             Math.pow(ghost.y - pacmanPosition.y, 2)
           );
-
-          if (distance < 6 && ghost.scared) {
-            setScore(prev => prev + 200);
-            createParticles(ghost.x, ghost.y, ghost.color, 10, '💯');
+          
+          if (distance < 5 && ghost.scared) {
+            setScore(prev => prev + 100);
             setIsEating(true);
             setTimeout(() => setIsEating(false), 200);
-
+            
+            // Respawn ghost
             setTimeout(() => {
               const pos = findValidPosition();
               setGhosts(prev => [...prev, {
@@ -522,17 +564,17 @@ export default function IdlePage() {
                 color: ghost.color,
                 direction: { x: (Math.random() - 0.5) * 2, y: (Math.random() - 0.5) * 2 },
                 scared: powerMode,
-                mode: 'flee',
+                mode: 'random',
                 modeTimer: 100,
                 stuckCounter: 0
               }]);
-            }, 4000);
-
+            }, 3000);
+            
             return false;
           }
           return true;
         });
-
+        
         return remainingGhosts;
       });
     }
@@ -541,41 +583,30 @@ export default function IdlePage() {
   // Auto-increment score
   useEffect(() => {
     const interval = setInterval(() => {
-      setScore(prev => {
-        const newScore = prev + 1;
-        if (newScore > highScore) {
-          setHighScore(newScore);
-          localStorage.setItem('pacman_high_score', newScore.toString());
-        }
-        return newScore;
-      });
+      setScore(prev => prev + 1);
     }, 1000);
     return () => clearInterval(interval);
-  }, [highScore]);
+  }, []);
 
-  // Messages
+  // Messages every 200 points
   useEffect(() => {
-    if (score > 0 && score % 300 === 0 && score !== lastMessageScore) {
+    if (score > 0 && score % 200 === 0 && score !== lastMessageScore) {
       const randomIndex = Math.floor(Math.random() * messages.length);
       setCurrentMessage(messages[randomIndex]);
       setShowMessage(true);
       setLastMessageScore(score);
-
+      
       const timeout = setTimeout(() => {
         setShowMessage(false);
-      }, 2500);
+      }, 1000);
 
       return () => clearTimeout(timeout);
     }
   }, [score, lastMessageScore]);
 
   const handleClick = useCallback(() => {
-    if (showStartOverlay) {
-      setShowStartOverlay(false);
-    } else {
-      window.location.href = '/';
-    }
-  }, [showStartOverlay]);
+    window.location.href = '/';
+  }, []);
 
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     if (event.key === ' ' || event.key === 'Enter') {
@@ -594,132 +625,49 @@ export default function IdlePage() {
   };
 
   return (
-    <div
-      className="min-h-screen w-full bg-mesh-gradient relative overflow-hidden cursor-pointer"
+    <div 
+      className="min-h-screen w-full bg-gradient-to-br from-cream-white via-caramel-beige to-mint-green/20 relative overflow-hidden cursor-pointer"
       onClick={handleClick}
     >
-      {/* Subtle grid pattern */}
-      <div className="absolute inset-0 opacity-10"
+      {/* Subtle pattern */}
+      <div className="absolute inset-0 opacity-5" 
         style={{
-          backgroundImage: 'linear-gradient(#D97706 1px, transparent 1px), linear-gradient(90deg, #D97706 1px, transparent 1px)',
-          backgroundSize: '60px 60px'
+          backgroundImage: 'radial-gradient(circle at 20px 20px, #D97706 1px, transparent 1px)',
+          backgroundSize: '40px 40px'
         }}
       />
 
-      {/* Start Overlay */}
-      {showStartOverlay && (
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center animate-scale-in">
-          <Card className="card-modern max-w-2xl mx-6">
-            <div className="p-12 text-center">
-              <div className="text-8xl mb-6 animate-bounce-slow">🍰</div>
-              <h1 className="text-6xl font-black bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent mb-4">
-                Golden Munch
-              </h1>
-              <p className="text-2xl text-chocolate-brown mb-8">
-                Kiosk Idle Mode
-              </p>
-              <div className="text-xl text-chocolate-brown/80 mb-8 space-y-2">
-                <p>🎮 Watch Pacman collect delicious treats!</p>
-                <p>⭐ Special items activate power mode</p>
-                <p>👻 Eat ghosts during power mode for bonus points</p>
-              </div>
-              <div className="bg-golden-orange/10 rounded-2xl p-6 mb-8">
-                <p className="text-4xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent">
-                  Tap Anywhere to Start
-                </p>
-              </div>
-              <p className="text-chocolate-brown/60">
-                Tap the screen to begin ordering delicious treats!
-              </p>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Score Display */}
-      <div className="absolute top-6 left-6 z-30">
-        <Card className="card-glass">
-          <div className="p-4">
-            <div className="flex items-center gap-4">
-              <div>
-                <p className="text-sm text-chocolate-brown/70 font-semibold">SCORE</p>
-                <p className="text-3xl font-black bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent">
-                  {score.toLocaleString()}
-                </p>
-              </div>
-              {highScore > 0 && (
-                <div className="border-l-2 border-golden-orange/30 pl-4">
-                  <p className="text-xs text-chocolate-brown/60 font-semibold">BEST</p>
-                  <p className="text-xl font-bold text-chocolate-brown">
-                    {highScore.toLocaleString()}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Power Mode Indicator */}
+      {/* Power mode indicator */}
       {powerMode && (
-        <div className="absolute top-6 right-6 z-30 animate-scale-in">
-          <Card className="card-modern bg-gradient-to-r from-golden-orange to-deep-amber border-0">
-            <div className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="text-3xl animate-pulse-slow">⚡</div>
-                <div>
-                  <p className="text-sm text-white/90 font-bold">POWER MODE</p>
-                  <p className="text-2xl font-black text-white">{powerTimeLeft}s</p>
-                </div>
-              </div>
-            </div>
-          </Card>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-5">
+          <div className="text-6xl font-bold text-golden-orange opacity-20 animate-pulse">
+            POWER MODE: {powerTimeLeft}s
+          </div>
         </div>
       )}
 
-      {/* Stats Bar */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
-        <Card className="card-glass">
-          <div className="px-6 py-3 flex items-center gap-6">
-            <Chip size="lg" variant="flat" color="warning">
-              🎂 {cakes.length} Treats
-            </Chip>
-            <Chip size="lg" variant="flat" color="primary">
-              👻 {ghosts.length} Ghosts
-            </Chip>
-            {powerMode && (
-              <Chip size="lg" variant="shadow" className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold animate-glow">
-                ⚡ POWERED UP!
-              </Chip>
-            )}
-          </div>
-        </Card>
-      </div>
-
-      {/* Particles */}
-      {particles.map(particle => (
+      {/* Walls */}
+      {walls.map((wall, index) => (
         <div
-          key={particle.id}
-          className="absolute text-2xl pointer-events-none"
+          key={index}
+          className="absolute bg-chocolate-brown rounded shadow-lg"
           style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            transform: 'translate(-50%, -50%)',
-            opacity: particle.life,
-            zIndex: 20,
-            color: particle.color,
-            filter: `drop-shadow(0 0 10px ${particle.color})`
+            left: `${wall.x}%`,
+            top: `${wall.y}%`,
+            width: `${wall.width}%`,
+            height: `${wall.height}%`,
+            opacity: 0.8,
+            background: 'linear-gradient(135deg, #4B2E2E 0%, #3A2323 100%)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.1)'
           }}
-        >
-          {particle.emoji || '✨'}
-        </div>
+        />
       ))}
 
       {/* Pacman */}
       <div
         className={`absolute transition-all duration-75 ${
-          isEating ? 'scale-125' : 'scale-100'
-        }`}
+          isEating ? 'scale-110' : 'scale-100'
+        } ${powerMode ? 'drop-shadow-[0_0_20px_rgba(249,160,63,0.8)]' : ''}`}
         style={{
           left: `${pacmanPosition.x}%`,
           top: `${pacmanPosition.y}%`,
@@ -727,29 +675,22 @@ export default function IdlePage() {
           zIndex: 15
         }}
       >
-        <div
-          className={`w-16 h-16 relative transition-all duration-300`}
+        <div 
+          className={`w-14 h-14 ${
+            powerMode 
+              ? 'bg-gradient-to-br from-golden-orange via-deep-amber to-golden-orange' 
+              : 'bg-gradient-to-br from-golden-orange to-deep-amber'
+          } rounded-full relative shadow-lg transition-all duration-300`}
           style={{
-            background: powerMode
-              ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%)'
-              : 'linear-gradient(135deg, #F9A03F 0%, #D97706 100%)',
-            borderRadius: '50%',
-            clipPath: mouthOpen
-              ? 'polygon(100% 70%, 40% 50%, 100% 30%, 100% 0%, 0% 0%, 0% 100%, 100% 100%)'
+            clipPath: mouthOpen 
+              ? 'polygon(100% 74%, 44% 48%, 100% 21%, 100% 0%, 0% 0%, 0% 100%, 100% 100%)'
               : 'circle(50%)',
-            boxShadow: powerMode
-              ? '0 0 40px rgba(255, 215, 0, 0.8), 0 0 80px rgba(255, 215, 0, 0.4)'
-              : '0 8px 20px rgba(249, 160, 63, 0.4)',
-            filter: powerMode ? 'brightness(1.3)' : 'none'
+            boxShadow: powerMode ? '0 0 30px rgba(249, 160, 63, 0.6)' : '0 4px 12px rgba(0, 0, 0, 0.2)'
           }}
         >
-          {/* Eye */}
-          <div className="absolute w-3 h-3 bg-chocolate-brown rounded-full top-4 left-4 shadow-inner">
-            <div className="absolute w-1 h-1 bg-white rounded-full top-0.5 left-0.5"></div>
+          <div className="absolute w-2.5 h-2.5 bg-chocolate-brown rounded-full top-3 left-3">
+            <div className="absolute w-0.5 h-0.5 bg-cream-white rounded-full top-0.5 left-0.5"></div>
           </div>
-          {powerMode && (
-            <div className="absolute inset-0 rounded-full bg-golden-orange/30 animate-pulse-slow"></div>
-          )}
         </div>
       </div>
 
@@ -757,33 +698,31 @@ export default function IdlePage() {
       {ghosts.map((ghost) => (
         <div
           key={ghost.id}
-          className={`absolute transition-all duration-200`}
+          className={`absolute text-3xl transition-all duration-300 ${
+            ghost.scared ? 'animate-pulse' : ''
+          }`}
           style={{
             left: `${ghost.x}%`,
             top: `${ghost.y}%`,
             transform: 'translate(-50%, -50%)',
-            zIndex: 12
+            zIndex: 12,
+            filter: ghost.scared ? 'saturate(0.3) brightness(1.5)' : 'none',
+            opacity: ghost.scared ? 0.7 : 1
           }}
         >
-          <div
-            className={`relative ${ghost.scared ? 'animate-pulse' : ''}`}
-            style={{
-              filter: ghost.scared
-                ? 'saturate(0.3) brightness(1.8) drop-shadow(0 0 15px rgba(138, 43, 226, 0.6))'
-                : `drop-shadow(0 4px 12px ${ghost.color}40)`,
-            }}
-          >
-            <div
-              className="text-5xl"
-              style={{
-                color: ghost.scared ? '#9CA3AF' : ghost.color,
+          <div className="relative">
+            <div 
+              className="text-4xl"
+              style={{ 
+                color: ghost.scared ? '#4A5568' : ghost.color,
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
               }}
             >
               👻
             </div>
             {ghost.scared && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-2xl">😱</div>
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
+                😱
               </div>
             )}
           </div>
@@ -794,52 +733,61 @@ export default function IdlePage() {
       {cakes.map((cake) => (
         <div
           key={cake.id}
-          className="absolute transition-all duration-300"
+          className={`absolute text-3xl transition-all duration-300 ${
+            cake.isSpecial ? 'animate-pulse scale-125' : ''
+          }`}
           style={{
             left: `${cake.x}%`,
             top: `${cake.y}%`,
             transform: 'translate(-50%, -50%)',
             zIndex: 10,
-            animation: cake.isSpecial
-              ? 'specialFloat 2s ease-in-out infinite'
-              : 'gentleFloat 3s ease-in-out infinite',
-            filter: cake.isSpecial
-              ? 'drop-shadow(0 0 20px rgba(255, 215, 0, 1)) drop-shadow(0 0 40px rgba(255, 215, 0, 0.5))'
-              : 'drop-shadow(0 4px 10px rgba(217, 119, 6, 0.3))'
+            animation: cake.isSpecial 
+              ? 'pulse 1s ease-in-out infinite' 
+              : 'gentle-float 3s ease-in-out infinite',
+            filter: cake.isSpecial 
+              ? 'drop-shadow(0 0 15px rgba(255, 215, 0, 0.8))' 
+              : 'drop-shadow(0 2px 8px rgba(217, 119, 6, 0.2))'
           }}
         >
-          <div className={`text-4xl ${cake.isSpecial ? 'scale-125' : ''}`}>
-            {cake.emoji}
-          </div>
+          {cake.emoji}
         </div>
       ))}
 
-      {/* Message Toast */}
+      {/* Message */}
       {showMessage && (
-        <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none animate-scale-in">
-          <Card className="card-modern shadow-2xl border-4 border-golden-orange">
-            <div className="px-10 py-6">
-              <p className="text-3xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent text-center">
-                {currentMessage}
-              </p>
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-cream-white bg-opacity-95 rounded-2xl px-10 py-5 shadow-golden animate-fade-in border-2 border-golden-orange/20">
+            <div className="text-2xl font-semibold text-chocolate-brown">
+              {currentMessage}
             </div>
-          </Card>
+          </div>
         </div>
       )}
 
       <style jsx>{`
-        @keyframes gentleFloat {
-          0%, 100% { transform: translate(-50%, -50%) translateY(0px) rotate(0deg); }
-          50% { transform: translate(-50%, -50%) translateY(-12px) rotate(5deg); }
+        @keyframes gentle-float {
+          0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
+          50% { transform: translate(-50%, -50%) translateY(-10px); }
         }
-
-        @keyframes specialFloat {
-          0%, 100% {
-            transform: translate(-50%, -50%) translateY(0px) scale(1.25) rotate(0deg);
+        
+        @keyframes fade-in {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes pulse {
+          0%, 100% { 
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
           }
-          50% {
-            transform: translate(-50%, -50%) translateY(-15px) scale(1.35) rotate(15deg);
+          50% { 
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.8;
           }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.2s ease-out;
         }
       `}</style>
     </div>
