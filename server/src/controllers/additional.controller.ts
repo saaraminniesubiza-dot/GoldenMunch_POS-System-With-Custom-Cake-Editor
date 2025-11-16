@@ -275,7 +275,7 @@ export const createFlavor = async (req: AuthRequest, res: Response) => {
   res.status(201).json(successResponse('Flavor created', { id: getInsertId(result) }));
 };
 
-export const getFlavors = async (req: AuthRequest, res: Response) => {
+export const getFlavors = async (_req: AuthRequest, res: Response) => {
   const flavors = await query('SELECT * FROM cake_flavors ORDER BY display_order ASC');
   res.json(successResponse('Flavors retrieved', flavors));
 };
@@ -311,7 +311,7 @@ export const createSize = async (req: AuthRequest, res: Response) => {
   res.status(201).json(successResponse('Size created', { id: getInsertId(result) }));
 };
 
-export const getSizes = async (req: AuthRequest, res: Response) => {
+export const getSizes = async (_req: AuthRequest, res: Response) => {
   const sizes = await query('SELECT * FROM cake_sizes ORDER BY display_order ASC');
   res.json(successResponse('Sizes retrieved', sizes));
 };
@@ -344,7 +344,7 @@ export const createTheme = async (req: AuthRequest, res: Response) => {
   res.status(201).json(successResponse('Theme created', { id: getInsertId(result) }));
 };
 
-export const getThemes = async (req: AuthRequest, res: Response) => {
+export const getThemes = async (_req: AuthRequest, res: Response) => {
   const themes = await query('SELECT * FROM custom_cake_theme ORDER BY display_order ASC');
   res.json(successResponse('Themes retrieved', themes));
 };
@@ -369,7 +369,7 @@ export const updateTheme = async (req: AuthRequest, res: Response) => {
 
 // ==== KIOSK SETTINGS MANAGEMENT ====
 
-export const getKioskSettings = async (req: AuthRequest, res: Response) => {
+export const getKioskSettings = async (_req: AuthRequest, res: Response) => {
   const settings = await query('SELECT * FROM kiosk_settings ORDER BY setting_key ASC');
   res.json(successResponse('Kiosk settings retrieved', settings));
 };
@@ -401,7 +401,7 @@ export const createKioskSetting = async (req: AuthRequest, res: Response) => {
 
 // ==== STOCK ADJUSTMENT REASONS ====
 
-export const getStockReasons = async (req: AuthRequest, res: Response) => {
+export const getStockReasons = async (_req: AuthRequest, res: Response) => {
   const reasons = await query('SELECT * FROM stock_adjustment_reason WHERE is_active = TRUE ORDER BY reason_code ASC');
   res.json(successResponse('Stock reasons retrieved', reasons));
 };

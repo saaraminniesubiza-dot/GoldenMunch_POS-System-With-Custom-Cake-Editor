@@ -6,7 +6,7 @@ import { AppError } from './error.middleware';
 // Verify JWT token
 export const authenticate = (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {
@@ -42,7 +42,7 @@ export const authenticate = (
 // Admin authentication
 export const authenticateAdmin = (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {
@@ -79,7 +79,7 @@ export const authenticateAdmin = (
 // Cashier authentication
 export const authenticateCashier = (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {
@@ -116,7 +116,7 @@ export const authenticateCashier = (
 // Optional authentication (for kiosk - anonymous allowed)
 export const optionalAuth = (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {

@@ -133,7 +133,7 @@ export const schemas = {
 
 // Validation middleware factory
 export const validate = (schema: Joi.ObjectSchema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     const { error, value } = schema.validate(req.body, {
       abortEarly: false,
       stripUnknown: true,
@@ -153,7 +153,7 @@ export const validate = (schema: Joi.ObjectSchema) => {
 
 // Query validation middleware
 export const validateQuery = (schema: Joi.ObjectSchema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     const { error, value } = schema.validate(req.query, {
       abortEarly: false,
       stripUnknown: true,

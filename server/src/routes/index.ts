@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { asyncHandler } from '../middleware/error.middleware';
 import { authenticate, authenticateAdmin, authenticateCashier, optionalAuth } from '../middleware/auth.middleware';
-import { validate, validateQuery, schemas } from '../middleware/validation.middleware';
+import { validate, schemas } from '../middleware/validation.middleware';
 import { uploadQRCode, uploadProductImage } from '../config/multer';
 
 // Controllers
@@ -20,7 +20,7 @@ const router = Router();
 // ==== PUBLIC ROUTES ====
 
 // Health check
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 

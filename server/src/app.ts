@@ -59,7 +59,7 @@ app.use(compression());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // ==== REQUEST LOGGING ====
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   logger.info({
     method: req.method,
     url: req.url,
@@ -73,7 +73,7 @@ app.use((req, res, next) => {
 app.use('/api', routes);
 
 // ==== ROOT ENDPOINT ====
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.json({
     name: 'GoldenMunch POS API',
     version: '1.0.0',

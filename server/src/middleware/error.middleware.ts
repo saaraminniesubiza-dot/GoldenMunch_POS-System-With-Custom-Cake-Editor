@@ -17,7 +17,7 @@ export class AppError extends Error {
 }
 
 // Not found error handler
-export const notFound = (req: Request, res: Response, next: NextFunction) => {
+export const notFound = (req: Request, _res: Response, next: NextFunction) => {
   const error = new AppError(`Not Found - ${req.originalUrl}`, 404);
   next(error);
 };
@@ -27,7 +27,7 @@ export const errorHandler = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';

@@ -12,10 +12,10 @@ uploadDirs.forEach(dir => {
 
 // Storage configuration for QR codes
 const qrCodeStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, './uploads/qr-codes');
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, `qr-${uniqueSuffix}${path.extname(file.originalname)}`);
   }
@@ -23,17 +23,17 @@ const qrCodeStorage = multer.diskStorage({
 
 // Storage configuration for product images
 const productStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, './uploads/products');
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, `product-${uniqueSuffix}${path.extname(file.originalname)}`);
   }
 });
 
 // File filter for images only
-const imageFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const imageFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedTypes = /jpeg|jpg|png|gif|webp/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);

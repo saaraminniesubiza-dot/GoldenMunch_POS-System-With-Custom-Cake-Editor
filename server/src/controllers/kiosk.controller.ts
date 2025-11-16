@@ -3,8 +3,7 @@ import { AuthRequest } from '../models/types';
 import { query, callProcedure } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
-import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
-import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
+import { getFirstRow } from '../utils/typeGuards';
 
 // Get all available menu items for kiosk
 export const getMenuItems = async (req: AuthRequest, res: Response) => {
@@ -67,7 +66,7 @@ export const getMenuItems = async (req: AuthRequest, res: Response) => {
 };
 
 // Get categories
-export const getCategories = async (req: AuthRequest, res: Response) => {
+export const getCategories = async (_req: AuthRequest, res: Response) => {
   const sql = `
     SELECT * FROM category
     WHERE is_active = TRUE
@@ -132,7 +131,7 @@ export const checkCapacity = async (req: AuthRequest, res: Response) => {
 };
 
 // Get active promotions
-export const getActivePromotions = async (req: AuthRequest, res: Response) => {
+export const getActivePromotions = async (_req: AuthRequest, res: Response) => {
   const sql = `
     SELECT * FROM promotion_rules
     WHERE is_active = TRUE

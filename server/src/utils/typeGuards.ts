@@ -1,4 +1,4 @@
-import { RowDataPacket, ResultSetHeader, OkPacket } from 'mysql2';
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
 /**
  * Type guard to check if result is an array of rows

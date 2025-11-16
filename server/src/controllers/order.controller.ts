@@ -1,10 +1,9 @@
 import { Response } from 'express';
-import { AuthRequest, CreateOrderRequest, OrderItemRequest } from '../models/types';
+import { AuthRequest, CreateOrderRequest } from '../models/types';
 import { query, transaction, callProcedure } from '../config/database';
 import { successResponse, calculateOrderTotal, generateSessionId } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
-import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
-import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
+import { getFirstRow } from '../utils/typeGuards';
 import { PoolConnection } from 'mysql2/promise';
 
 // Create order (from kiosk or cashier)

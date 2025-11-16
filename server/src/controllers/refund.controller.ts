@@ -3,8 +3,7 @@ import { AuthRequest } from '../models/types';
 import { query } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
-import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
-import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
+import { getFirstRow, getInsertId } from '../utils/typeGuards';
 
 // ==== REFUND MANAGEMENT ====
 
@@ -156,7 +155,6 @@ export const rejectRefund = async (req: AuthRequest, res: Response) => {
 export const completeRefund = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const { reference_number } = req.body;
-  const admin_id = req.user?.id;
 
   // Get refund details
   const refund = getFirstRow<any>(await query(

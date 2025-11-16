@@ -3,8 +3,7 @@ import { AuthRequest } from '../models/types';
 import { query, callProcedure } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
-import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
-import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
+import { getFirstRow } from '../utils/typeGuards';
 
 // ==== PROMOTION ASSIGNMENT ====
 

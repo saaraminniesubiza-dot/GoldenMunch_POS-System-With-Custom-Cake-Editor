@@ -4,8 +4,7 @@ import jwt from 'jsonwebtoken';
 import { query } from '../config/database';
 import { successResponse } from '../utils/helpers';
 import { AppError } from '../middleware/error.middleware';
-import { getFirstRow, getAllRows, getInsertId } from '../utils/typeGuards';
-import { parsePagination, getQueryString, getQueryNumber, getQueryBoolean, getTypedBody } from '../utils/queryHelpers';
+import { getFirstRow } from '../utils/typeGuards';
 import { JwtPayload } from '../models/types';
 
 // Admin login
@@ -107,7 +106,7 @@ export const cashierLogin = async (req: Request, res: Response) => {
 };
 
 // Verify token
-export const verifyToken = async (req: Request, res: Response) => {
+export const verifyToken = async (_req: Request, res: Response) => {
   // If we reach here, token is valid (middleware verified it)
   res.json(successResponse('Token is valid'));
 };
