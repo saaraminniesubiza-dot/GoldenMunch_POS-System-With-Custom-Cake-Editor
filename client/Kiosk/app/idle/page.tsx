@@ -161,7 +161,12 @@ export default function IdlePage() {
     return true;
   }, [isInsideObstacle]);
 
-  // A* Pathfinding Algorithm - Simplified and working
+  // A* Pathfinding Algorithm
+  // Uses heuristic-based search with f(n) = g(n) + h(n) scoring
+  // - g(n): Cost from start to current node
+  // - h(n): Estimated cost from current node to goal (Manhattan/Euclidean distance)
+  // - f(n): Total estimated cost through current node
+  // Efficiently finds shortest path while avoiding obstacles
   const findPath = useCallback((start: Position, goal: Position, avoidPoints: Position[] = []): Position[] => {
     console.log('\n🔍 FINDPATH CALLED:');
     console.log('  Start:', { x: start?.x?.toFixed(1), y: start?.y?.toFixed(1) });
@@ -752,8 +757,8 @@ export default function IdlePage() {
           }
         }
 
-        // Movement speed based on behavior
-        const baseSpeed = newBehavior === 'scared' ? 0.5 : newBehavior === 'aggression' ? 1.0 : 0.6;
+        // Movement speed based on behavior (reduced for slower gameplay)
+        const baseSpeed = newBehavior === 'scared' ? 0.25 : newBehavior === 'aggression' ? 0.5 : 0.3;
         const speed = baseSpeed * (0.9 + Math.random() * 0.2);
         const testX = ghost.x + newDirection.x * speed;
         const testY = ghost.y + newDirection.y * speed;
@@ -1014,12 +1019,12 @@ export default function IdlePage() {
           }
         }
 
-        // Apply movement with speed based on behavior
-        let speed = 1.4; // Default
+        // Apply movement with speed based on behavior (reduced for slower gameplay)
+        let speed = 0.6; // Default - much slower
         if (desiredBehavior === 'hunting_ghosts') {
-          speed = 1.8; // Fast when powered up
+          speed = 0.8; // Faster when powered up
         } else if (desiredBehavior === 'run') {
-          speed = 1.6; // Fast when fleeing
+          speed = 0.7; // Faster when fleeing
         }
 
         // Use newly calculated direction if available, otherwise use current direction
