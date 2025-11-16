@@ -2,11 +2,12 @@
 
 @config "../tailwind.config.js";
 
-/* Golden Munch Custom Styles */
+/* Golden Munch Custom Styles - Modern Food Kiosk Design */
 
 /* Smooth scrolling for the kiosk */
 html {
   scroll-behavior: smooth;
+  font-size: 16px;
 }
 
 /* Disable text selection for kiosk interface */
@@ -17,6 +18,7 @@ body {
   user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
 }
 
 /* Allow text selection for specific elements */
@@ -29,13 +31,13 @@ body {
 
 /* Custom animations */
 @keyframes float {
-  0%, 100% { 
+  0%, 100% {
     transform: translateY(0px) rotate(0deg);
   }
-  33% { 
+  33% {
     transform: translateY(-10px) rotate(1deg);
   }
-  66% { 
+  66% {
     transform: translateY(-5px) rotate(-1deg);
   }
 }
@@ -62,6 +64,57 @@ body {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(249, 160, 63, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(249, 160, 63, 0.6), 0 0 60px rgba(249, 160, 63, 0.3);
+  }
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
@@ -74,6 +127,33 @@ body {
   animation: pulse-slow 4s infinite;
 }
 
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    to right,
+    #f5f0e8 4%,
+    #fef6e7 25%,
+    #f5f0e8 36%
+  );
+  background-size: 1000px 100%;
+}
+
+.animate-slide-up {
+  animation: slideInUp 0.4s ease-out;
+}
+
+.animate-slide-right {
+  animation: slideInRight 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
 /* Custom gradient backgrounds */
 .bg-golden-gradient {
   background: linear-gradient(135deg, #F9A03F 0%, #D97706 100%);
@@ -83,6 +163,22 @@ body {
   background: linear-gradient(135deg, #FFF8F0 0%, #E6C89C 50%, #F9A03F 100%);
 }
 
+.bg-mesh-gradient {
+  background:
+    radial-gradient(at 0% 0%, rgba(249, 160, 63, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(217, 119, 6, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(249, 160, 63, 0.15) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(217, 119, 6, 0.15) 0px, transparent 50%),
+    linear-gradient(135deg, #FFF8F0 0%, #FEF6E7 100%);
+}
+
+.bg-glass {
+  background: rgba(255, 248, 240, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(249, 160, 63, 0.2);
+}
+
 /* Custom shadows for kiosk elements */
 .shadow-golden {
   box-shadow: 0 10px 25px -5px rgba(249, 160, 63, 0.3), 0 10px 10px -5px rgba(249, 160, 63, 0.1);
@@ -90,6 +186,14 @@ body {
 
 .shadow-deep {
   box-shadow: 0 20px 25px -5px rgba(75, 46, 46, 0.3), 0 10px 10px -5px rgba(75, 46, 46, 0.1);
+}
+
+.shadow-xl-golden {
+  box-shadow: 0 20px 50px -12px rgba(249, 160, 63, 0.4), 0 10px 25px -5px rgba(249, 160, 63, 0.2);
+}
+
+.shadow-inner-glow {
+  box-shadow: inset 0 2px 15px rgba(249, 160, 63, 0.1), 0 4px 20px rgba(249, 160, 63, 0.15);
 }
 
 /* Touch-friendly button styles */
@@ -117,13 +221,53 @@ body {
 .card-golden {
   background: linear-gradient(145deg, #FFF8F0, #F5F0E8);
   border: 2px solid rgba(249, 160, 63, 0.2);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-golden:hover {
   border-color: #F9A03F;
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px -5px rgba(249, 160, 63, 0.4);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px -10px rgba(249, 160, 63, 0.4), 0 10px 20px -5px rgba(249, 160, 63, 0.2);
+}
+
+.card-modern {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.card-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #F9A03F, #D97706, #F9A03F);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card-modern:hover::before {
+  opacity: 1;
+}
+
+.card-modern:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(249, 160, 63, 0.2), 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 /* Loading spinner customization */
