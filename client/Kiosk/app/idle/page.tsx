@@ -50,6 +50,15 @@ interface Particle {
   emoji?: string;
 }
 
+interface Obstacle {
+  id: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+}
+
 interface PathNode {
   x: number;
   y: number;
@@ -77,15 +86,30 @@ export default function IdlePage() {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [highScore, setHighScore] = useState(0);
   const [showStartOverlay, setShowStartOverlay] = useState(true);
+  const [obstacles, setObstacles] = useState<Obstacle[]>([]);
 
   const cakeIdRef = useRef(0);
   const ghostIdRef = useRef(0);
   const particleIdRef = useRef(0);
+  const obstacleIdRef = useRef(0);
   const lastPacmanPos = useRef<Position>({ x: 50, y: 50 });
   const pathfindingCache = useRef<Map<string, Position[]>>(new Map());
   const cakeEmojis = ['🎂', '🧁', '🍰', '🍪', '🍩', '🥧'];
   const specialCakeEmoji = '⭐';
   const ghostColors = ['#FF69B4', '#00CED1', '#FF6347', '#98FB98'];
+
+  // Helper function to check if a position collides with any obstacle
+  const isInsideObstacle = useCallback((x: number, y: number, margin: number = 2): boolean => {
+    return obstacles.some(obstacle => {
+      const obstacleLeft = obstacle.x - margin;
+      const obstacleRight = obstacle.x + obstacle.width + margin;
+      const obstacleTop = obstacle.y - margin;
+      const obstacleBottom = obstacle.y + obstacle.height + margin;
+
+      return x >= obstacleLeft && x <= obstacleRight &&
+             y >= obstacleTop && y <= obstacleBottom;
+    });
+  }, [obstacles]);
 
   // A* Pathfinding Algorithm
   const findPath = useCallback((start: Position, goal: Position, avoidPoints: Position[] = []): Position[] => {
@@ -163,6 +187,9 @@ export default function IdlePage() {
         // Bounds check
         if (newX < 5 || newX > 95 || newY < 5 || newY > 95) continue;
 
+        // Check if position is inside an obstacle
+        if (isInsideObstacle(newX, newY)) continue;
+
         // Check if too close to avoid points (like dangerous ghosts)
         const tooCloseToAvoid = avoidPoints.some(avoid =>
           Math.sqrt(Math.pow(newX - avoid.x, 2) + Math.pow(newY - avoid.y, 2)) < 15
@@ -200,7 +227,7 @@ export default function IdlePage() {
 
     // No path found, return direct path
     return [start, goal];
-  }, []);
+  }, [isInsideObstacle]);
 
   // Smooth path by removing unnecessary waypoints
   const smoothPath = (path: Position[]): Position[] => {
@@ -261,15 +288,92 @@ export default function IdlePage() {
     return () => clearInterval(interval);
   }, []);
 
-  const findValidPosition = (): Position => {
-    return {
-      x: Math.random() * 80 + 10,
-      y: Math.random() * 80 + 10
-    };
-  };
+  const findValidPosition = useCallback((): Position => {
+    let attempts = 0;
+    while (attempts < 50) {
+      const pos = {
+        x: Math.random() * 80 + 10,
+        y: Math.random() * 80 + 10
+      };
+
+      // Check if position is not inside any obstacle
+      if (!isInsideObstacle(pos.x, pos.y, 3)) {
+        return pos;
+      }
+      attempts++;
+    }
+    // Fallback if no valid position found
+    return { x: 50, y: 50 };
+  }, [isInsideObstacle]);
 
   // Initialize
   useEffect(() => {
+    // Generate random obstacles first
+    const initialObstacles: Obstacle[] = [];
+    const obstacleCount = Math.floor(Math.random() * 8) + 8; // 8-15 obstacles
+    const obstacleColors = ['#8B4513', '#A0522D', '#6B4423', '#8B7355', '#654321'];
+
+    // Reserved areas (don't spawn obstacles here)
+    const reservedAreas = [
+      { x: 50, y: 50, radius: 15 }, // Center area for Pacman start
+      { x: 15, y: 15, radius: 10 }, // Ghost corners
+      { x: 85, y: 15, radius: 10 },
+      { x: 85, y: 85, radius: 10 },
+      { x: 15, y: 85, radius: 10 }
+    ];
+
+    for (let i = 0; i < obstacleCount; i++) {
+      let validPosition = false;
+      let obstacle: Obstacle | null = null;
+      let attempts = 0;
+
+      while (!validPosition && attempts < 100) {
+        const width = Math.random() * 5 + 3; // 3-8 units
+        const height = Math.random() * 5 + 3; // 3-8 units
+        const x = Math.random() * 75 + 10; // Keep away from edges
+        const y = Math.random() * 75 + 10;
+
+        // Check if obstacle overlaps with reserved areas
+        const overlapsReserved = reservedAreas.some(area => {
+          const obstacleCenter = { x: x + width / 2, y: y + height / 2 };
+          const distance = Math.sqrt(
+            Math.pow(obstacleCenter.x - area.x, 2) +
+            Math.pow(obstacleCenter.y - area.y, 2)
+          );
+          return distance < area.radius + Math.max(width, height) / 2;
+        });
+
+        // Check if obstacle overlaps with existing obstacles
+        const overlapsObstacle = initialObstacles.some(existing => {
+          return !(
+            x > existing.x + existing.width + 3 ||
+            x + width < existing.x - 3 ||
+            y > existing.y + existing.height + 3 ||
+            y + height < existing.y - 3
+          );
+        });
+
+        if (!overlapsReserved && !overlapsObstacle) {
+          obstacle = {
+            id: obstacleIdRef.current++,
+            x,
+            y,
+            width,
+            height,
+            color: obstacleColors[Math.floor(Math.random() * obstacleColors.length)]
+          };
+          validPosition = true;
+        }
+        attempts++;
+      }
+
+      if (obstacle) {
+        initialObstacles.push(obstacle);
+      }
+    }
+
+    setObstacles(initialObstacles);
+
     const initialCakes: Cake[] = [];
     for (let i = 0; i < 12; i++) {
       const pos = findValidPosition();
@@ -313,7 +417,7 @@ export default function IdlePage() {
     if (savedHighScore) {
       setHighScore(parseInt(savedHighScore));
     }
-  }, []);
+  }, [findValidPosition]);
 
   // Mouth animation
   useEffect(() => {
@@ -474,9 +578,19 @@ export default function IdlePage() {
         const testX = ghost.x + newDirection.x * speed;
         const testY = ghost.y + newDirection.y * speed;
 
-        if (testX > 5 && testX < 95 && testY > 5 && testY < 95) {
+        // Check obstacle collision
+        const wouldHitObstacle = isInsideObstacle(testX, testY, 1);
+
+        if (testX > 5 && testX < 95 && testY > 5 && testY < 95 && !wouldHitObstacle) {
           newX = testX;
           newY = testY;
+        } else if (wouldHitObstacle) {
+          // Hit obstacle, change direction
+          const angle = Math.random() * Math.PI * 2;
+          newDirection = {
+            x: Math.cos(angle),
+            y: Math.sin(angle)
+          };
         }
 
         return {
@@ -492,7 +606,7 @@ export default function IdlePage() {
 
     const interval = setInterval(moveGhosts, 50);
     return () => clearInterval(interval);
-  }, [pacmanPosition, pacmanDirection, findPath]);
+  }, [pacmanPosition, pacmanDirection, findPath, isInsideObstacle]);
 
   // Improved Pacman AI with A* pathfinding
   useEffect(() => {
@@ -600,16 +714,22 @@ export default function IdlePage() {
         const testX = prev.x + pacmanDirection.x * speed;
         const testY = prev.y + pacmanDirection.y * speed;
 
-        if (testX > 5 && testX < 95 && testY > 5 && testY < 95) {
+        // Check obstacle collision
+        const wouldHitObstacle = isInsideObstacle(testX, testY, 1);
+
+        if (testX > 5 && testX < 95 && testY > 5 && testY < 95 && !wouldHitObstacle) {
           newX = testX;
           newY = testY;
-        } else {
-          if (testX > 5 && testX < 95) {
+        } else if (!wouldHitObstacle) {
+          if (testX > 5 && testX < 95 && !isInsideObstacle(testX, prev.y, 1)) {
             newX = testX;
           }
-          if (testY > 5 && testY < 95) {
+          if (testY > 5 && testY < 95 && !isInsideObstacle(prev.x, testY, 1)) {
             newY = testY;
           }
+        } else {
+          // Hit obstacle, clear path to recalculate
+          setPacmanPath([]);
         }
 
         return { x: newX, y: newY };
@@ -618,7 +738,7 @@ export default function IdlePage() {
 
     const interval = setInterval(movePacman, 30);
     return () => clearInterval(interval);
-  }, [pacmanDirection, cakes, ghosts, powerMode, pacmanStuckCounter, pacmanPath, findPath]);
+  }, [pacmanDirection, cakes, ghosts, powerMode, pacmanStuckCounter, pacmanPath, findPath, isInsideObstacle]);
 
   // Collision detection - cakes
   useEffect(() => {
@@ -779,6 +899,7 @@ export default function IdlePage() {
                 <p>🎮 Watch Smart Pacman collect treats with A* pathfinding!</p>
                 <p>⭐ Special items activate power mode</p>
                 <p>👻 Ghosts have unique AI personalities</p>
+                <p>🧱 Random obstacles change every reload</p>
                 <p>🧠 Advanced pathfinding & prediction</p>
               </div>
               <div className="bg-golden-orange/10 rounded-2xl p-6 mb-8">
@@ -845,6 +966,9 @@ export default function IdlePage() {
             <Chip size="lg" variant="flat" color="primary">
               👻 {ghosts.length} Ghosts
             </Chip>
+            <Chip size="lg" variant="flat" color="default">
+              🧱 {obstacles.length} Obstacles
+            </Chip>
             {powerMode && (
               <Chip size="lg" variant="shadow" className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold animate-glow">
                 ⚡ POWERED UP!
@@ -856,6 +980,41 @@ export default function IdlePage() {
           </div>
         </Card>
       </div>
+
+      {/* Obstacles */}
+      {obstacles.map((obstacle) => (
+        <div
+          key={obstacle.id}
+          className="absolute rounded-xl shadow-lg"
+          style={{
+            left: `${obstacle.x}%`,
+            top: `${obstacle.y}%`,
+            width: `${obstacle.width}%`,
+            height: `${obstacle.height}%`,
+            background: `linear-gradient(135deg, ${obstacle.color} 0%, ${obstacle.color}CC 100%)`,
+            border: '2px solid rgba(139, 69, 19, 0.3)',
+            boxShadow: `
+              inset 0 2px 4px rgba(255, 255, 255, 0.2),
+              inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+              0 4px 12px rgba(139, 69, 19, 0.4)
+            `,
+            zIndex: 5,
+          }}
+        >
+          {/* Wood grain texture effect */}
+          <div className="absolute inset-0 rounded-xl opacity-20"
+            style={{
+              backgroundImage: `repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+              )`
+            }}
+          />
+        </div>
+      ))}
 
       {/* Particles */}
       {particles.map(particle => (
