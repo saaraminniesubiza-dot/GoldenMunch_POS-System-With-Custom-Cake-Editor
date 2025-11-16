@@ -1,17 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Card } from '@heroui/card';
-import { Chip } from '@heroui/chip';
-
-const messages = [
-  "Welcome to Golden Munch! 🍰",
-  "Fresh Bakes Daily ✨",
-  "Sweet Treats Await 🎂",
-  "Discover New Flavors 🧁",
-  "Handcrafted with Love ❤️",
-  "Tap Anywhere to Start Ordering! 🛒"
-];
 
 interface Cake {
   id: number;
@@ -69,10 +58,6 @@ interface PathNode {
 }
 
 export default function IdlePage() {
-  const [score, setScore] = useState(0);
-  const [showMessage, setShowMessage] = useState(false);
-  const [currentMessage, setCurrentMessage] = useState("");
-  const [lastMessageScore, setLastMessageScore] = useState(0);
   const [pacmanPosition, setPacmanPosition] = useState<Position>({ x: 50, y: 50 });
   const [pacmanDirection, setPacmanDirection] = useState<Position>({ x: 1, y: 0 });
   const [pacmanPath, setPacmanPath] = useState<Position[]>([]);
@@ -84,8 +69,6 @@ export default function IdlePage() {
   const [powerTimeLeft, setPowerTimeLeft] = useState(0);
   const [pacmanStuckCounter, setPacmanStuckCounter] = useState(0);
   const [particles, setParticles] = useState<Particle[]>([]);
-  const [highScore, setHighScore] = useState(0);
-  const [showStartOverlay, setShowStartOverlay] = useState(true);
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
 
   const cakeIdRef = useRef(0);
@@ -186,7 +169,7 @@ export default function IdlePage() {
         const newY = current.y + dir.y * gridSize;
 
         // Bounds check
-        if (newX < 5 || newX > 95 || newY < 5 || newY > 95) continue;
+        if (newX < 2 || newX > 98 || newY < 2 || newY > 98) continue;
 
         // Check if position is inside an obstacle
         if (isInsideObstacle(newX, newY)) continue;
@@ -298,8 +281,8 @@ export default function IdlePage() {
     let attempts = 0;
     while (attempts < 50) {
       const pos = {
-        x: Math.random() * 80 + 10,
-        y: Math.random() * 80 + 10
+        x: Math.random() * 96 + 2,
+        y: Math.random() * 96 + 2
       };
 
       // Check if position is not inside any obstacle
@@ -322,10 +305,10 @@ export default function IdlePage() {
     // Reserved areas (don't spawn obstacles here)
     const reservedAreas = [
       { x: 50, y: 50, radius: 15 }, // Center area for Pacman start
-      { x: 15, y: 15, radius: 10 }, // Ghost corners
-      { x: 85, y: 15, radius: 10 },
-      { x: 85, y: 85, radius: 10 },
-      { x: 15, y: 85, radius: 10 }
+      { x: 10, y: 10, radius: 8 }, // Ghost corners
+      { x: 90, y: 10, radius: 8 },
+      { x: 90, y: 90, radius: 8 },
+      { x: 10, y: 90, radius: 8 }
     ];
 
     for (let i = 0; i < obstacleCount; i++) {
@@ -336,8 +319,8 @@ export default function IdlePage() {
       while (!validPosition && attempts < 100) {
         const width = Math.random() * 5 + 3; // 3-8 units
         const height = Math.random() * 5 + 3; // 3-8 units
-        const x = Math.random() * 75 + 10; // Keep away from edges
-        const y = Math.random() * 75 + 10;
+        const x = Math.random() * 90 + 5; // Keep away from edges
+        const y = Math.random() * 90 + 5;
 
         // Check if obstacle overlaps with reserved areas
         const overlapsReserved = reservedAreas.some(area => {
@@ -385,8 +368,8 @@ export default function IdlePage() {
       let attempts = 0;
       while (attempts < 50) {
         const pos = {
-          x: Math.random() * 80 + 10,
-          y: Math.random() * 80 + 10
+          x: Math.random() * 96 + 2,
+          y: Math.random() * 96 + 2
         };
 
         // Check if position is not inside any obstacle
@@ -423,10 +406,10 @@ export default function IdlePage() {
 
     const initialGhosts: Ghost[] = [];
     const ghostStartPositions = [
-      { x: 15, y: 15 },
-      { x: 85, y: 15 },
-      { x: 85, y: 85 },
-      { x: 15, y: 85 }
+      { x: 10, y: 10 },
+      { x: 90, y: 10 },
+      { x: 90, y: 90 },
+      { x: 10, y: 90 }
     ];
     const personalities: Ghost['personality'][] = ['aggressive', 'smart', 'random', 'ambusher'];
 
@@ -446,11 +429,6 @@ export default function IdlePage() {
       });
     }
     setGhosts(initialGhosts);
-
-    const savedHighScore = localStorage.getItem('pacman_high_score');
-    if (savedHighScore) {
-      setHighScore(parseInt(savedHighScore));
-    }
   }, []); // Empty deps - only run once on mount
 
   // Mouth animation
@@ -620,7 +598,7 @@ export default function IdlePage() {
         // Check obstacle collision
         const wouldHitObstacle = isInsideObstacle(testX, testY, 1);
 
-        if (testX > 5 && testX < 95 && testY > 5 && testY < 95 && !wouldHitObstacle) {
+        if (testX > 2 && testX < 98 && testY > 2 && testY < 98 && !wouldHitObstacle) {
           newX = testX;
           newY = testY;
         } else if (wouldHitObstacle) {
@@ -764,14 +742,14 @@ export default function IdlePage() {
           // Check obstacle collision
           const wouldHitObstacle = isInsideObstacle(testX, testY, 1);
 
-          if (testX > 5 && testX < 95 && testY > 5 && testY < 95 && !wouldHitObstacle) {
+          if (testX > 2 && testX < 98 && testY > 2 && testY < 98 && !wouldHitObstacle) {
             newX = testX;
             newY = testY;
           } else if (!wouldHitObstacle) {
-            if (testX > 5 && testX < 95 && !isInsideObstacle(testX, prev.y, 1)) {
+            if (testX > 2 && testX < 98 && !isInsideObstacle(testX, prev.y, 1)) {
               newX = testX;
             }
-            if (testY > 5 && testY < 95 && !isInsideObstacle(prev.x, testY, 1)) {
+            if (testY > 2 && testY < 98 && !isInsideObstacle(prev.x, testY, 1)) {
               newY = testY;
             }
           } else {
@@ -816,13 +794,11 @@ export default function IdlePage() {
 
         if (distance < 5) {
           if (cake.isSpecial) {
-            setScore(prev => prev + 50);
             setPowerMode(true);
             setPowerTimeLeft(10);
             setGhosts(prev => prev.map(ghost => ({ ...ghost, scared: true, mode: 'flee', modeTimer: 120 })));
             createParticles(cake.x, cake.y, '#FFD700', 12, '✨');
           } else {
-            setScore(prev => prev + 10);
             createParticles(cake.x, cake.y, '#F9A03F', 6);
           }
           setIsEating(true);
@@ -848,7 +824,6 @@ export default function IdlePage() {
           );
 
           if (distance < 6 && ghost.scared) {
-            setScore(prev => prev + 200);
             createParticles(ghost.x, ghost.y, ghost.color, 10, '💯');
             setIsEating(true);
             setTimeout(() => setIsEating(false), 200);
@@ -886,44 +861,9 @@ export default function IdlePage() {
     }
   }, [pacmanPosition, powerMode, findValidPosition]);
 
-  // Auto-increment score
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setScore(prev => {
-        const newScore = prev + 1;
-        if (newScore > highScore) {
-          setHighScore(newScore);
-          localStorage.setItem('pacman_high_score', newScore.toString());
-        }
-        return newScore;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [highScore]);
-
-  // Messages
-  useEffect(() => {
-    if (score > 0 && score % 300 === 0 && score !== lastMessageScore) {
-      const randomIndex = Math.floor(Math.random() * messages.length);
-      setCurrentMessage(messages[randomIndex]);
-      setShowMessage(true);
-      setLastMessageScore(score);
-
-      const timeout = setTimeout(() => {
-        setShowMessage(false);
-      }, 2500);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [score, lastMessageScore]);
-
   const handleClick = useCallback(() => {
-    if (showStartOverlay) {
-      setShowStartOverlay(false);
-    } else {
-      window.location.href = '/';
-    }
-  }, [showStartOverlay]);
+    window.location.href = '/';
+  }, []);
 
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     if (event.key === ' ' || event.key === 'Enter') {
@@ -953,104 +893,6 @@ export default function IdlePage() {
           backgroundSize: '60px 60px'
         }}
       />
-
-      {/* Start Overlay */}
-      {showStartOverlay && (
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center animate-scale-in">
-          <Card className="card-modern max-w-2xl mx-6">
-            <div className="p-12 text-center">
-              <div className="text-8xl mb-6 animate-bounce-slow">🍰</div>
-              <h1 className="text-6xl font-black bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent mb-4">
-                Golden Munch
-              </h1>
-              <p className="text-2xl text-chocolate-brown mb-8">
-                Kiosk Idle Mode - AI Enhanced
-              </p>
-              <div className="text-xl text-chocolate-brown/80 mb-8 space-y-2">
-                <p>🎮 Watch Smart Pacman collect treats with A* pathfinding!</p>
-                <p>⭐ Special items activate power mode</p>
-                <p>👻 Ghosts have unique AI personalities</p>
-                <p>🧱 Random obstacles change every reload</p>
-                <p>🧠 Advanced pathfinding & prediction</p>
-              </div>
-              <div className="bg-golden-orange/10 rounded-2xl p-6 mb-8">
-                <p className="text-4xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent">
-                  Tap Anywhere to Start
-                </p>
-              </div>
-              <p className="text-chocolate-brown/60">
-                Tap the screen to begin ordering delicious treats!
-              </p>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Score Display */}
-      <div className="absolute top-6 left-6 z-30">
-        <Card className="card-glass">
-          <div className="p-4">
-            <div className="flex items-center gap-4">
-              <div>
-                <p className="text-sm text-chocolate-brown/70 font-semibold">SCORE</p>
-                <p className="text-3xl font-black bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent">
-                  {score.toLocaleString()}
-                </p>
-              </div>
-              {highScore > 0 && (
-                <div className="border-l-2 border-golden-orange/30 pl-4">
-                  <p className="text-xs text-chocolate-brown/60 font-semibold">BEST</p>
-                  <p className="text-xl font-bold text-chocolate-brown">
-                    {highScore.toLocaleString()}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Power Mode Indicator */}
-      {powerMode && (
-        <div className="absolute top-6 right-6 z-30 animate-scale-in">
-          <Card className="card-modern bg-gradient-to-r from-golden-orange to-deep-amber border-0">
-            <div className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="text-3xl animate-pulse-slow">⚡</div>
-                <div>
-                  <p className="text-sm text-white/90 font-bold">POWER MODE</p>
-                  <p className="text-2xl font-black text-white">{powerTimeLeft}s</p>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Stats Bar */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
-        <Card className="card-glass">
-          <div className="px-6 py-3 flex items-center gap-6">
-            <Chip size="lg" variant="flat" color="warning">
-              🎂 {cakes.length} Treats
-            </Chip>
-            <Chip size="lg" variant="flat" color="primary">
-              👻 {ghosts.length} Ghosts
-            </Chip>
-            <Chip size="lg" variant="flat" color="default">
-              🧱 {obstacles.length} Obstacles
-            </Chip>
-            {powerMode && (
-              <Chip size="lg" variant="shadow" className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold animate-glow">
-                ⚡ POWERED UP!
-              </Chip>
-            )}
-            <Chip size="sm" variant="flat" color="success">
-              🧠 A* AI
-            </Chip>
-          </div>
-        </Card>
-      </div>
 
       {/* Obstacles */}
       {obstacles.map((obstacle) => (
@@ -1091,7 +933,7 @@ export default function IdlePage() {
       {particles.map(particle => (
         <div
           key={particle.id}
-          className="absolute text-2xl pointer-events-none"
+          className="absolute text-xl pointer-events-none"
           style={{
             left: `${particle.x}%`,
             top: `${particle.y}%`,
@@ -1133,7 +975,7 @@ export default function IdlePage() {
         }}
       >
         <div
-          className={`w-16 h-16 relative transition-all duration-300`}
+          className={`w-10 h-10 relative transition-all duration-300`}
           style={{
             background: powerMode
               ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%)'
@@ -1148,8 +990,8 @@ export default function IdlePage() {
             filter: powerMode ? 'brightness(1.3)' : 'none'
           }}
         >
-          <div className="absolute w-3 h-3 bg-chocolate-brown rounded-full top-4 left-4 shadow-inner">
-            <div className="absolute w-1 h-1 bg-white rounded-full top-0.5 left-0.5"></div>
+          <div className="absolute w-2 h-2 bg-chocolate-brown rounded-full top-2.5 left-2.5 shadow-inner">
+            <div className="absolute w-0.5 h-0.5 bg-white rounded-full top-0.5 left-0.5"></div>
           </div>
           {powerMode && (
             <div className="absolute inset-0 rounded-full bg-golden-orange/30 animate-pulse-slow"></div>
@@ -1178,7 +1020,7 @@ export default function IdlePage() {
             }}
           >
             <div
-              className="text-5xl"
+              className="text-3xl"
               style={{
                 color: ghost.scared ? '#9CA3AF' : ghost.color,
               }}
@@ -1187,18 +1029,7 @@ export default function IdlePage() {
             </div>
             {ghost.scared && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-2xl">😱</div>
-              </div>
-            )}
-            {/* Personality indicator */}
-            {!ghost.scared && (
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-                <div className="text-xs bg-black/50 text-white px-1 rounded">
-                  {ghost.personality === 'aggressive' && '⚔️'}
-                  {ghost.personality === 'smart' && '🧠'}
-                  {ghost.personality === 'ambusher' && '🎯'}
-                  {ghost.personality === 'random' && '🎲'}
-                </div>
+                <div className="text-lg">😱</div>
               </div>
             )}
           </div>
@@ -1223,24 +1054,11 @@ export default function IdlePage() {
               : 'drop-shadow(0 4px 10px rgba(217, 119, 6, 0.3))'
           }}
         >
-          <div className={`text-4xl ${cake.isSpecial ? 'scale-125' : ''}`}>
+          <div className={`text-2xl ${cake.isSpecial ? 'scale-125' : ''}`}>
             {cake.emoji}
           </div>
         </div>
       ))}
-
-      {/* Message Toast */}
-      {showMessage && (
-        <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none animate-scale-in">
-          <Card className="card-modern shadow-2xl border-4 border-golden-orange">
-            <div className="px-10 py-6">
-              <p className="text-3xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent text-center">
-                {currentMessage}
-              </p>
-            </div>
-          </Card>
-        </div>
-      )}
 
       <style jsx>{`
         @keyframes gentleFloat {
