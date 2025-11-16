@@ -896,6 +896,10 @@ export default function IdlePage() {
           console.log('  🚧 BLOCKED BY OBSTACLE - Clearing path');
         }
 
+        // Update position ref immediately
+        pacmanPosRef.current = { x: newX, y: newY };
+        console.log('  ✅ POSITION REF UPDATED:', { x: pacmanPosRef.current.x.toFixed(2), y: pacmanPosRef.current.y.toFixed(2) });
+
         return { x: newX, y: newY };
       });
 
@@ -907,20 +911,29 @@ export default function IdlePage() {
       console.log('  Clear Path:', shouldClearPath);
       console.log('  New Direction:', newDirectionToSet ? { x: newDirectionToSet.x.toFixed(2), y: newDirectionToSet.y.toFixed(2) } : 'null');
 
+      // Update refs immediately (don't wait for state to propagate)
       if (shouldIncrementStuck) {
         setPacmanStuckCounter(c => c + 1);
+        pacmanStuckCounterRef.current += 1;
       } else if (shouldResetStuck) {
         setPacmanStuckCounter(0);
+        pacmanStuckCounterRef.current = 0;
       }
 
       if (newPathToSet !== null) {
         setPacmanPath(newPathToSet);
+        pacmanPathRef.current = newPathToSet; // Update ref immediately
+        console.log('  ✅ REF UPDATED - pacmanPathRef length:', pacmanPathRef.current.length);
       } else if (shouldClearPath) {
         setPacmanPath([]);
+        pacmanPathRef.current = [];
+        console.log('  🗑️  REF CLEARED - pacmanPathRef');
       }
 
       if (newDirectionToSet !== null) {
         setPacmanDirection(newDirectionToSet);
+        pacmanDirRef.current = newDirectionToSet; // Update ref immediately
+        console.log('  ✅ REF UPDATED - pacmanDirRef:', { x: pacmanDirRef.current.x.toFixed(2), y: pacmanDirRef.current.y.toFixed(2) });
       }
 
       console.log('═══════════════════════════════════════════════\n');
@@ -1022,7 +1035,8 @@ export default function IdlePage() {
   }, [handleKeyPress]);
 
   const getRotation = () => {
-    const angle = Math.atan2(pacmanDirection.y, pacmanDirection.x) * (180 / Math.PI);
+    // Use ref for immediate direction updates (not lagging state)
+    const angle = Math.atan2(pacmanDirRef.current.y, pacmanDirRef.current.x) * (180 / Math.PI);
     return angle;
   };
 
