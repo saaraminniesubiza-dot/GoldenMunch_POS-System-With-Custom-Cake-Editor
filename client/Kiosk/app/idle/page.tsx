@@ -133,13 +133,22 @@ export default function IdlePage() {
 
   // A* Pathfinding Algorithm - Simplified and working
   const findPath = useCallback((start: Position, goal: Position, avoidPoints: Position[] = []): Position[] => {
+    console.log('\n🔍 FINDPATH CALLED:');
+    console.log('  Start:', { x: start?.x?.toFixed(1), y: start?.y?.toFixed(1) });
+    console.log('  Goal:', { x: goal?.x?.toFixed(1), y: goal?.y?.toFixed(1) });
+    console.log('  Avoid Points:', avoidPoints.length);
+
     // Validate inputs
     if (!start || !goal) {
+      console.log('  ❌ INVALID INPUT - Returning default position');
       return [start || { x: 50, y: 50 }];
     }
 
     const distance = Math.sqrt(Math.pow(goal.x - start.x, 2) + Math.pow(goal.y - start.y, 2));
+    console.log('  Direct Distance:', distance.toFixed(2));
+
     if (distance < 3) {
+      console.log('  ✅ ALREADY AT GOAL - Returning start position');
       return [start];
     }
 
@@ -225,7 +234,12 @@ export default function IdlePage() {
           path.unshift({ x: node.x, y: node.y });
           node = node.parent;
         }
-        return path.length > 2 ? [path[0], path[Math.floor(path.length / 2)], path[path.length - 1]] : path;
+        const simplifiedPath = path.length > 2 ? [path[0], path[Math.floor(path.length / 2)], path[path.length - 1]] : path;
+        console.log('  ✅ PATH FOUND!');
+        console.log('    Full path length:', path.length);
+        console.log('    Simplified path length:', simplifiedPath.length);
+        console.log('    Iterations used:', iterations);
+        return simplifiedPath;
       }
 
       // Explore neighbors
@@ -265,6 +279,10 @@ export default function IdlePage() {
     }
 
     // No path found - return direct line
+    console.log('  ⚠️  NO PATH FOUND - Returning direct line');
+    console.log('    Iterations used:', iterations);
+    console.log('    Open set size:', openSet.length);
+    console.log('    Closed set size:', closedSet.size);
     return [start, goal];
   }, []);
 
@@ -653,13 +671,22 @@ export default function IdlePage() {
         const currentStuckCounter = pacmanStuckCounterRef.current;
         const currentDirection = pacmanDirRef.current;
 
-        console.log('🎮 PACMAN MOVEMENT DEBUG:', {
-          position: prev,
-          cakesCount: currentCakes.length,
-          ghostsCount: currentGhosts.length,
-          currentPathLength: currentPath.length,
-          stuckCounter: currentStuckCounter,
-          direction: currentDirection
+        console.log('\n═══════════════════════════════════════════════');
+        console.log('🎮 PACMAN MOVEMENT TICK');
+        console.log('═══════════════════════════════════════════════');
+        console.log('📍 Current Position:', { x: prev.x.toFixed(2), y: prev.y.toFixed(2) });
+        console.log('🧭 Current Direction:', { x: currentDirection.x.toFixed(2), y: currentDirection.y.toFixed(2) });
+        console.log('🎯 Cakes Available:', currentCakes.length);
+        console.log('👻 Ghosts Active:', currentGhosts.length);
+        console.log('🛤️  Current Path Length:', currentPath.length);
+        console.log('🔒 Stuck Counter:', currentStuckCounter);
+        console.log('⚡ Power Mode:', currentPowerMode);
+
+        // Log all cake positions
+        console.log('\n🍰 ALL CAKE POSITIONS:');
+        currentCakes.forEach((cake, i) => {
+          const dist = Math.sqrt(Math.pow(cake.x - prev.x, 2) + Math.pow(cake.y - prev.y, 2));
+          console.log(`  Cake ${i + 1}: ${cake.emoji} at (${cake.x.toFixed(1)}, ${cake.y.toFixed(1)}) - Distance: ${dist.toFixed(1)} - Special: ${cake.isSpecial}`);
         });
 
         // Stuck detection
@@ -690,10 +717,17 @@ export default function IdlePage() {
           });
         }
 
-        console.log('🎯 TARGETS:', {
-          count: targets.length,
-          firstThree: targets.slice(0, 3).map(t => ({ x: t.x, y: t.y, type: t.type }))
-        });
+        console.log('\n🎯 TARGET ANALYSIS:');
+        console.log('  Total Targets:', targets.length);
+        if (targets.length > 0) {
+          console.log('  All Targets:');
+          targets.forEach((t, i) => {
+            const dist = Math.sqrt(Math.pow(t.x - prev.x, 2) + Math.pow(t.y - prev.y, 2));
+            console.log(`    Target ${i + 1}: ${t.type} at (${t.x.toFixed(1)}, ${t.y.toFixed(1)}) - Dist: ${dist.toFixed(1)} - Priority: ${t.priority}`);
+          });
+        } else {
+          console.log('  ⚠️  NO TARGETS AVAILABLE!');
+        }
 
         // Find dangerous ghosts to avoid
         const dangerGhosts = currentGhosts.filter(g => !g.scared);
@@ -704,14 +738,21 @@ export default function IdlePage() {
           })
           .map(g => ({ x: g.x, y: g.y }));
 
+        // Find dangerous ghosts to avoid
+        console.log('\n⚠️  DANGER ANALYSIS:');
+        console.log('  Dangerous Ghosts:', avoidPoints.length);
+        avoidPoints.forEach((pt, i) => {
+          const dist = Math.sqrt(Math.pow(pt.x - prev.x, 2) + Math.pow(pt.y - prev.y, 2));
+          console.log(`    Danger ${i + 1}: Ghost at (${pt.x.toFixed(1)}, ${pt.y.toFixed(1)}) - Distance: ${dist.toFixed(1)}`);
+        });
+
         // Recalculate path if needed
         const shouldRecalculate = currentPath.length === 0 || currentStuckCounter > 15 || Math.random() < 0.1;
-        console.log('🔄 PATH RECALCULATION CHECK:', {
-          shouldRecalculate,
-          reason: currentPath.length === 0 ? 'no path' : currentStuckCounter > 15 ? 'stuck' : 'random',
-          pathLength: currentPath.length,
-          stuckCounter: currentStuckCounter
-        });
+        console.log('\n🔄 PATH RECALCULATION CHECK:');
+        console.log('  Should Recalculate:', shouldRecalculate);
+        console.log('  Reason:', currentPath.length === 0 ? 'NO PATH' : currentStuckCounter > 15 ? 'STUCK TOO LONG' : 'RANDOM REPLAN');
+        console.log('  Current Path Length:', currentPath.length);
+        console.log('  Stuck Counter:', currentStuckCounter);
 
         if (shouldRecalculate) {
           if (targets.length > 0) {
@@ -723,23 +764,38 @@ export default function IdlePage() {
               return score < best.score ? { target, score } : best;
             }, { target: null, score: Infinity });
 
-            console.log('🎯 BEST TARGET:', {
-              target: bestTarget.target ? { x: bestTarget.target.x, y: bestTarget.target.y, type: bestTarget.target.type } : null,
-              score: bestTarget.score
-            });
+            console.log('\n🎯 BEST TARGET SELECTION:');
+            if (bestTarget.target) {
+              const targetDist = Math.sqrt(Math.pow(bestTarget.target.x - prev.x, 2) + Math.pow(bestTarget.target.y - prev.y, 2));
+              console.log('  Selected Target:', bestTarget.target.type);
+              console.log('  Position:', { x: bestTarget.target.x.toFixed(1), y: bestTarget.target.y.toFixed(1) });
+              console.log('  Distance:', targetDist.toFixed(1));
+              console.log('  Priority:', bestTarget.target.priority);
+              console.log('  Score:', bestTarget.score.toFixed(2));
+              console.log('  Is Special:', bestTarget.target.isSpecial || false);
+            } else {
+              console.log('  ❌ NO TARGET SELECTED');
+            }
 
             if (bestTarget.target && bestTarget.score < 100) {
+              console.log('\n📍 CALCULATING PATH TO TARGET...');
+              console.log('  From:', { x: prev.x.toFixed(1), y: prev.y.toFixed(1) });
+              console.log('  To:', { x: bestTarget.target.x.toFixed(1), y: bestTarget.target.y.toFixed(1) });
+              console.log('  Avoid Points:', avoidPoints.length);
+
               const calculatedPath = findPath(prev, { x: bestTarget.target.x, y: bestTarget.target.y }, avoidPoints);
-              console.log('📍 CALCULATED PATH:', {
-                from: prev,
-                to: { x: bestTarget.target.x, y: bestTarget.target.y },
-                pathLength: calculatedPath.length,
-                path: calculatedPath
+
+              console.log('\n✅ PATH CALCULATED:');
+              console.log('  Path Length:', calculatedPath.length);
+              console.log('  Full Path:');
+              calculatedPath.forEach((point, i) => {
+                console.log(`    Step ${i + 1}: (${point.x.toFixed(1)}, ${point.y.toFixed(1)})`);
               });
+
               newPathToSet = calculatedPath.slice(1);
               shouldResetStuck = true;
             } else {
-              console.log('❌ NO VALID TARGET (score too high or no target)');
+              console.log('\n❌ TARGET REJECTED - Score too high:', bestTarget.score);
             }
           } else if (currentStuckCounter > 10) {
             // No targets available and stuck - move to random position
@@ -747,46 +803,56 @@ export default function IdlePage() {
               x: Math.random() * 80 + 10,
               y: Math.random() * 80 + 10
             };
-            console.log('🎲 MOVING TO RANDOM TARGET:', randomTarget);
+            console.log('\n🎲 NO TARGETS - MOVING TO RANDOM POSITION');
+            console.log('  Random Target:', { x: randomTarget.x.toFixed(1), y: randomTarget.y.toFixed(1) });
             const calculatedPath = findPath(prev, randomTarget, avoidPoints);
+            console.log('  Random Path Length:', calculatedPath.length);
             newPathToSet = calculatedPath.slice(1);
             shouldResetStuck = true;
+          } else {
+            console.log('\n⏸️  NO RECALCULATION NEEDED - Using existing path');
           }
+        } else {
+          console.log('\n⏸️  SKIPPING PATH RECALCULATION');
         }
 
         // Follow the calculated path
+        console.log('\n🚶 PATH FOLLOWING:');
         if (currentPath.length > 0) {
           const nextWaypoint = currentPath[0];
           const dx = nextWaypoint.x - prev.x;
           const dy = nextWaypoint.y - prev.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          console.log('🚶 FOLLOWING PATH:', {
-            currentWaypoint: nextWaypoint,
-            distance: dist,
-            willAdvance: dist < 3
-          });
+          console.log('  Next Waypoint:', { x: nextWaypoint.x.toFixed(1), y: nextWaypoint.y.toFixed(1) });
+          console.log('  Distance to Waypoint:', dist.toFixed(2));
+          console.log('  Waypoints Remaining:', currentPath.length);
 
           if (dist < 3) {
             newPathToSet = currentPath.slice(1);
-            console.log('✅ REACHED WAYPOINT, advancing to next');
+            console.log('  ✅ REACHED WAYPOINT - Advancing to next');
+          } else {
+            console.log('  ⏩ Moving towards waypoint');
           }
 
           if (dist > 0) {
             newDirectionToSet = { x: dx / dist, y: dy / dist };
-            console.log('➡️ NEW DIRECTION SET:', newDirectionToSet);
+            console.log('  ➡️  Setting Direction:', { x: newDirectionToSet.x.toFixed(2), y: newDirectionToSet.y.toFixed(2) });
           }
         } else if (avoidPoints.length > 0) {
           const nearestDanger = avoidPoints[0];
           const dx = prev.x - nearestDanger.x;
           const dy = prev.y - nearestDanger.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          console.log('⚠️ FLEEING FROM DANGER:', { danger: nearestDanger, distance: dist });
+          console.log('  ⚠️  FLEEING FROM DANGER!');
+          console.log('  Danger at:', { x: nearestDanger.x.toFixed(1), y: nearestDanger.y.toFixed(1) });
+          console.log('  Distance from danger:', dist.toFixed(2));
           if (dist > 0) {
             newDirectionToSet = { x: dx / dist, y: dy / dist };
+            console.log('  ➡️  Flee Direction:', { x: newDirectionToSet.x.toFixed(2), y: newDirectionToSet.y.toFixed(2) });
           }
         } else {
-          console.log('🤷 NO PATH AND NO DANGER - continuing current direction');
+          console.log('  ➡️  NO PATH - Continuing current direction:', { x: currentDirection.x.toFixed(2), y: currentDirection.y.toFixed(2) });
         }
 
         // Apply movement
@@ -796,41 +862,43 @@ export default function IdlePage() {
 
         const wouldHitObstacle = isInsideObstacle(testX, testY, 1);
 
-        console.log('🏃 MOVEMENT:', {
-          currentPos: prev,
-          currentDirection,
-          speed,
-          testPos: { x: testX, y: testY },
-          wouldHitObstacle,
-          willMove: testX > 2 && testX < 98 && testY > 2 && testY < 98 && !wouldHitObstacle
-        });
+        console.log('\n🏃 MOVEMENT APPLICATION:');
+        console.log('  Current Position:', { x: prev.x.toFixed(2), y: prev.y.toFixed(2) });
+        console.log('  Direction:', { x: currentDirection.x.toFixed(2), y: currentDirection.y.toFixed(2) });
+        console.log('  Speed:', speed);
+        console.log('  Test Position:', { x: testX.toFixed(2), y: testY.toFixed(2) });
+        console.log('  Would Hit Obstacle:', wouldHitObstacle);
+        console.log('  In Bounds:', testX > 2 && testX < 98 && testY > 2 && testY < 98);
 
         if (testX > 2 && testX < 98 && testY > 2 && testY < 98 && !wouldHitObstacle) {
           newX = testX;
           newY = testY;
+          console.log('  ✅ MOVEMENT ALLOWED - Moving to:', { x: newX.toFixed(2), y: newY.toFixed(2) });
         } else if (!wouldHitObstacle) {
           if (testX > 2 && testX < 98 && !isInsideObstacle(testX, prev.y, 1)) {
             newX = testX;
+            console.log('  ➡️  Partial X movement allowed');
           }
           if (testY > 2 && testY < 98 && !isInsideObstacle(prev.x, testY, 1)) {
             newY = testY;
+            console.log('  ⬆️  Partial Y movement allowed');
           }
+          console.log('  ⚠️  PARTIAL MOVEMENT - New pos:', { x: newX.toFixed(2), y: newY.toFixed(2) });
         } else {
           shouldClearPath = true;
-          console.log('🚧 HIT OBSTACLE - clearing path');
+          console.log('  🚧 BLOCKED BY OBSTACLE - Clearing path');
         }
 
         return { x: newX, y: newY };
       });
 
       // Apply deferred state updates
-      console.log('📝 DEFERRED STATE UPDATES:', {
-        shouldIncrementStuck,
-        shouldResetStuck,
-        newPathLength: newPathToSet ? newPathToSet.length : 'null',
-        shouldClearPath,
-        newDirection: newDirectionToSet
-      });
+      console.log('\n📝 DEFERRED STATE UPDATES:');
+      console.log('  Increment Stuck:', shouldIncrementStuck);
+      console.log('  Reset Stuck:', shouldResetStuck);
+      console.log('  New Path Length:', newPathToSet ? newPathToSet.length : 'null');
+      console.log('  Clear Path:', shouldClearPath);
+      console.log('  New Direction:', newDirectionToSet ? { x: newDirectionToSet.x.toFixed(2), y: newDirectionToSet.y.toFixed(2) } : 'null');
 
       if (shouldIncrementStuck) {
         setPacmanStuckCounter(c => c + 1);
@@ -848,7 +916,7 @@ export default function IdlePage() {
         setPacmanDirection(newDirectionToSet);
       }
 
-      console.log('─────────────────────────────────────────────');
+      console.log('═══════════════════════════════════════════════\n');
     };
 
     const interval = setInterval(movePacman, 30);
