@@ -12,9 +12,14 @@ export const getMenuItems = async (req: AuthRequest, res: Response) => {
     item_type,
     is_featured,
     search,
-    page = 1,
-    limit = 50,
+    page = '1',
+    limit = '50',
   } = req.query;
+
+  // Parse and validate pagination parameters
+  const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 50));
+  const offset = (pageNum - 1) * limitNum;
 
   let sql = `
     SELECT
@@ -58,7 +63,7 @@ export const getMenuItems = async (req: AuthRequest, res: Response) => {
 
   sql += ` ORDER BY mi.is_featured DESC, mi.popularity_score DESC`;
   sql += ` LIMIT ? OFFSET ?`;
-  params.push(Number(limit), (Number(page) - 1) * Number(limit));
+  params.push(limitNum, offset);
 
   const items = await query(sql, params);
 

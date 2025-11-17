@@ -337,9 +337,14 @@ export const getOrders = async (req: AuthRequest, res: Response) => {
     order_type,
     date_from,
     date_to,
-    page = 1,
-    limit = 20,
+    page = '1',
+    limit = '20',
   } = req.query;
+
+  // Parse and validate pagination parameters
+  const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 20));
+  const offset = (pageNum - 1) * limitNum;
 
   let sql = `
     SELECT co.*, c.first_name, c.last_name, c.phone
@@ -377,22 +382,22 @@ export const getOrders = async (req: AuthRequest, res: Response) => {
 
   // Get total count
   const countSql = sql.replace(/SELECT co\.\*.*FROM/, 'SELECT COUNT(*) as total FROM');
-  const countResult = getFirstRow<any>(await query(countSql, params.slice(0, -2)));
+  const countResult = getFirstRow<any>(await query(countSql, params));
   const total = countResult?.total || 0;
 
   sql += ` ORDER BY co.order_datetime DESC`;
   sql += ` LIMIT ? OFFSET ?`;
-  params.push(Number(limit), (Number(page) - 1) * Number(limit));
+  params.push(limitNum, offset);
 
   const orders = await query(sql, params);
 
   res.json(successResponse('Orders retrieved', {
     orders,
     pagination: {
-      page: Number(page),
-      limit: Number(limit),
+      page: pageNum,
+      limit: limitNum,
       total,
-      totalPages: Math.ceil(total / Number(limit))
+      totalPages: Math.ceil(total / limitNum)
     }
   }));
 };

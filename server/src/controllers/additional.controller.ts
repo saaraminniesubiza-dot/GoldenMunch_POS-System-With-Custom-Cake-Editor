@@ -483,7 +483,10 @@ export const getDailyStats = async (req: AuthRequest, res: Response) => {
 };
 
 export const getPopularityHistory = async (req: AuthRequest, res: Response) => {
-  const { menu_item_id, limit = 50 } = req.query;
+  const { menu_item_id, limit = '50' } = req.query;
+
+  // Parse and validate limit parameter
+  const limitNum = Math.min(200, Math.max(1, parseInt(limit as string, 10) || 50));
 
   let sql = `
     SELECT ph.*, mi.name as item_name
@@ -500,7 +503,7 @@ export const getPopularityHistory = async (req: AuthRequest, res: Response) => {
   }
 
   sql += ' ORDER BY ph.changed_at DESC LIMIT ?';
-  params.push(Number(limit));
+  params.push(limitNum);
 
   const history = await query(sql, params);
 
