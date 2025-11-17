@@ -1,8 +1,11 @@
-const { app, BrowserWindow, screen } = require('electron');
+const { app, BrowserWindow, screen, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const isDev = process.env.NODE_ENV !== 'production';
+const ThermalPrinterService = require('./printer');
 
 let mainWindow;
+let printerService = null;
 
 function createWindow() {
   // Get primary display dimensions
@@ -103,3 +106,159 @@ if (!isDev) {
   const id = powerSaveBlocker.start('prevent-display-sleep');
   console.log('Power save blocker started:', powerSaveBlocker.isStarted(id));
 }
+
+// ============================================================================
+// PRINTER INTEGRATION
+// ============================================================================
+
+/**
+ * Initialize printer service
+ */
+function initializePrinter() {
+  try {
+    // Load printer configuration
+    const configPath = path.join(__dirname, 'printer-config.json');
+    let config = {};
+
+    if (fs.existsSync(configPath)) {
+      const configData = fs.readFileSync(configPath, 'utf8');
+      config = JSON.parse(configData);
+      console.log('Printer config loaded:', config);
+    } else {
+      console.log('No printer config found, using defaults');
+    }
+
+    // Create printer service instance
+    const printerConfig = {
+      type: config.printerType || 'usb',
+      vid: parseInt(config.usb?.vid || '0x0416', 16),
+      pid: parseInt(config.usb?.pid || '0x5011', 16),
+      address: config.network?.address || '192.168.1.100',
+      port: config.network?.port || 9100,
+      serialPath: config.serial?.path || '/dev/ttyUSB0',
+      baudRate: config.serial?.baudRate || 9600,
+      width: config.settings?.width || 48,
+      encoding: config.settings?.encoding || 'GB18030'
+    };
+
+    printerService = new ThermalPrinterService(printerConfig);
+    console.log('Printer service initialized');
+  } catch (error) {
+    console.error('Error initializing printer:', error);
+    printerService = null;
+  }
+}
+
+/**
+ * IPC Handler: Print receipt
+ */
+ipcMain.handle('print-receipt', async (event, orderData) => {
+  console.log('Print receipt requested:', orderData);
+
+  try {
+    if (!printerService) {
+      initializePrinter();
+    }
+
+    if (!printerService) {
+      throw new Error('Printer service not available');
+    }
+
+    await printerService.printReceipt(orderData);
+    return { success: true, message: 'Receipt printed successfully' };
+  } catch (error) {
+    console.error('Error printing receipt:', error);
+    return {
+      success: false,
+      error: error.message,
+      suggestion: 'Check printer connection and configuration'
+    };
+  }
+});
+
+/**
+ * IPC Handler: Print test receipt
+ */
+ipcMain.handle('print-test', async () => {
+  console.log('Test print requested');
+
+  try {
+    if (!printerService) {
+      initializePrinter();
+    }
+
+    if (!printerService) {
+      throw new Error('Printer service not available');
+    }
+
+    await printerService.printTest();
+    return { success: true, message: 'Test receipt printed' };
+  } catch (error) {
+    console.error('Error printing test:', error);
+    return {
+      success: false,
+      error: error.message,
+      suggestion: 'Check printer connection and configuration'
+    };
+  }
+});
+
+/**
+ * IPC Handler: Print daily report
+ */
+ipcMain.handle('print-daily-report', async (event, reportData) => {
+  console.log('Daily report print requested');
+
+  try {
+    if (!printerService) {
+      initializePrinter();
+    }
+
+    if (!printerService) {
+      throw new Error('Printer service not available');
+    }
+
+    await printerService.printDailyReport(reportData);
+    return { success: true, message: 'Report printed successfully' };
+  } catch (error) {
+    console.error('Error printing report:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+/**
+ * IPC Handler: Get printer status
+ */
+ipcMain.handle('printer-status', async () => {
+  return {
+    available: printerService !== null,
+    connected: printerService !== null,
+    config: printerService ? printerService.config : null
+  };
+});
+
+// Initialize printer on app ready
+app.whenReady().then(() => {
+  createWindow();
+
+  // Initialize printer after a short delay
+  setTimeout(() => {
+    initializePrinter();
+  }, 2000);
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+// Cleanup printer on quit
+app.on('before-quit', () => {
+  if (printerService) {
+    printerService.disconnect();
+  }
+});

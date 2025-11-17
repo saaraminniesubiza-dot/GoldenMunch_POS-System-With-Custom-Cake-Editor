@@ -6,13 +6,25 @@ contextBridge.exposeInMainWorld('electron', {
   // Add any electron APIs you need to expose to the renderer
   // For security, only expose specific functions you need
 
-  // Example: Get app version
+  // Printer Functions
+  printer: {
+    // Print order receipt
+    printReceipt: (orderData) => ipcRenderer.invoke('print-receipt', orderData),
+
+    // Print test receipt
+    printTest: () => ipcRenderer.invoke('print-test'),
+
+    // Print daily report
+    printDailyReport: (reportData) => ipcRenderer.invoke('print-daily-report', reportData),
+
+    // Get printer status
+    getStatus: () => ipcRenderer.invoke('printer-status'),
+  },
+
+  // App Functions
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
 
-  // Example: Print receipt
-  printReceipt: (data) => ipcRenderer.invoke('print-receipt', data),
-
-  // Example: Open external payment window
+  // Payment Functions (for future integration)
   openPayment: (paymentData) => ipcRenderer.invoke('open-payment', paymentData),
 });
 
