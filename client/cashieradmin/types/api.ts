@@ -1,0 +1,635 @@
+// API Response Types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message: string;
+  data?: T;
+  error?: string;
+}
+
+// Enums matching backend
+export enum ItemType {
+  CAKE = 'cake',
+  PASTRY = 'pastry',
+  BEVERAGE = 'beverage',
+  COFFEE = 'coffee',
+  SANDWICH = 'sandwich',
+  BREAD = 'bread',
+  DESSERT = 'dessert',
+  SNACK = 'snack',
+  OTHER = 'other'
+}
+
+export enum OrderType {
+  WALK_IN = 'walk_in',
+  PICKUP = 'pickup',
+  PRE_ORDER = 'pre_order',
+  CUSTOM_ORDER = 'custom_order'
+}
+
+export enum OrderStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  PREPARING = 'preparing',
+  READY = 'ready',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled'
+}
+
+export enum PaymentMethod {
+  CASH = 'cash',
+  GCASH = 'gcash',
+  PAYMAYA = 'paymaya',
+  CARD = 'card',
+  BANK_TRANSFER = 'bank_transfer'
+}
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PARTIAL_PAID = 'partial_paid',
+  PAID = 'paid',
+  FAILED = 'failed',
+  REFUNDED = 'refunded'
+}
+
+export enum PromotionType {
+  PERCENTAGE = 'percentage',
+  FIXED_AMOUNT = 'fixed_amount',
+  BUY_X_GET_Y = 'buy_x_get_y',
+  BUNDLE = 'bundle',
+  SEASONAL = 'seasonal'
+}
+
+export enum RefundType {
+  FULL = 'full',
+  PARTIAL = 'partial',
+  ITEM = 'item'
+}
+
+export enum RefundReason {
+  CUSTOMER_REQUEST = 'customer_request',
+  WRONG_ITEM = 'wrong_item',
+  QUALITY_ISSUE = 'quality_issue',
+  DELAY = 'delay',
+  CANCELLATION = 'cancellation'
+}
+
+export enum RefundStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  COMPLETED = 'completed'
+}
+
+export enum RefundMethod {
+  CASH = 'cash',
+  GCASH = 'gcash',
+  PAYMAYA = 'paymaya',
+  CARD = 'card',
+  BANK_TRANSFER = 'bank_transfer',
+  STORE_CREDIT = 'store_credit'
+}
+
+export enum WasteReason {
+  EXPIRED = 'expired',
+  DAMAGED = 'damaged',
+  OVERPRODUCTION = 'overproduction',
+  QUALITY_ISSUE = 'quality_issue',
+  CUSTOMER_RETURN = 'customer_return'
+}
+
+export enum FrostingType {
+  BUTTERCREAM = 'buttercream',
+  FONDANT = 'fondant',
+  WHIPPED_CREAM = 'whipped_cream',
+  GANACHE = 'ganache',
+  CREAM_CHEESE = 'cream_cheese'
+}
+
+export enum DesignComplexity {
+  SIMPLE = 'simple',
+  MODERATE = 'moderate',
+  COMPLEX = 'complex',
+  INTRICATE = 'intricate'
+}
+
+export enum InventoryTransactionType {
+  IN = 'in',
+  OUT = 'out',
+  ADJUSTMENT = 'adjustment',
+  RETURN = 'return',
+  WASTE = 'waste',
+  TRANSFER = 'transfer'
+}
+
+export enum InventoryAlertType {
+  LOW_STOCK = 'low_stock',
+  OUT_OF_STOCK = 'out_of_stock',
+  EXPIRING_SOON = 'expiring_soon',
+  OVERSTOCKED = 'overstocked'
+}
+
+export enum TaxType {
+  PERCENTAGE = 'percentage',
+  FIXED = 'fixed'
+}
+
+export enum PriceType {
+  REGULAR = 'regular',
+  PROMOTION = 'promotion',
+  SEASONAL = 'seasonal',
+  BULK = 'bulk'
+}
+
+// Entity Types
+export interface MenuItem {
+  menu_item_id: number;
+  name: string;
+  description: string;
+  image_url?: string;
+  item_type: ItemType;
+  unit_of_measure: string;
+  stock_quantity: number;
+  is_infinite_stock: boolean;
+  min_stock_level: number;
+  can_customize: boolean;
+  can_preorder: boolean;
+  preparation_time_minutes: number;
+  popularity_score: number;
+  total_orders: number;
+  total_quantity_sold: number;
+  last_ordered_date?: string;
+  is_featured: boolean;
+  allergen_info?: string;
+  nutritional_info?: string;
+  is_deleted: boolean;
+  status: 'available' | 'unavailable' | 'out_of_stock';
+  created_at: string;
+  updated_at: string;
+  current_price?: number;
+}
+
+export interface Category {
+  category_id: number;
+  category_name: string;
+  description?: string;
+  image_url?: string;
+  parent_category_id?: number;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface MenuItemPrice {
+  price_id: number;
+  menu_item_id: number;
+  price: number;
+  start_date: string;
+  end_date?: string;
+  price_type: PriceType;
+  created_by: number;
+  created_at: string;
+}
+
+export interface CustomerOrder {
+  order_id: number;
+  order_number: string;
+  verification_code: string;
+  customer_id?: number;
+  cashier_id?: number;
+  order_type: OrderType;
+  order_source: 'kiosk' | 'cashier' | 'admin';
+  is_preorder: boolean;
+  order_datetime: string;
+  scheduled_pickup_datetime?: string;
+  actual_pickup_datetime?: string;
+  order_status: OrderStatus;
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
+  gcash_reference_number?: string;
+  paymaya_reference_number?: string;
+  card_transaction_ref?: string;
+  total_amount: number;
+  discount_amount: number;
+  tax_amount: number;
+  final_amount: number;
+  payment_verified_by?: number;
+  payment_verified_at?: string;
+  special_instructions?: string;
+  is_printed: boolean;
+  kiosk_session_id?: number;
+  is_deleted: boolean;
+  created_at: string;
+  updated_at: string;
+  items?: OrderItem[];
+  customer?: Customer;
+  cashier?: Cashier;
+}
+
+export interface OrderItem {
+  order_item_id: number;
+  order_id: number;
+  menu_item_id: number;
+  custom_cake_design_id?: number;
+  flavor_id?: number;
+  size_id?: number;
+  quantity: number;
+  unit_price: number;
+  flavor_cost: number;
+  design_cost: number;
+  size_multiplier: number;
+  item_total: number;
+  special_instructions?: string;
+  menu_item?: MenuItem;
+}
+
+export interface Customer {
+  customer_id: number;
+  phone: string;
+  name?: string;
+  email?: string;
+  date_of_birth?: string;
+  loyalty_points: number;
+  total_orders: number;
+  total_spent: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Cashier {
+  cashier_id: number;
+  name: string;
+  cashier_code: string;
+  phone?: string;
+  email?: string;
+  hire_date: string;
+  hourly_rate: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Admin {
+  admin_id: number;
+  username: string;
+  name: string;
+  email?: string;
+  role_id: number;
+  is_active: boolean;
+  last_login?: string;
+  created_at: string;
+  role?: Role;
+}
+
+export interface Role {
+  role_id: number;
+  role_name: string;
+  description?: string;
+  created_at: string;
+}
+
+export interface PromotionRule {
+  promotion_id: number;
+  promotion_name: string;
+  description?: string;
+  promotion_type: PromotionType;
+  discount_value: number;
+  min_purchase_amount?: number;
+  min_quantity?: number;
+  max_quantity?: number;
+  start_date: string;
+  end_date?: string;
+  start_time?: string;
+  end_time?: string;
+  max_uses_per_customer?: number;
+  total_usage_limit?: number;
+  current_usage_count: number;
+  display_on_kiosk: boolean;
+  is_stackable: boolean;
+  is_active: boolean;
+  created_by: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Supplier {
+  supplier_id: number;
+  supplier_name: string;
+  contact_person?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TaxRule {
+  tax_id: number;
+  tax_name: string;
+  tax_type: TaxType;
+  tax_value: number;
+  applies_to_item_types: ItemType[];
+  is_inclusive: boolean;
+  effective_date: string;
+  created_at: string;
+}
+
+export interface RefundRequest {
+  refund_id: number;
+  order_id: number;
+  refund_type: RefundType;
+  refund_amount: number;
+  refund_reason: RefundReason;
+  detailed_reason?: string;
+  refund_status: RefundStatus;
+  requested_by: number;
+  requested_at: string;
+  approved_by?: number;
+  approved_at?: string;
+  rejected_reason?: string;
+  refund_method?: RefundMethod;
+  refund_reference?: string;
+  completed_at?: string;
+  order?: CustomerOrder;
+  cashier?: Cashier;
+}
+
+export interface WasteTracking {
+  waste_id: number;
+  menu_item_id: number;
+  quantity_wasted: number;
+  waste_cost: number;
+  waste_reason: WasteReason;
+  detailed_reason?: string;
+  reported_by: number;
+  waste_date: string;
+  created_at: string;
+  menu_item?: MenuItem;
+  cashier?: Cashier;
+}
+
+export interface CustomerFeedback {
+  feedback_id: number;
+  order_id?: number;
+  customer_id?: number;
+  rating: number;
+  service_rating?: number;
+  food_rating?: number;
+  cleanliness_rating?: number;
+  feedback_text?: string;
+  feedback_type: 'positive' | 'neutral' | 'negative';
+  is_anonymous: boolean;
+  admin_response?: string;
+  responded_by?: number;
+  responded_at?: string;
+  created_at: string;
+}
+
+export interface CakeFlavor {
+  flavor_id: number;
+  flavor_name: string;
+  description?: string;
+  image_url?: string;
+  additional_cost: number;
+  display_order: number;
+  is_available: boolean;
+  created_at: string;
+}
+
+export interface CakeSize {
+  size_id: number;
+  size_name: string;
+  serves_people: number;
+  diameter_inches: number;
+  size_multiplier: number;
+  display_order: number;
+  is_available: boolean;
+  created_at: string;
+}
+
+export interface CustomCakeTheme {
+  theme_id: number;
+  theme_name: string;
+  description?: string;
+  theme_image_url?: string;
+  base_additional_cost: number;
+  preparation_days: number;
+  display_order: number;
+  is_available: boolean;
+  created_at: string;
+}
+
+export interface InventoryAlert {
+  alert_id: number;
+  menu_item_id: number;
+  alert_type: InventoryAlertType;
+  threshold_value: number;
+  current_value: number;
+  is_acknowledged: boolean;
+  acknowledged_by?: number;
+  acknowledged_at?: string;
+  created_at: string;
+  menu_item?: MenuItem;
+}
+
+export interface InventoryTransaction {
+  transaction_id: number;
+  menu_item_id: number;
+  transaction_type: InventoryTransactionType;
+  quantity: number;
+  previous_quantity: number;
+  new_quantity: number;
+  reason_id?: number;
+  reference_number?: string;
+  performed_by: number;
+  performed_by_role: 'admin' | 'cashier';
+  notes?: string;
+  transaction_date: string;
+  created_at: string;
+}
+
+export interface KioskSetting {
+  setting_id: number;
+  setting_key: string;
+  setting_value: string;
+  setting_type: 'string' | 'number' | 'boolean' | 'json';
+  description?: string;
+  updated_by: number;
+  updated_at: string;
+}
+
+// Analytics Types
+export interface SalesAnalytics {
+  totalRevenue: number;
+  totalOrders: number;
+  averageOrderValue: number;
+  topSellingItems: Array<{
+    menu_item_id: number;
+    name: string;
+    total_quantity: number;
+    total_revenue: number;
+  }>;
+  salesByPaymentMethod: Array<{
+    payment_method: PaymentMethod;
+    count: number;
+    total_amount: number;
+  }>;
+  salesByHour?: Array<{
+    hour: number;
+    orders: number;
+    revenue: number;
+  }>;
+}
+
+export interface DailyStats {
+  stat_id: number;
+  menu_item_id: number;
+  stat_date: string;
+  daily_orders: number;
+  daily_quantity_sold: number;
+  daily_revenue: number;
+  created_at: string;
+  menu_item?: MenuItem;
+}
+
+// Request Types
+export interface LoginRequest {
+  username?: string;
+  password?: string;
+  cashier_code?: string;
+  pin?: string;
+}
+
+export interface CreateMenuItemRequest {
+  name: string;
+  description: string;
+  item_type: ItemType;
+  unit_of_measure: string;
+  stock_quantity: number;
+  is_infinite_stock?: boolean;
+  min_stock_level?: number;
+  can_customize?: boolean;
+  can_preorder?: boolean;
+  preparation_time_minutes?: number;
+  is_featured?: boolean;
+  allergen_info?: string;
+  nutritional_info?: string;
+}
+
+export interface UpdateMenuItemRequest extends Partial<CreateMenuItemRequest> {
+  status?: 'available' | 'unavailable' | 'out_of_stock';
+}
+
+export interface CreateCategoryRequest {
+  category_name: string;
+  description?: string;
+  parent_category_id?: number;
+  display_order?: number;
+  is_active?: boolean;
+}
+
+export interface CreatePromotionRequest {
+  promotion_name: string;
+  description?: string;
+  promotion_type: PromotionType;
+  discount_value: number;
+  min_purchase_amount?: number;
+  min_quantity?: number;
+  max_quantity?: number;
+  start_date: string;
+  end_date?: string;
+  start_time?: string;
+  end_time?: string;
+  max_uses_per_customer?: number;
+  total_usage_limit?: number;
+  display_on_kiosk?: boolean;
+  is_stackable?: boolean;
+  is_active?: boolean;
+}
+
+export interface CreateRefundRequest {
+  order_id: number;
+  refund_type: RefundType;
+  refund_amount: number;
+  refund_reason: RefundReason;
+  detailed_reason?: string;
+}
+
+export interface CreateWasteRequest {
+  menu_item_id: number;
+  quantity_wasted: number;
+  waste_cost: number;
+  waste_reason: WasteReason;
+  detailed_reason?: string;
+  waste_date: string;
+}
+
+export interface VerifyPaymentRequest {
+  order_id: number;
+  payment_method: PaymentMethod;
+  reference_number?: string;
+}
+
+export interface UpdateOrderStatusRequest {
+  order_status: OrderStatus;
+  notes?: string;
+}
+
+export interface CreateCustomerRequest {
+  phone: string;
+  name?: string;
+  email?: string;
+  date_of_birth?: string;
+}
+
+export interface CreateSupplierRequest {
+  supplier_name: string;
+  contact_person?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  is_active?: boolean;
+}
+
+export interface CreateCashierRequest {
+  name: string;
+  cashier_code: string;
+  pin: string;
+  phone?: string;
+  email?: string;
+  hire_date: string;
+  hourly_rate: number;
+  is_active?: boolean;
+}
+
+export interface CreateTaxRuleRequest {
+  tax_name: string;
+  tax_type: TaxType;
+  tax_value: number;
+  applies_to_item_types: ItemType[];
+  is_inclusive?: boolean;
+  effective_date: string;
+}
+
+export interface StockAdjustmentRequest {
+  menu_item_id: number;
+  quantity: number;
+  reason_id: number;
+  notes?: string;
+}
+
+// Auth Types
+export interface AuthUser {
+  id: number;
+  username?: string;
+  name: string;
+  email?: string;
+  type: 'admin' | 'cashier';
+  role_id?: number;
+  cashier_code?: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: AuthUser;
+}
