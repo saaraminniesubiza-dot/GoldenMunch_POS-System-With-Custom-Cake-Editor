@@ -30,7 +30,7 @@ function createWindow() {
 
   // Load the app
   const startUrl = isDev
-    ? 'http://localhost:3000' // Next.js dev server
+    ? 'http://localhost:3002' // Next.js dev server
     : `file://${path.join(__dirname, '../out/index.html')}`; // Production build
 
   mainWindow.loadURL(startUrl);
@@ -72,6 +72,11 @@ function createWindow() {
 // This method will be called when Electron has finished initialization
 app.whenReady().then(() => {
   createWindow();
+
+  // Initialize printer after a short delay
+  setTimeout(() => {
+    initializePrinter();
+  }, 2000);
 
   app.on('activate', () => {
     // On macOS, re-create window when dock icon is clicked
@@ -240,21 +245,6 @@ ipcMain.handle('printer-status', async () => {
   };
 });
 
-// Initialize printer on app ready
-app.whenReady().then(() => {
-  createWindow();
-
-  // Initialize printer after a short delay
-  setTimeout(() => {
-    initializePrinter();
-  }, 2000);
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
-});
 
 // Cleanup printer on quit
 app.on('before-quit', () => {
