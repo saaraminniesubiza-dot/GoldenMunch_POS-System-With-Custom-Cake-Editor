@@ -237,18 +237,68 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
   const { order_id, reference_number, payment_method } = req.body;
   const cashier_id = req.user?.id;
 
-  if (payment_method === 'gcash') {
-    const result = await callProcedure('VerifyGCashPayment', [
-      order_id,
-      reference_number,
-      cashier_id,
-    ]);
+  // Import payment service
+  const { paymentService } = require('../services/payment.service');
 
-    res.json(successResponse('Payment verified', result[0][0]));
+  // Verify payment with gateway for GCash and PayMaya
+  if (payment_method === 'gcash' || payment_method === 'paymaya') {
+    let verificationResult;
+
+    if (payment_method === 'gcash') {
+      verificationResult = await paymentService.verifyGCashPayment(reference_number);
+    } else {
+      verificationResult = await paymentService.verifyPayMayaPayment(reference_number);
+    }
+
+    if (!verificationResult.success || verificationResult.status !== 'completed') {
+      throw new AppError(
+        verificationResult.error || 'Payment verification failed',
+        400
+      );
+    }
+
+    // Process payment verification in database
+    if (payment_method === 'gcash') {
+      const result = await callProcedure('VerifyGCashPayment', [
+        order_id,
+        reference_number,
+        cashier_id,
+      ]);
+      res.json(successResponse('GCash payment verified', result[0][0]));
+    } else {
+      // PayMaya verification
+      await transaction(async (conn: PoolConnection) => {
+        const orderData = getFirstRow<any>(await conn.query(
+          'SELECT final_amount FROM customer_order WHERE order_id = ?',
+          [order_id]
+        ));
+
+        if (!orderData) {
+          throw new AppError('Order not found', 404);
+        }
+
+        await conn.query(
+          `UPDATE customer_order
+           SET payment_status = 'paid',
+               payment_verified_by = ?,
+               payment_verified_at = NOW()
+           WHERE order_id = ?`,
+          [cashier_id, order_id]
+        );
+
+        await conn.query(
+          `INSERT INTO payment_transaction
+           (order_id, payment_method, amount, reference_number, payment_status, verified_by, verified_at)
+           VALUES (?, ?, ?, ?, 'verified', ?, NOW())`,
+          [order_id, payment_method, orderData.final_amount, reference_number, cashier_id]
+        );
+      });
+
+      res.json(successResponse('PayMaya payment verified successfully'));
+    }
   } else {
-    // Handle other payment methods
+    // Handle other payment methods (cash, card, bank transfer)
     await transaction(async (conn: PoolConnection) => {
-      // Get order amount
       const orderData = getFirstRow<any>(await conn.query(
         'SELECT final_amount FROM customer_order WHERE order_id = ?',
         [order_id]
@@ -258,7 +308,6 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
         throw new AppError('Order not found', 404);
       }
 
-      // Update order payment status
       await conn.query(
         `UPDATE customer_order
          SET payment_status = 'paid',
@@ -268,7 +317,6 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
         [cashier_id, order_id]
       );
 
-      // Create payment transaction record
       await conn.query(
         `INSERT INTO payment_transaction
          (order_id, payment_method, amount, reference_number, payment_status, verified_by, verified_at)
