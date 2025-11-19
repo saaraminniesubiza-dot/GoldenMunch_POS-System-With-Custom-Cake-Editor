@@ -3,7 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Button, Divider, Avatar, Tooltip } from '@heroui/react';
+import { Button } from '@heroui/button';
+import { Divider } from '@heroui/divider';
+import { Avatar } from '@heroui/avatar';
+import { Tooltip } from '@heroui/tooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   HomeIcon,

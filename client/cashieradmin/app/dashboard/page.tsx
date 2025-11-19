@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardBody, CardHeader } from '@heroui/react';
+import { Card, CardBody, CardHeader } from '@heroui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   ShoppingCartIcon,

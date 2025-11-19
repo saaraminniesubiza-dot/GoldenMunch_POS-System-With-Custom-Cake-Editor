@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Input, Card, CardBody, CardHeader, Tabs, Tab } from '@heroui/react';
+import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
+import { Card, CardBody, CardHeader } from '@heroui/card';
+import { Tabs, Tab } from '@heroui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {

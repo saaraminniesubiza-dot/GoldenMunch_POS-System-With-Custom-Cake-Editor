@@ -1,29 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Chip,
-  Button,
-  Input,
-  Select,
-  SelectItem,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-  Spinner,
-} from '@heroui/react';
+import { Card, CardBody, CardHeader } from '@heroui/card';
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
+import { Chip } from '@heroui/chip';
+import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
+import { Select, SelectItem } from '@heroui/select';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/modal';
+import { Spinner } from '@heroui/spinner';
 import { OrderService } from '@/services/order.service';
 import type { CustomerOrder, OrderStatus } from '@/types/api';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';

@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Spinner } from '@heroui/react';
+import { Spinner } from '@heroui/spinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
