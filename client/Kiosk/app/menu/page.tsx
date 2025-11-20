@@ -11,6 +11,8 @@ import { useCart } from '@/contexts/CartContext';
 import { MenuService } from '@/services/menu.service';
 import type { MenuItem, Category } from '@/types/api';
 import NextLink from 'next/link';
+import ImageLightbox from '@/components/ImageLightbox';
+import Image from 'next/image';
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -293,41 +295,65 @@ export default function MenuPage() {
                     isPressable={isAvailable}
                   >
                     <CardHeader className="flex-col items-start p-0 relative">
-                      {/* Image Container with Gradient Overlay */}
-                      <div className="w-full h-48 bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 flex items-center justify-center relative overflow-hidden">
-                        <div className="text-8xl animate-float">
-                          {item.image_url || getItemEmoji(item.item_type)}
-                        </div>
+                      {/* Image Container with Gradient Overlay - Smaller height for better fit */}
+                      <ImageLightbox
+                        src={item.image_url}
+                        alt={item.name}
+                        className="w-full"
+                      >
+                        <div className="w-full h-32 bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 flex items-center justify-center relative overflow-hidden group">
+                          {item.image_url ? (
+                            <div className="relative w-full h-full">
+                              <Image
+                                src={item.image_url}
+                                alt={item.name}
+                                fill
+                                className="object-cover group-hover:scale-110 transition-transform duration-300"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                              />
+                              {/* Hover overlay with zoom icon */}
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                <span className="text-white text-4xl opacity-0 group-hover:opacity-100 transition-opacity">
+                                  🔍
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-6xl animate-float">
+                              {getItemEmoji(item.item_type)}
+                            </div>
+                          )}
 
-                        {/* Badges */}
-                        <div className="absolute top-3 right-3 flex flex-col gap-2">
-                          {item.is_featured && (
-                            <Chip
-                              color="warning"
-                              size="md"
-                              variant="shadow"
-                              className="font-bold animate-pulse-slow"
-                            >
-                              🔥 Popular
-                            </Chip>
-                          )}
-                          {!isAvailable && (
-                            <Chip color="danger" size="md" variant="shadow" className="font-bold">
-                              Sold Out
-                            </Chip>
-                          )}
-                          {cartQty > 0 && (
-                            <Chip
-                              color="success"
-                              size="md"
-                              variant="shadow"
-                              className="font-bold animate-bounce-slow"
-                            >
-                              {cartQty} in cart
-                            </Chip>
-                          )}
+                          {/* Badges - Smaller size to match reduced card */}
+                          <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
+                            {item.is_featured && (
+                              <Chip
+                                color="warning"
+                                size="sm"
+                                variant="shadow"
+                                className="font-bold animate-pulse-slow"
+                              >
+                                🔥 Popular
+                              </Chip>
+                            )}
+                            {!isAvailable && (
+                              <Chip color="danger" size="sm" variant="shadow" className="font-bold">
+                                Sold Out
+                              </Chip>
+                            )}
+                            {cartQty > 0 && (
+                              <Chip
+                                color="success"
+                                size="sm"
+                                variant="shadow"
+                                className="font-bold animate-bounce-slow"
+                              >
+                                {cartQty} in cart
+                              </Chip>
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      </ImageLightbox>
                     </CardHeader>
 
                     <CardBody className="px-5 py-4">
