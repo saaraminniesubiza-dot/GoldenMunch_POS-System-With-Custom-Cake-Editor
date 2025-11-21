@@ -14,6 +14,7 @@ import * as refundController from '../controllers/refund.controller';
 import * as wasteController from '../controllers/waste.controller';
 import * as feedbackController from '../controllers/feedback.controller';
 import * as promotionController from '../controllers/promotion.controller';
+import * as customCakeSessionController from '../controllers/customCakeSession.controller';
 
 const router = Router();
 
@@ -370,6 +371,14 @@ router.get('/kiosk/capacity/check', asyncHandler(kioskController.checkCapacity))
 // Kiosk Orders
 router.post('/kiosk/orders', validate(schemas.createOrder), asyncHandler(orderController.createOrder));
 router.get('/kiosk/orders/:code', asyncHandler(orderController.getOrderByVerificationCode));
+
+// Custom Cake Sessions (for QR code customization flow)
+router.post('/kiosk/custom-cake/session', asyncHandler(customCakeSessionController.createCustomCakeSession));
+router.get('/kiosk/custom-cake/session/:sessionId', asyncHandler(customCakeSessionController.getCustomCakeSession));
+router.put('/kiosk/custom-cake/session/:sessionId', asyncHandler(customCakeSessionController.updateCustomCakeSession));
+router.post('/kiosk/custom-cake/session/:sessionId/complete', asyncHandler(customCakeSessionController.completeCustomCakeSession));
+router.get('/kiosk/custom-cake/session/:sessionId/poll', asyncHandler(customCakeSessionController.pollCustomCakeSession));
+router.delete('/kiosk/custom-cake/session/:sessionId', asyncHandler(customCakeSessionController.deleteCustomCakeSession));
 
 // ==== CASHIER ROUTES ====
 router.post(
