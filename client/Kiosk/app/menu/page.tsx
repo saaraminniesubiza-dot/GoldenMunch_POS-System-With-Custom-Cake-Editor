@@ -2,18 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@heroui/button';
-import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
+import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Chip } from '@heroui/chip';
 import { Spinner } from '@heroui/spinner';
-import { Badge } from '@heroui/badge';
 import { Input } from '@heroui/input';
 import { useCart } from '@/contexts/CartContext';
 import { MenuService } from '@/services/menu.service';
 import type { MenuItem, Category } from '@/types/api';
-import NextLink from 'next/link';
 import ImageLightbox from '@/components/ImageLightbox';
 import Image from 'next/image';
-import CustomCakeQRModal from '@/components/CustomCakeQRModal';
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -23,8 +20,7 @@ export default function MenuPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isCustomCakeModalOpen, setIsCustomCakeModalOpen] = useState(false);
-  const { addItem, items: cartItems, getItemCount, getTotal } = useCart();
+  const { addItem, items: cartItems } = useCart();
 
   // Fetch menu items and categories
   useEffect(() => {
@@ -78,26 +74,9 @@ export default function MenuPage() {
     });
   };
 
-  const handleCustomCakeComplete = (customizationData: any) => {
-    console.log('Custom cake customization completed:', customizationData);
-    // TODO: Add custom cake to cart with customization data
-    // For now, we'll just show a success message
-    alert('Custom cake design completed! (Cart integration coming soon)');
-  };
-
   const getCartQuantity = (itemId: number): number => {
     const cartItem = cartItems.find(item => item.menuItem.menu_item_id === itemId);
     return cartItem?.quantity || 0;
-  };
-
-  // Generate unique kiosk session ID
-  const getKioskSessionId = (): string => {
-    let sessionId = sessionStorage.getItem('kiosk_session_id');
-    if (!sessionId) {
-      sessionId = `kiosk_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-      sessionStorage.setItem('kiosk_session_id', sessionId);
-    }
-    return sessionId;
   };
 
   const getItemEmoji = (itemType: string): string => {
@@ -168,38 +147,22 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-mesh-gradient">
-      {/* Modern Header with Glassmorphism */}
-      <div className="sticky top-0 z-40 bg-glass border-b border-golden-orange/20 shadow-lg backdrop-blur-lg">
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div className="text-6xl animate-float">🍰</div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent">
-                  Golden Munch
-                </h1>
-                <p className="text-lg text-chocolate-brown/70">Fresh. Delicious. Made with Love.</p>
-              </div>
+    <div className="min-h-screen bg-mesh-gradient pb-8">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-golden-orange to-deep-amber p-8 shadow-xl mb-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-4 mb-6 animate-slide-right">
+            <div className="text-7xl animate-float">🍰</div>
+            <div>
+              <h1 className="text-5xl font-bold text-white drop-shadow-lg">
+                Golden Munch
+              </h1>
+              <p className="text-xl text-white/90">Fresh. Delicious. Made with Love.</p>
             </div>
-
-            {/* Cart Button */}
-            {getItemCount() > 0 && (
-              <Badge content={getItemCount()} color="danger" size="lg" placement="top-right" className="animate-scale-in">
-                <Button
-                  as={NextLink}
-                  href="/cart"
-                  size="lg"
-                  className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-xl px-8 shadow-xl-golden hover:scale-105 transition-transform"
-                >
-                  🛒 ${getTotal().toFixed(2)}
-                </Button>
-              </Badge>
-            )}
           </div>
 
           {/* Search Bar */}
-          <div className="max-w-xl">
+          <div className="max-w-2xl animate-slide-left">
             <Input
               placeholder="Search for delicious treats..."
               value={searchQuery}
@@ -208,14 +171,14 @@ export default function MenuPage() {
               startContent={<span className="text-2xl">🔍</span>}
               classNames={{
                 input: "text-lg",
-                inputWrapper: "bg-white shadow-lg border-2 border-golden-orange/20 hover:border-golden-orange/40 transition-colors"
+                inputWrapper: "bg-white shadow-xl border-2 border-white/50 hover:border-white transition-colors"
               }}
             />
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+      <div className="max-w-7xl mx-auto px-6 space-y-8">
         {/* Category Pills with Modern Design */}
         {categories.length > 0 && (
           <div className="animate-slide-right">
@@ -259,41 +222,6 @@ export default function MenuPage() {
           </div>
         )}
 
-        {/* Custom Cake Button - Special Highlight */}
-        <div className="animate-slide-left">
-          <Card className="card-modern bg-gradient-to-r from-golden-orange/10 via-deep-amber/10 to-golden-orange/10 border-2 border-golden-orange/30 hover:border-golden-orange hover:shadow-2xl-golden transition-all duration-300 hover:scale-[1.02]">
-            <CardBody className="p-8">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-6">
-                  <div className="text-8xl animate-float">🎨</div>
-                  <div>
-                    <h3 className="text-3xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent mb-2">
-                      Design Your Dream Cake
-                    </h3>
-                    <p className="text-lg text-chocolate-brown/80 mb-2">
-                      Create a custom cake tailored to your special occasion
-                    </p>
-                    <div className="flex gap-2 flex-wrap">
-                      <Chip color="warning" variant="flat" size="sm">Choose Flavor</Chip>
-                      <Chip color="warning" variant="flat" size="sm">Pick Size</Chip>
-                      <Chip color="warning" variant="flat" size="sm">Select Theme</Chip>
-                      <Chip color="warning" variant="flat" size="sm">Customize Design</Chip>
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-2xl px-12 py-8 h-auto shadow-xl-golden hover:scale-110 transition-transform animate-pulse-slow"
-                  onClick={() => setIsCustomCakeModalOpen(true)}
-                >
-                  <span className="text-3xl mr-2">✨</span>
-                  Start Designing
-                </Button>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
-
         {/* Menu Items Grid with Staggered Animation */}
         {filteredItems.length === 0 ? (
           <Card className="card-modern animate-scale-in">
@@ -331,7 +259,7 @@ export default function MenuPage() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredItems.map((item, index) => {
                 const cartQty = getCartQuantity(item.menu_item_id);
                 const isAvailable = item.status === 'available' &&
@@ -349,13 +277,12 @@ export default function MenuPage() {
                     isPressable={isAvailable}
                   >
                     <CardHeader className="flex-col items-start p-0 relative">
-                      {/* Image Container with Gradient Overlay - Smaller height for better fit */}
                       <ImageLightbox
                         src={item.image_url}
                         alt={item.name}
                         className="w-full"
                       >
-                        <div className="w-full h-32 bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 flex items-center justify-center relative overflow-hidden group">
+                        <div className="w-full h-48 bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 flex items-center justify-center relative overflow-hidden group">
                           {item.image_url ? (
                             <div className="relative w-full h-full">
                               <Image
@@ -363,9 +290,8 @@ export default function MenuPage() {
                                 alt={item.name}
                                 fill
                                 className="object-cover group-hover:scale-110 transition-transform duration-300"
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                               />
-                              {/* Hover overlay with zoom icon */}
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                                 <span className="text-white text-4xl opacity-0 group-hover:opacity-100 transition-opacity">
                                   🔍
@@ -373,12 +299,12 @@ export default function MenuPage() {
                               </div>
                             </div>
                           ) : (
-                            <div className="text-6xl animate-float">
+                            <div className="text-8xl animate-float">
                               {getItemEmoji(item.item_type)}
                             </div>
                           )}
 
-                          {/* Badges - Smaller size to match reduced card */}
+                          {/* Badges */}
                           <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
                             {item.is_featured && (
                               <Chip
@@ -460,33 +386,6 @@ export default function MenuPage() {
           </>
         )}
       </div>
-
-      {/* Floating Cart Button for Mobile */}
-      {getItemCount() > 0 && (
-        <div className="fixed bottom-8 right-8 z-50 lg:hidden animate-scale-in">
-          <Badge content={getItemCount()} color="danger" size="lg" placement="top-left">
-            <Button
-              as={NextLink}
-              href="/cart"
-              isIconOnly
-              className="w-16 h-16 bg-gradient-to-r from-golden-orange to-deep-amber text-white text-2xl rounded-full shadow-2xl animate-glow"
-            >
-              🛒
-            </Button>
-          </Badge>
-        </div>
-      )}
-
-      {/* Spacer for bottom navigation */}
-      <div className="h-24"></div>
-
-      {/* Custom Cake QR Modal */}
-      <CustomCakeQRModal
-        isOpen={isCustomCakeModalOpen}
-        onClose={() => setIsCustomCakeModalOpen(false)}
-        onComplete={handleCustomCakeComplete}
-        kioskSessionId={getKioskSessionId()}
-      />
     </div>
   );
 }
