@@ -238,12 +238,9 @@ export default function CategoriesPage() {
                       )}
                     </div>
 
-                    <Button
-                      size="md"
-                      className="w-full bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold shadow-lg group-hover:shadow-xl-golden transition-all"
-                    >
+                    <div className="w-full bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold shadow-lg group-hover:shadow-xl-golden transition-all rounded-lg px-4 py-2 text-center">
                       Explore →
-                    </Button>
+                    </div>
                   </CardBody>
                 </Card>
               ))}

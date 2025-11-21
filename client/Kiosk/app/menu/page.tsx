@@ -270,11 +270,10 @@ export default function MenuPage() {
                     key={item.menu_item_id}
                     className={`
                       card-modern
-                      ${isAvailable ? 'hover:cursor-pointer' : 'opacity-60'}
+                      ${isAvailable ? '' : 'opacity-60'}
                       animate-slide-up
                     `}
                     style={{ animationDelay: `${index * 0.05}s` }}
-                    isPressable={isAvailable}
                   >
                     <CardHeader className="flex-col items-start p-0 relative">
                       <ImageLightbox
