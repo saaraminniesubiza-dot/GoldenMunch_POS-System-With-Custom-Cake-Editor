@@ -8,6 +8,7 @@ import { Providers } from "./providers";
 
 import { fontSans } from "@/config/fonts";
 import { KioskSidebar } from "@/components/KioskSidebar";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -37,19 +38,27 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   if (isIdlePage) {
     // Return full-screen layout without sidebar for idle page
-    return <>{children}</>;
+    return (
+      <>
+        <AnimatedBackground />
+        {children}
+      </>
+    );
   }
 
   // Return layout with sidebar for all other pages
   return (
-    <div className="relative flex h-screen overflow-hidden">
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto lg:mr-[420px]">
-        {children}
-      </main>
+    <>
+      <AnimatedBackground />
+      <div className="relative flex h-screen overflow-hidden">
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto lg:mr-[420px]">
+          {children}
+        </main>
 
-      {/* Sidebar */}
-      <KioskSidebar />
-    </div>
+        {/* Sidebar */}
+        <KioskSidebar />
+      </div>
+    </>
   );
 }

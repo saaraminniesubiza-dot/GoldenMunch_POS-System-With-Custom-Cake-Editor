@@ -79,8 +79,8 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ onCustomCakeComplete
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 right-0 h-screen bg-white/95 backdrop-blur-xl
-          shadow-2xl border-l-4 border-golden-orange/30
+          fixed top-0 right-0 h-screen sidebar-glass
+          shadow-2xl-golden
           transition-all duration-500 ease-in-out z-40
           ${isSidebarCollapsed ? 'translate-x-full lg:translate-x-0' : 'translate-x-0'}
           w-full sm:w-96 lg:w-[420px]
@@ -121,20 +121,46 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ onCustomCakeComplete
         {/* Cart Items */}
         <ScrollShadow className="flex-1 overflow-y-auto px-4 py-6">
           {items.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center animate-fade-in">
+            <div className="h-full flex flex-col items-center justify-center text-center animate-fade-in px-4">
               <div className="text-9xl mb-6 animate-bounce-slow opacity-30">🛒</div>
-              <h3 className="text-2xl font-bold text-chocolate-brown mb-2">
+              <h3 className="text-2xl font-bold text-chocolate-brown mb-3">
                 Your cart is empty
               </h3>
-              <p className="text-chocolate-brown/60 mb-6">
+              <p className="text-chocolate-brown/70 mb-4 text-lg">
                 Start adding delicious treats!
               </p>
+
+              {/* Feature Highlights */}
+              <div className="space-y-3 mb-6 text-left bg-golden-orange/10 rounded-xl p-4 border-2 border-golden-orange/20">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">🍰</span>
+                  <div>
+                    <p className="font-semibold text-chocolate-brown">Fresh Daily</p>
+                    <p className="text-sm text-chocolate-brown/60">All items baked fresh</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">🎨</span>
+                  <div>
+                    <p className="font-semibold text-chocolate-brown">Custom Cakes</p>
+                    <p className="text-sm text-chocolate-brown/60">Design your dream cake</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">⚡</span>
+                  <div>
+                    <p className="font-semibold text-chocolate-brown">Quick Service</p>
+                    <p className="text-sm text-chocolate-brown/60">Fast checkout process</p>
+                  </div>
+                </div>
+              </div>
+
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold"
+                className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-lg px-8 shadow-xl-golden hover:scale-105 transition-all"
                 onClick={() => router.push('/menu')}
               >
-                Browse Menu
+                🍽️ Browse Menu
               </Button>
             </div>
           ) : (
@@ -142,7 +168,7 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ onCustomCakeComplete
               {items.map((item, index) => (
                 <Card
                   key={`${item.menuItem.menu_item_id}-${index}`}
-                  className="card-modern hover:shadow-xl-golden transition-all duration-300 hover:scale-[1.02] animate-slide-right"
+                  className="card-transparent hover:shadow-xl-golden transition-all duration-300 hover:scale-[1.02] animate-slide-right"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <CardBody className="p-4">
@@ -222,7 +248,7 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ onCustomCakeComplete
 
         {/* Footer Actions */}
         {items.length > 0 && (
-          <div className="p-4 bg-white border-t-2 border-golden-orange/20 space-y-3">
+          <div className="p-4 bg-white/80 backdrop-blur-lg border-t-2 border-golden-orange/20 space-y-3">
             {/* Summary */}
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-chocolate-brown">

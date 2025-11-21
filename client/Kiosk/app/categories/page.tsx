@@ -52,7 +52,7 @@ export default function CategoriesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-mesh-gradient flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center animate-scale-in">
           <div className="relative">
             <Spinner
@@ -79,8 +79,8 @@ export default function CategoriesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-mesh-gradient flex items-center justify-center p-6">
-        <Card className="max-w-md card-modern animate-scale-in">
+      <div className="min-h-screen  flex items-center justify-center p-6">
+        <Card className="max-w-md card-transparent animate-scale-in">
           <CardBody className="text-center p-8">
             <div className="text-8xl mb-6 animate-bounce-slow">⚠️</div>
             <h1 className="text-4xl font-bold text-chocolate-brown mb-4">
@@ -103,7 +103,7 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-mesh-gradient">
+    <div className="min-h-screen ">
       {/* Hero Header */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-golden-orange via-deep-amber to-golden-orange opacity-90"></div>
@@ -152,7 +152,7 @@ export default function CategoriesPage() {
 
         {/* Categories Grid */}
         {categories.length === 0 ? (
-          <Card className="card-modern animate-scale-in">
+          <Card className="card-transparent animate-scale-in">
             <CardBody className="text-center py-16">
               <div className="text-9xl mb-6 animate-float">📋</div>
               <h3 className="text-4xl font-bold text-chocolate-brown mb-4">
@@ -182,7 +182,7 @@ export default function CategoriesPage() {
               {categories.map((category, index) => (
                 <Card
                   key={category.category_id}
-                  className="card-modern group cursor-pointer animate-slide-up"
+                  className="card-transparent group cursor-pointer animate-slide-up"
                   style={{ animationDelay: `${index * 0.05}s` }}
                   isPressable
                   as={NextLink}

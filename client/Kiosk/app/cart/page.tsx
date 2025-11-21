@@ -97,8 +97,8 @@ export default function CartPage() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-mesh-gradient flex items-center justify-center p-6">
-        <Card className="max-w-lg card-modern animate-scale-in">
+      <div className="min-h-screen  flex items-center justify-center p-6">
+        <Card className="max-w-lg card-transparent animate-scale-in">
           <CardBody className="text-center p-12">
             <div className="text-9xl mb-6 animate-float">🛒</div>
             <h1 className="text-5xl font-bold text-chocolate-brown mb-4">
@@ -133,7 +133,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-mesh-gradient">
+    <div className="min-h-screen ">
       {/* Beautiful Header */}
       <div className="bg-gradient-to-r from-golden-orange via-deep-amber to-golden-orange shadow-xl-golden">
         <div className="max-w-7xl mx-auto p-8">
@@ -153,7 +153,7 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items - Takes 2 columns on large screens */}
           <div className="lg:col-span-2 space-y-4">
-            <Card className="card-modern animate-slide-up">
+            <Card className="card-transparent animate-slide-up">
               <CardHeader className="p-6 border-b border-golden-orange/20">
                 <h2 className="text-3xl font-bold text-chocolate-brown flex items-center gap-2">
                   <span className="text-4xl">📦</span>
@@ -258,7 +258,7 @@ export default function CartPage() {
           {/* Checkout Section */}
           <div className="space-y-6">
             {/* Order Information */}
-            <Card className="card-modern animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <Card className="card-transparent animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <CardHeader className="p-6 bg-gradient-to-r from-golden-orange/10 to-deep-amber/10 border-b border-golden-orange/20">
                 <h2 className="text-2xl font-bold text-chocolate-brown flex items-center gap-2">
                   <span className="text-3xl">📋</span>
@@ -344,7 +344,7 @@ export default function CartPage() {
             </Card>
 
             {/* Order Summary */}
-            <Card className="card-modern animate-slide-up sticky top-24" style={{ animationDelay: '0.3s' }}>
+            <Card className="card-transparent animate-slide-up sticky top-24" style={{ animationDelay: '0.3s' }}>
               <CardHeader className="p-6 bg-gradient-to-r from-golden-orange to-deep-amber">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                   <span className="text-3xl">💰</span>
@@ -401,7 +401,7 @@ export default function CartPage() {
         size="2xl"
         isDismissable={false}
         classNames={{
-          base: "bg-mesh-gradient",
+          base: "",
           header: "border-b-0",
           body: "py-8",
           footer: "border-t-0"
@@ -422,7 +422,7 @@ export default function CartPage() {
                     <p className="text-2xl text-chocolate-brown mb-6 font-semibold">
                       Thank you for your order! 🙏
                     </p>
-                    <Card className="card-modern mb-6 animate-scale-in">
+                    <Card className="card-transparent mb-6 animate-scale-in">
                       <CardBody className="p-8">
                         <p className="text-chocolate-brown/70 text-lg mb-3">
                           Order Number

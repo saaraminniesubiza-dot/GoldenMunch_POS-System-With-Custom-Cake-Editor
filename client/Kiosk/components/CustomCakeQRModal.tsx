@@ -154,8 +154,13 @@ export const CustomCakeQRModal: React.FC<CustomCakeQRModalProps> = ({
         <ModalBody>
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Spinner size="lg" color="warning" />
-              <p className="mt-4 text-chocolate-brown">Creating your customization session...</p>
+              <Spinner size="lg" color="warning" className="mb-4" />
+              <p className="text-xl font-semibold text-chocolate-brown mb-2">✨ Creating Your Session...</p>
+              <div className="text-sm text-chocolate-brown/60 space-y-1 text-center">
+                <p>🎨 Preparing canvas</p>
+                <p>🍰 Loading design tools</p>
+                <p>📱 Generating QR code</p>
+              </div>
             </div>
           ) : error ? (
             <Card className="bg-red-50 border-2 border-red-200">

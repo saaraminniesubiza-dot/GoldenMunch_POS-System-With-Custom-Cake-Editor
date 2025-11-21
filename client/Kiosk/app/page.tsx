@@ -96,7 +96,7 @@ export default function MenuPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-mesh-gradient flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center animate-scale-in">
           <div className="relative">
             <Spinner
@@ -123,8 +123,8 @@ export default function MenuPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-mesh-gradient flex items-center justify-center p-6">
-        <Card className="max-w-md card-modern animate-scale-in">
+      <div className="min-h-screen  flex items-center justify-center p-6">
+        <Card className="max-w-md card-transparent animate-scale-in">
           <CardBody className="text-center p-8">
             <div className="text-8xl mb-6 animate-bounce-slow">⚠️</div>
             <h1 className="text-4xl font-bold text-chocolate-brown mb-4">
@@ -147,7 +147,7 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-mesh-gradient">
+    <div className="min-h-screen ">
       {/* Modern Header with Glassmorphism */}
       <div className="sticky top-0 z-40 bg-glass border-b border-golden-orange/20 shadow-lg backdrop-blur-lg">
         <div className="max-w-7xl mx-auto p-6">
@@ -240,7 +240,7 @@ export default function MenuPage() {
 
         {/* Menu Items Grid with Staggered Animation */}
         {filteredItems.length === 0 ? (
-          <Card className="card-modern animate-scale-in">
+          <Card className="card-transparent animate-scale-in">
             <CardBody className="text-center py-16">
               <div className="text-9xl mb-6 animate-float">🍽️</div>
               <h3 className="text-4xl font-bold text-chocolate-brown mb-4">
@@ -285,7 +285,7 @@ export default function MenuPage() {
                   <Card
                     key={item.menu_item_id}
                     className={`
-                      card-modern
+                      card-transparent
                       ${isAvailable ? '' : 'opacity-60'}
                       animate-slide-up
                     `}

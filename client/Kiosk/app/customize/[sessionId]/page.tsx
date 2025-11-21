@@ -105,28 +105,39 @@ export default function CustomizeCakePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 flex items-center justify-center p-4">
-        <div className="text-center">
-          <Spinner size="lg" color="warning" />
-          <p className="mt-4 text-chocolate-brown text-xl">Loading customization options...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="card-transparent shadow-2xl-golden">
+          <CardBody className="text-center p-12">
+            <Spinner size="lg" color="warning" className="mb-4" />
+            <p className="text-2xl text-chocolate-brown font-bold mb-3">🎨 Loading Your Canvas...</p>
+            <div className="text-sm text-chocolate-brown/60 space-y-1">
+              <p>✨ Fetching design options</p>
+              <p>🍰 Loading flavors & sizes</p>
+              <p>🎨 Preparing customization tools</p>
+            </div>
+          </CardBody>
+        </Card>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 flex items-center justify-center p-4">
-        <Card className="max-w-md">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="max-w-md card-transparent shadow-2xl-golden">
           <CardBody className="text-center p-8">
-            <div className="text-6xl mb-4">⚠️</div>
-            <h2 className="text-2xl font-bold text-chocolate-brown mb-2">Session Error</h2>
-            <p className="text-chocolate-brown/70 mb-4">{error}</p>
+            <div className="text-6xl mb-4 animate-bounce-slow">⚠️</div>
+            <h2 className="text-2xl font-bold text-chocolate-brown mb-3">Session Error</h2>
+            <p className="text-chocolate-brown/70 mb-2">{error}</p>
+            <p className="text-sm text-chocolate-brown/60 mb-6">
+              ⏱️ Sessions expire after 15 minutes for your security
+            </p>
             <Button
-              color="warning"
+              size="lg"
+              className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold"
               onClick={() => router.push('/')}
             >
-              Return to Kiosk
+              🏠 Return to Kiosk
             </Button>
           </CardBody>
         </Card>
@@ -135,7 +146,7 @@ export default function CustomizeCakePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 p-4 pb-20">
+    <div className="min-h-screen p-4 pb-20">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <Card className="bg-gradient-to-r from-golden-orange to-deep-amber text-white">

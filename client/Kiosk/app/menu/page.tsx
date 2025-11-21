@@ -96,8 +96,8 @@ export default function MenuPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-mesh-gradient flex items-center justify-center">
-        <div className="text-center animate-scale-in">
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center animate-scale-in card-transparent p-12 rounded-3xl">
           <div className="relative">
             <Spinner
               size="lg"
@@ -111,11 +111,16 @@ export default function MenuPage() {
             </div>
           </div>
           <p className="text-3xl text-chocolate-brown mt-6 font-bold">
-            Loading delicious menu...
+            🍰 Loading Delicious Menu...
           </p>
-          <p className="text-lg text-chocolate-brown/60 mt-2">
+          <p className="text-lg text-chocolate-brown/70 mt-3 mb-4">
             Preparing something amazing for you
           </p>
+          <div className="text-sm text-chocolate-brown/60 space-y-1">
+            <p>✨ Fetching fresh treats</p>
+            <p>🎂 Loading bakery specials</p>
+            <p>☕ Preparing beverage options</p>
+          </div>
         </div>
       </div>
     );
@@ -123,8 +128,8 @@ export default function MenuPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-mesh-gradient flex items-center justify-center p-6">
-        <Card className="max-w-md card-modern animate-scale-in">
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <Card className="max-w-md card-transparent animate-scale-in">
           <CardBody className="text-center p-8">
             <div className="text-8xl mb-6 animate-bounce-slow">⚠️</div>
             <h1 className="text-4xl font-bold text-chocolate-brown mb-4">
@@ -147,9 +152,9 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-mesh-gradient pb-8">
+    <div className="min-h-screen pb-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-golden-orange to-deep-amber p-8 shadow-xl mb-8">
+      <div className="header-glass p-8 shadow-xl mb-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4 mb-6 animate-slide-right">
             <div className="text-7xl animate-float">🍰</div>
@@ -224,7 +229,7 @@ export default function MenuPage() {
 
         {/* Menu Items Grid with Staggered Animation */}
         {filteredItems.length === 0 ? (
-          <Card className="card-modern animate-scale-in">
+          <Card className="card-transparent animate-scale-in">
             <CardBody className="text-center py-16">
               <div className="text-9xl mb-6 animate-float">🍽️</div>
               <h3 className="text-4xl font-bold text-chocolate-brown mb-4">
@@ -269,7 +274,7 @@ export default function MenuPage() {
                   <Card
                     key={item.menu_item_id}
                     className={`
-                      card-modern
+                      card-transparent
                       ${isAvailable ? '' : 'opacity-60'}
                       animate-slide-up
                     `}

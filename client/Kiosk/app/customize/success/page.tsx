@@ -9,21 +9,25 @@ export default function CustomizeSuccessPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 flex items-center justify-center p-4">
-      <Card className="max-w-lg">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="max-w-lg card-transparent shadow-2xl-golden">
         <CardBody className="text-center p-12">
           <div className="text-9xl mb-6 animate-bounce">🎉</div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent mb-4">
             Design Complete!
           </h1>
-          <p className="text-xl text-chocolate-brown mb-6">
+          <p className="text-xl text-chocolate-brown mb-4">
             Your custom cake design has been submitted successfully!
           </p>
-          <div className="bg-golden-orange/10 border-2 border-golden-orange/30 rounded-lg p-6 mb-6">
+          <p className="text-md text-chocolate-brown/70 mb-6">
+            ✨ Our team is excited to bring your vision to life!
+          </p>
+          <div className="bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 border-2 border-golden-orange/30 rounded-xl p-6 mb-6 backdrop-blur-sm">
+            <p className="text-chocolate-brown/90 font-semibold mb-3 text-lg">
+              📱 Next Steps:
+            </p>
             <p className="text-chocolate-brown/80">
-              <strong className="text-deep-amber">📱 Next Steps:</strong>
-              <br />
-              Please return to the kiosk to review your design and complete your order.
+              Return to the kiosk to review your design and complete your order. You can also continue browsing our menu!
             </p>
           </div>
           <div className="space-y-3 text-left text-chocolate-brown/70 bg-white/50 rounded-lg p-4 mb-6">
