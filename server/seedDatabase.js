@@ -386,7 +386,7 @@ async function seedCakeFlavors(connection) {
 
   for (const flavor of CAKE_FLAVORS) {
     await connection.execute(
-      `INSERT INTO cake_flavor (name, description, created_at, updated_at)
+      `INSERT INTO cake_flavors (name, description, created_at, updated_at)
        VALUES (?, ?, NOW(), NOW())
        ON DUPLICATE KEY UPDATE description = ?, updated_at = NOW()`,
       [flavor.name, flavor.description, flavor.description]
@@ -401,7 +401,7 @@ async function seedCakeSizes(connection) {
 
   for (const size of CAKE_SIZES) {
     await connection.execute(
-      `INSERT INTO cake_size (name, description, base_price, created_at, updated_at)
+      `INSERT INTO cake_sizes (name, description, base_price, created_at, updated_at)
        VALUES (?, ?, ?, NOW(), NOW())
        ON DUPLICATE KEY UPDATE description = ?, base_price = ?, updated_at = NOW()`,
       [size.name, size.description, size.base_price, size.description, size.base_price]
