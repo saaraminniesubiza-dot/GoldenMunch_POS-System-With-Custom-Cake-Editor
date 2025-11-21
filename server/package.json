@@ -9,6 +9,7 @@
     "build": "tsc",
     "clean": "rm -rf dist",
     "rebuild": "npm run clean && npm run build",
+    "seed:admin": "ts-node src/seeders/seedAdminAndCashier.ts",
     "test": "jest --coverage --verbose",
     "test:watch": "jest --watch",
     "test:integration": "jest --testPathPattern=tests/integration",
