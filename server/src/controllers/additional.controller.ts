@@ -450,11 +450,11 @@ export const getOrderTimeline = async (req: AuthRequest, res: Response) => {
 // ==== STATS VIEWING ====
 
 export const getDailyStats = async (req: AuthRequest, res: Response) => {
-  const { date_from, date_to, menu_item_id } = req.query;
+  const { start_date, end_date, menu_item_id } = req.query;
 
   // Validate date range if provided
-  if (date_from && date_to) {
-    validateDateRange(date_from as string, date_to as string, 365);
+  if (start_date && end_date) {
+    validateDateRange(start_date as string, end_date as string, 365);
   }
 
   let sql = `
@@ -471,14 +471,14 @@ export const getDailyStats = async (req: AuthRequest, res: Response) => {
     params.push(menu_item_id);
   }
 
-  if (date_from) {
+  if (start_date) {
     sql += ' AND mids.stats_date >= ?';
-    params.push(date_from);
+    params.push(start_date);
   }
 
-  if (date_to) {
+  if (end_date) {
     sql += ' AND mids.stats_date <= ?';
-    params.push(date_to);
+    params.push(end_date);
   }
 
   sql += ' ORDER BY mids.stats_date DESC, mids.daily_revenue DESC';

@@ -164,13 +164,13 @@ export const adjustInventory = async (req: AuthRequest, res: Response) => {
 
 // Get sales analytics
 export const getSalesAnalytics = async (req: AuthRequest, res: Response) => {
-  const { date_from, date_to } = req.query;
+  const { start_date, end_date } = req.query;
 
   // Validate date range
-  if (!date_from || !date_to) {
-    throw new AppError('date_from and date_to are required', 400);
+  if (!start_date || !end_date) {
+    throw new AppError('start_date and end_date are required', 400);
   }
-  validateDateRange(date_from as string, date_to as string, 365);
+  validateDateRange(start_date as string, end_date as string, 365);
 
   const sql = `
     SELECT
@@ -187,7 +187,7 @@ export const getSalesAnalytics = async (req: AuthRequest, res: Response) => {
     ORDER BY date DESC
   `;
 
-  const analytics = await query(sql, [date_from, date_to]);
+  const analytics = await query(sql, [start_date, end_date]);
 
   res.json(successResponse('Sales analytics retrieved', analytics));
 };
