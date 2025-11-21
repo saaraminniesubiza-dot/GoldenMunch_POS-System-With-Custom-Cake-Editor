@@ -1,8 +1,28 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+interface Particle {
+  left: number;
+  top: number;
+  delay: number;
+  duration: number;
+}
 
 export const AnimatedBackground: React.FC = () => {
+  const [particles, setParticles] = useState<Particle[]>([]);
+
+  useEffect(() => {
+    // Generate random positions only on client side to avoid hydration mismatch
+    const generatedParticles = [...Array(20)].map(() => ({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      delay: Math.random() * 5,
+      duration: 10 + Math.random() * 10,
+    }));
+    setParticles(generatedParticles);
+  }, []);
+
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
       {/* Base Gradient */}
@@ -16,15 +36,15 @@ export const AnimatedBackground: React.FC = () => {
 
       {/* Floating Particles */}
       <div className="absolute inset-0">
-        {[...Array(20)].map((_, i) => (
+        {particles.map((particle, i) => (
           <div
             key={i}
             className="absolute w-2 h-2 bg-golden-orange/20 rounded-full animate-float-random"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${10 + Math.random() * 10}s`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
+              animationDelay: `${particle.delay}s`,
+              animationDuration: `${particle.duration}s`,
             }}
           />
         ))}
