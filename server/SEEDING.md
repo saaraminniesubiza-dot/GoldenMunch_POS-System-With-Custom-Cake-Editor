@@ -1,15 +1,46 @@
 # Database Seeding Guide
 
-This guide explains how to seed default admin and cashier credentials into your Golden Munch POS database.
+This guide explains how to seed your Golden Munch POS database with demo data.
 
-## Why Use the Seeder?
+## Seeder Options
 
-The seeder creates default credentials with **Node.js bcrypt hashes** that are guaranteed to work with the authentication system. Running the seeder ensures:
+### 🚀 Option 1: Complete Database Seeder (Recommended for New Setup)
+
+Seeds everything you need to get started:
+- ✅ Admin and Cashier credentials
+- ✅ Product categories (Cakes, Pastries, Breads, Beverages)
+- ✅ 16+ Menu items with prices
+- ✅ Cake flavors (Chocolate, Vanilla, Red Velvet, etc.)
+- ✅ Cake sizes (6", 8", 10", 12", sheets)
+- ✅ Custom cake themes (Birthday, Wedding, etc.)
+
+```bash
+cd server
+node seedDatabase.js
+# OR
+npm run seed
+```
+
+### 🔐 Option 2: Credentials Only
+
+If you only need to fix/reset login credentials:
+
+```bash
+cd server
+node seedCredentials.js
+# OR
+npm run seed:credentials
+```
+
+## Why Use These Seeders?
+
+The seeders create data with **Node.js bcrypt hashes** that are guaranteed to work with the authentication system:
 
 - ✅ Correct hash format (`$2b$` instead of PHP's `$2y$`)
 - ✅ Automatic verification after seeding
 - ✅ Works with both new and existing databases
-- ✅ Updates existing credentials if they already exist
+- ✅ Updates existing data instead of duplicating
+- ✅ No manual SQL execution needed
 
 ## Prerequisites
 
@@ -18,30 +49,22 @@ The seeder creates default credentials with **Node.js bcrypt hashes** that are g
 3. Tables created (run the schema SQL first)
 4. `.env` file configured with database credentials
 
-## Method 1: Quick JavaScript Seeder (Recommended)
+## Quick Start (Full Setup)
 
-The simplest way - just run the standalone JavaScript file:
+For a complete database with demo data:
 
 ```bash
 cd server
-node seedCredentials.js
+node seedDatabase.js
 ```
 
 This will:
 - Connect to your database
-- Generate secure bcrypt hashes
-- Create/update admin and cashier accounts
-- Verify the credentials work
-- Display login information
-
-## Method 2: TypeScript Seeder (via npm script)
-
-If you prefer using the TypeScript version:
-
-```bash
-cd server
-npm run seed:admin
-```
+- Seed all categories and menu items
+- Create cake customization options
+- Generate secure credential hashes
+- Verify everything works
+- Display a summary
 
 ## Default Credentials
 
@@ -97,12 +120,47 @@ This should not happen with the seeder! If it does:
 4. **Verifies** the credentials by comparing the plain passwords with the hashes
 5. **Displays** success message with login information
 
+## What Gets Seeded?
+
+### Complete Database Seeder (`seedDatabase.js`)
+
+**Categories (5):**
+- Cakes
+- Pastries
+- Breads
+- Beverages
+- Custom Cakes
+
+**Menu Items (16):**
+- Chocolate Fudge Cake, Red Velvet Cake, Vanilla Birthday Cake, Strawberry Shortcake
+- Croissant, Chocolate Danish, Apple Turnover, Almond Bear Claw
+- Sourdough Loaf, Baguette, Cinnamon Raisin Bread
+- Cappuccino, Latte, Hot Chocolate, Iced Coffee
+- Custom Designed Cake
+
+**Cake Flavors (8):**
+- Chocolate, Vanilla, Red Velvet, Strawberry, Lemon, Carrot, Marble, Coconut
+
+**Cake Sizes (6):**
+- 6 inch, 8 inch, 10 inch, 12 inch, Quarter Sheet, Half Sheet
+
+**Custom Cake Themes (10):**
+- Birthday, Wedding, Anniversary, Baby Shower, Graduation, Sports, Floral, Cartoon, Elegant, Rustic
+
+**Credentials:**
+- 1 Admin account
+- 1 Cashier account
+
+### Credentials Only Seeder (`seedCredentials.js`)
+
+Only seeds admin and cashier login credentials.
+
 ## Files
 
-- `seedCredentials.js` - Standalone JavaScript version (no build needed)
-- `src/seeders/seedAdminAndCashier.ts` - TypeScript version (requires ts-node)
+- `seedDatabase.js` - **Complete database seeder** (Recommended for new setup)
+- `seedCredentials.js` - **Credentials only seeder** (Quick credential reset)
+- `src/seeders/seedAdminAndCashier.ts` - TypeScript credentials seeder (requires ts-node)
 - `generateHash.js` - Hash generator utility (for manual hash generation)
-- `databaseSchema/update_credentials.sql` - SQL update script (not recommended - use seeder instead)
 
 ## Need Help?
 
