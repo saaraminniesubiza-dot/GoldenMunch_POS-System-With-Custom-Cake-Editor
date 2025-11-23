@@ -78,6 +78,11 @@ app.use(compression());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Serve Mobile Editor (Next.js static export)
+// This allows mobile devices to access the cake editor via http://SERVER_IP:3001/
+const mobileEditorPath = path.join(__dirname, '../../client/MobileEditor/out');
+app.use(express.static(mobileEditorPath));
+
 // ==== REQUEST LOGGING ====
 app.use((req, _res, next) => {
   logger.info({
