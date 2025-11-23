@@ -17,7 +17,11 @@ export const authenticate = (
       throw new AppError('No token provided', 401);
     }
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const token = authHeader.substring(7).trim(); // Remove 'Bearer ' prefix and trim whitespace
+
+    if (!token) {
+      throw new AppError('No token provided', 401);
+    }
 
     // Verify token
     const decoded = jwt.verify(
@@ -30,6 +34,11 @@ export const authenticate = (
     next();
   } catch (error: any) {
     if (error.name === 'JsonWebTokenError') {
+      console.error('JWT Verification Error:', {
+        error: error.message,
+        url: req.url,
+        method: req.method,
+      });
       next(new AppError('Invalid token', 401));
     } else if (error.name === 'TokenExpiredError') {
       next(new AppError('Token expired', 401));
@@ -52,7 +61,11 @@ export const authenticateAdmin = (
       throw new AppError('No token provided', 401);
     }
 
-    const token = authHeader.substring(7);
+    const token = authHeader.substring(7).trim(); // Remove 'Bearer ' prefix and trim whitespace
+
+    if (!token) {
+      throw new AppError('No token provided', 401);
+    }
 
     const decoded = jwt.verify(
       token,
@@ -67,6 +80,11 @@ export const authenticateAdmin = (
     next();
   } catch (error: any) {
     if (error.name === 'JsonWebTokenError') {
+      console.error('Admin JWT Verification Error:', {
+        error: error.message,
+        url: req.url,
+        method: req.method,
+      });
       next(new AppError('Invalid token', 401));
     } else if (error.name === 'TokenExpiredError') {
       next(new AppError('Token expired', 401));
@@ -89,7 +107,11 @@ export const authenticateCashier = (
       throw new AppError('No token provided', 401);
     }
 
-    const token = authHeader.substring(7);
+    const token = authHeader.substring(7).trim(); // Remove 'Bearer ' prefix and trim whitespace
+
+    if (!token) {
+      throw new AppError('No token provided', 401);
+    }
 
     const decoded = jwt.verify(
       token,
@@ -104,6 +126,12 @@ export const authenticateCashier = (
     next();
   } catch (error: any) {
     if (error.name === 'JsonWebTokenError') {
+      console.error('Cashier JWT Verification Error:', {
+        error: error.message,
+        url: req.url,
+        method: req.method,
+        authHeader: req.headers.authorization ? 'Present' : 'Missing',
+      });
       next(new AppError('Invalid token', 401));
     } else if (error.name === 'TokenExpiredError') {
       next(new AppError('Token expired', 401));
