@@ -78,8 +78,10 @@ export const generateQRSession = async (req: AuthRequest, res: Response) => {
   // QR session expires in 30 minutes
   const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
-  // Frontend URL for mobile editor
-  const editorUrl = `${process.env.FRONTEND_URL || 'http://localhost:3002'}/cake-editor?session=${sessionToken}`;
+  // Mobile Editor URL - served from backend server (accessible via network)
+  // In production, set MOBILE_EDITOR_URL to http://SERVER_IP:3001
+  const baseUrl = process.env.MOBILE_EDITOR_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+  const editorUrl = `${baseUrl}/?session=${sessionToken}`;
 
   // Generate QR code as data URL
   let qrCodeDataUrl: string;
