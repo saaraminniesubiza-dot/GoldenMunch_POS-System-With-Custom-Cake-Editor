@@ -6,6 +6,8 @@ export const API_CONFIG = {
   timeout: Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 30000,
 };
 
+export const API_BASE_URL = API_CONFIG.baseURL;
+
 // Create axios instance
 export const apiClient = axios.create({
   baseURL: API_CONFIG.baseURL,

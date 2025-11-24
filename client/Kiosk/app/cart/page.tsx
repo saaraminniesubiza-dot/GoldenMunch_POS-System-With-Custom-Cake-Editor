@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Chip } from '@heroui/chip';
@@ -10,9 +10,11 @@ import { Select, SelectItem } from '@heroui/select';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/modal';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 import { OrderService } from '@/services/order.service';
 import { printerService } from '@/services/printer.service';
+import { SettingsService } from '@/services/settings.service';
 import type {
   OrderType,
   OrderSource,
@@ -45,6 +47,49 @@ export default function CartPage() {
   const [error, setError] = useState<string | null>(null);
   const [completedOrder, setCompletedOrder] = useState<CustomerOrder | null>(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+  // QR Code state
+  const { isOpen: isQROpen, onOpen: onQROpen, onClose: onQRClose } = useDisclosure();
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [loadingQR, setLoadingQR] = useState(false);
+  const [showReferenceInput, setShowReferenceInput] = useState(false);
+
+  // Fetch QR code when payment method changes to cashless
+  useEffect(() => {
+    if (paymentMethod === 'gcash' || paymentMethod === 'paymaya') {
+      fetchQRCode(paymentMethod);
+      setShowReferenceInput(false);
+    } else {
+      setQrCodeUrl(null);
+      setShowReferenceInput(false);
+    }
+  }, [paymentMethod]);
+
+  const fetchQRCode = async (method: 'gcash' | 'paymaya') => {
+    setLoadingQR(true);
+    try {
+      const url = await SettingsService.getPaymentQR(method);
+      setQrCodeUrl(url);
+    } catch (error) {
+      console.error(`Failed to fetch ${method} QR code:`, error);
+      setQrCodeUrl(null);
+    } finally {
+      setLoadingQR(false);
+    }
+  };
+
+  const handleShowQRCode = () => {
+    if (qrCodeUrl) {
+      onQROpen();
+    } else {
+      setError(`No ${paymentMethod.toUpperCase()} QR code configured. Please contact staff.`);
+    }
+  };
+
+  const handlePaymentComplete = () => {
+    onQRClose();
+    setShowReferenceInput(true);
+  };
 
   const getItemEmoji = (itemType: string): string => {
     const emojiMap: Record<string, string> = {
@@ -367,23 +412,57 @@ export default function CartPage() {
                   <SelectItem key="card" value="card">💳 Card</SelectItem>
                 </Select>
 
-                {/* ✅ FIX: Show reference number input for cashless payments */}
+                {/* ✅ FIX: Show QR code and reference number input for cashless payments */}
                 {(paymentMethod === 'gcash' || paymentMethod === 'paymaya') && (
-                  <Input
-                    label="Reference Number *"
-                    placeholder="Enter your payment reference number"
-                    value={referenceNumber}
-                    onChange={(e) => setReferenceNumber(e.target.value)}
-                    size="lg"
-                    variant="bordered"
-                    required
-                    classNames={{
-                      input: "text-chocolate-brown",
-                      label: "text-chocolate-brown/70 font-semibold",
-                      inputWrapper: "border-2 hover:border-golden-orange"
-                    }}
-                    description="Enter the reference number from your GCash/PayMaya transaction"
-                  />
+                  <div className="space-y-4">
+                    {/* Show QR Code Button */}
+                    {!showReferenceInput && (
+                      <Button
+                        size="lg"
+                        color="primary"
+                        className="w-full"
+                        onPress={handleShowQRCode}
+                        isLoading={loadingQR}
+                      >
+                        {loadingQR ? 'Loading QR Code...' : `Show ${paymentMethod.toUpperCase()} QR Code`}
+                      </Button>
+                    )}
+
+                    {/* Reference Number Input - shows after payment */}
+                    {showReferenceInput && (
+                      <div className="space-y-3">
+                        <div className="bg-success-50 p-4 rounded-lg border-2 border-success-200">
+                          <p className="text-sm text-success-700 font-semibold">
+                            ✅ Payment Complete? Enter your reference number below:
+                          </p>
+                        </div>
+                        <Input
+                          label="Reference Number *"
+                          placeholder="Enter your payment reference number"
+                          value={referenceNumber}
+                          onChange={(e) => setReferenceNumber(e.target.value)}
+                          size="lg"
+                          variant="bordered"
+                          required
+                          classNames={{
+                            input: "text-chocolate-brown",
+                            label: "text-chocolate-brown/70 font-semibold",
+                            inputWrapper: "border-2 hover:border-golden-orange"
+                          }}
+                          description="Enter the reference number from your payment confirmation"
+                        />
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          color="warning"
+                          onPress={() => setShowReferenceInput(false)}
+                          className="w-full"
+                        >
+                          View QR Code Again
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 <Input
@@ -533,6 +612,95 @@ export default function CartPage() {
               </ModalFooter>
             </>
           )}
+        </ModalContent>
+      </Modal>
+
+      {/* QR Code Payment Modal */}
+      <Modal
+        isOpen={isQROpen}
+        onClose={onQRClose}
+        size="2xl"
+        backdrop="blur"
+        classNames={{
+          backdrop: "bg-black/80"
+        }}
+      >
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">
+            <h2 className="text-2xl font-bold capitalize">{paymentMethod} Payment</h2>
+            <p className="text-sm text-default-500 font-normal">
+              Scan this QR code with your {paymentMethod === 'gcash' ? 'GCash' : 'PayMaya'} app
+            </p>
+          </ModalHeader>
+          <ModalBody className="py-6">
+            {qrCodeUrl ? (
+              <div className="space-y-6">
+                {/* QR Code Display */}
+                <div className="flex justify-center">
+                  <div className="relative w-full max-w-md aspect-square bg-white rounded-xl p-6 shadow-lg border-4 border-primary">
+                    <Image
+                      src={qrCodeUrl}
+                      alt={`${paymentMethod.toUpperCase()} QR Code`}
+                      fill
+                      className="object-contain p-4"
+                      priority
+                    />
+                  </div>
+                </div>
+
+                {/* Amount Display */}
+                <div className="bg-primary-50 p-6 rounded-xl border-2 border-primary-200 text-center">
+                  <p className="text-sm text-primary-700 mb-2">Amount to Pay:</p>
+                  <p className="text-4xl font-bold text-primary">
+                    ₱{getTotal().toFixed(2)}
+                  </p>
+                </div>
+
+                {/* Instructions */}
+                <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                  <h3 className="font-semibold text-blue-900 mb-3">Payment Instructions:</h3>
+                  <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                    <li>Open your {paymentMethod === 'gcash' ? 'GCash' : 'PayMaya'} app</li>
+                    <li>Tap "Scan QR" in your app</li>
+                    <li>Scan the QR code shown above</li>
+                    <li>Verify the amount: ₱{getTotal().toFixed(2)}</li>
+                    <li>Complete the payment in your app</li>
+                    <li>Save the reference number from your receipt</li>
+                    <li>Click "I've Paid" below to continue</li>
+                  </ol>
+                </div>
+
+                <div className="bg-warning-50 p-3 rounded-lg border-2 border-warning-200">
+                  <p className="text-sm text-warning-700 text-center">
+                    ⚠️ <strong>Important:</strong> Make sure to complete the payment and get your reference number before clicking "I've Paid"
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-lg text-danger">QR Code not available</p>
+                <p className="text-sm text-default-500 mt-2">
+                  Please contact staff for assistance with {paymentMethod} payments
+                </p>
+              </div>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="light"
+              onPress={onQRClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="success"
+              size="lg"
+              onPress={handlePaymentComplete}
+              isDisabled={!qrCodeUrl}
+            >
+              ✅ I've Paid - Enter Reference Number
+            </Button>
+          </ModalFooter>
         </ModalContent>
       </Modal>
 

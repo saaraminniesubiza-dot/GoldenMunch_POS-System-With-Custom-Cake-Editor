@@ -25,4 +25,12 @@ export class SettingsService {
   }) {
     return apiClient.put<KioskSetting>(`/admin/kiosk-settings/${key}`, data);
   }
+
+  static async uploadPaymentQR(formData: FormData) {
+    return apiClient.postFormData('/admin/payment-qr/upload', formData);
+  }
+
+  static async getPaymentQR(paymentMethod: 'gcash' | 'paymaya') {
+    return apiClient.get(`/kiosk/payment-qr/${paymentMethod}`);
+  }
 }
