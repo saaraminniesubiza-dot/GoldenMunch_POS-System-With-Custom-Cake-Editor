@@ -223,6 +223,17 @@ export interface CustomerOrder {
   items?: OrderItem[];
   customer?: Customer;
   cashier?: Cashier;
+  timeline?: OrderTimelineEntry[];
+}
+
+export interface OrderTimelineEntry {
+  timeline_id: number;
+  order_id: number;
+  status: OrderStatus;
+  changed_by: number;
+  changed_by_name?: string;
+  notes?: string;
+  timestamp: string;
 }
 
 export interface OrderItem {
