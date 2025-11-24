@@ -12,6 +12,7 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { OrderService } from '@/services/order.service';
+import { printerService } from '@/services/printer.service';
 import type {
   OrderType,
   OrderSource,
@@ -39,6 +40,7 @@ export default function CartPage() {
   const [specialInstructions, setSpecialInstructions] = useState("");
   const [orderType, setOrderType] = useState<OrderType>('walk_in');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
+  const [referenceNumber, setReferenceNumber] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [completedOrder, setCompletedOrder] = useState<CustomerOrder | null>(null);
@@ -63,6 +65,13 @@ export default function CartPage() {
     setIsProcessing(true);
     setError(null);
 
+    // ✅ FIX: Validate reference number for cashless payments
+    if ((paymentMethod === 'gcash' || paymentMethod === 'paymaya') && !referenceNumber.trim()) {
+      setError('Please enter your payment reference number');
+      setIsProcessing(false);
+      return;
+    }
+
     try {
       const orderData: CreateOrderRequest = {
         order_type: orderType,
@@ -76,6 +85,35 @@ export default function CartPage() {
       setCompletedOrder(order);
       clearCart();
       onOpen();
+
+      // ✅ FIX: Print receipt after successful order creation
+      try {
+        console.log('🖨️ Attempting to print receipt...');
+        const receiptData = printerService.formatOrderForPrint({
+          ...order,
+          items: cartItems.map(item => ({
+            name: item.menuItem.name,
+            quantity: item.quantity,
+            unit_price: item.menuItem.current_price,
+            special_instructions: item.special_instructions
+          })),
+          total_amount: getSubtotal(),
+          tax_amount: getTax(),
+          final_amount: getTotal(),
+          discount_amount: 0
+        });
+
+        const printResult = await printerService.printReceipt(receiptData);
+        if (printResult.success) {
+          console.log('✅ Receipt printed successfully');
+        } else {
+          console.warn('⚠️ Receipt printing failed:', printResult.error);
+          // Don't block order completion if printing fails
+        }
+      } catch (printErr) {
+        console.error('❌ Receipt printing error:', printErr);
+        // Don't block order completion if printing fails
+      }
     } catch (err: any) {
       console.error('Error creating order:', err);
       setError(err.message || 'Failed to create order. Please try again.');
@@ -90,6 +128,7 @@ export default function CartPage() {
     setSpecialInstructions("");
     setOrderType('walk_in');
     setPaymentMethod('cash');
+    setReferenceNumber("");
     setCompletedOrder(null);
     onOpenChange();
     router.push('/');
@@ -327,6 +366,26 @@ export default function CartPage() {
                   <SelectItem key="paymaya" value="paymaya">💳 PayMaya</SelectItem>
                   <SelectItem key="card" value="card">💳 Card</SelectItem>
                 </Select>
+
+                {/* ✅ FIX: Show reference number input for cashless payments */}
+                {(paymentMethod === 'gcash' || paymentMethod === 'paymaya') && (
+                  <Input
+                    label="Reference Number *"
+                    placeholder="Enter your payment reference number"
+                    value={referenceNumber}
+                    onChange={(e) => setReferenceNumber(e.target.value)}
+                    size="lg"
+                    variant="bordered"
+                    required
+                    classNames={{
+                      input: "text-chocolate-brown",
+                      label: "text-chocolate-brown/70 font-semibold",
+                      inputWrapper: "border-2 hover:border-golden-orange"
+                    }}
+                    description="Enter the reference number from your GCash/PayMaya transaction"
+                  />
+                )}
+
                 <Input
                   label="Special Instructions (Optional)"
                   placeholder="Any special requests?"

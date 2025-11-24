@@ -46,6 +46,26 @@ export default function MenuPage() {
     };
 
     fetchData();
+
+    // ✅ FIX: Auto-refresh menu every 30 seconds to get latest items from admin
+    const refreshInterval = setInterval(() => {
+      console.log('🔄 Auto-refreshing menu items...');
+      MenuService.getMenuItems().then(items => {
+        setMenuItems(items);
+        console.log('✅ Menu refreshed:', items.length, 'items');
+      }).catch(err => {
+        console.error('❌ Auto-refresh failed:', err);
+      });
+
+      MenuService.getCategories().then(cats => {
+        setCategories(cats);
+      }).catch(err => {
+        console.error('❌ Category refresh failed:', err);
+      });
+    }, 30000); // Refresh every 30 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(refreshInterval);
   }, []);
 
   // Filter items by category and search

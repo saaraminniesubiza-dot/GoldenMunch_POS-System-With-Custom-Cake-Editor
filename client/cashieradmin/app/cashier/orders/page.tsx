@@ -33,6 +33,15 @@ export default function CashierOrdersPage() {
 
   useEffect(() => {
     loadOrders();
+
+    // ✅ FIX: Auto-refresh orders every 10 seconds to see new orders in real-time
+    const refreshInterval = setInterval(() => {
+      console.log('🔄 Auto-refreshing orders...');
+      loadOrders();
+    }, 10000); // Refresh every 10 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(refreshInterval);
   }, [statusFilter]);
 
   const loadOrders = async () => {
