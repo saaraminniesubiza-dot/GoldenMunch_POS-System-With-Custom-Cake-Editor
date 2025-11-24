@@ -26,7 +26,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
            ORDER BY price_type = 'base' DESC
            LIMIT 1) as current_price
          FROM menu_item mi
-         WHERE mi.menu_item_id = ? AND mi.is_deleted = FALSE`,
+         WHERE mi.menu_item_id = ?`,
         [item.menu_item_id]
       );
 
@@ -137,7 +137,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
       `INSERT INTO customer_order
        (order_number, verification_code, customer_id, order_type, order_source,
         scheduled_pickup_datetime, payment_method, payment_status, order_status,
-        total_amount, discount_amount, tax_amount, final_amount,
+        subtotal, discount_amount, tax_amount, total_amount,
         special_instructions, kiosk_session_id, is_preorder)
        VALUES ('', '', ?, ?, ?, ?, ?, 'pending', 'pending', ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -211,8 +211,7 @@ export const getOrderByVerificationCode = async (req: AuthRequest, res: Response
   const order = getFirstRow<any>(await query(
     `SELECT * FROM customer_order
      WHERE verification_code = ?
-     AND DATE(order_datetime) = CURDATE()
-     AND is_deleted = FALSE`,
+     AND DATE(created_at) = CURDATE()`,
     [code]
   ));
 
@@ -269,7 +268,7 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
       // PayMaya verification
       await transaction(async (conn: PoolConnection) => {
         const orderData = getFirstRow<any>(await conn.query(
-          'SELECT final_amount FROM customer_order WHERE order_id = ?',
+          'SELECT total_amount FROM customer_order WHERE order_id = ?',
           [order_id]
         ));
 
@@ -290,7 +289,7 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
           `INSERT INTO payment_transaction
            (order_id, payment_method, amount, reference_number, payment_status, verified_by, verified_at)
            VALUES (?, ?, ?, ?, 'verified', ?, NOW())`,
-          [order_id, payment_method, orderData.final_amount, reference_number, cashier_id]
+          [order_id, payment_method, orderData.total_amount, reference_number, cashier_id]
         );
       });
 
@@ -300,7 +299,7 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
     // Handle other payment methods (cash, card, bank transfer)
     await transaction(async (conn: PoolConnection) => {
       const orderData = getFirstRow<any>(await conn.query(
-        'SELECT final_amount FROM customer_order WHERE order_id = ?',
+        'SELECT total_amount FROM customer_order WHERE order_id = ?',
         [order_id]
       ));
 
@@ -321,7 +320,7 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
         `INSERT INTO payment_transaction
          (order_id, payment_method, amount, reference_number, payment_status, verified_by, verified_at)
          VALUES (?, ?, ?, ?, 'verified', ?, NOW())`,
-        [order_id, payment_method, orderData.final_amount, reference_number || null, cashier_id]
+        [order_id, payment_method, orderData.total_amount, reference_number || null, cashier_id]
       );
     });
 
@@ -344,7 +343,7 @@ export const getOrderDetails = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   const order = getFirstRow<any>(await query(
-    'SELECT * FROM customer_order WHERE order_id = ? AND is_deleted = FALSE',
+    'SELECT * FROM customer_order WHERE order_id = ?',
     [id]
   ));
 
@@ -398,7 +397,7 @@ export const getOrders = async (req: AuthRequest, res: Response) => {
     SELECT co.*, c.first_name, c.last_name, c.phone
     FROM customer_order co
     LEFT JOIN customer c ON co.customer_id = c.customer_id
-    WHERE co.is_deleted = FALSE
+    WHERE 1=1
   `;
 
   const params: any[] = [];
@@ -419,12 +418,12 @@ export const getOrders = async (req: AuthRequest, res: Response) => {
   }
 
   if (date_from) {
-    sql += ` AND DATE(co.order_datetime) >= ?`;
+    sql += ` AND DATE(co.created_at) >= ?`;
     params.push(date_from);
   }
 
   if (date_to) {
-    sql += ` AND DATE(co.order_datetime) <= ?`;
+    sql += ` AND DATE(co.created_at) <= ?`;
     params.push(date_to);
   }
 
@@ -433,7 +432,7 @@ export const getOrders = async (req: AuthRequest, res: Response) => {
   const countResult = getFirstRow<any>(await query(countSql, params));
   const total = countResult?.total || 0;
 
-  sql += ` ORDER BY co.order_datetime DESC`;
+  sql += ` ORDER BY co.created_at DESC`;
   sql += ` LIMIT ? OFFSET ?`;
   params.push(limitNum, offset);
 

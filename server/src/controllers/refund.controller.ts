@@ -118,7 +118,7 @@ export const getRefundDetails = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   const refund = getFirstRow<any>(await query(
-    `SELECT rr.*, co.order_number, co.order_datetime,
+    `SELECT rr.*, co.order_number, co.created_at as order_datetime,
             c.name as requested_by_name, a.name as approved_by_name
      FROM refund_request rr
      JOIN customer_order co ON rr.order_id = co.order_id

@@ -34,8 +34,7 @@ export const getMenuItems = async (req: AuthRequest, res: Response) => {
        ORDER BY price_type = 'base' DESC, created_at DESC
        LIMIT 1) as current_price
     FROM menu_item mi
-    WHERE mi.is_deleted = FALSE
-      AND mi.status = 'available'
+    WHERE mi.status = 'available'
       AND (mi.is_infinite_stock = TRUE OR mi.stock_quantity > 0)
   `;
 
@@ -108,7 +107,7 @@ export const getItemDetails = async (req: AuthRequest, res: Response) => {
        ORDER BY price_type = 'base' DESC
        LIMIT 1) as current_price
      FROM menu_item mi
-     WHERE mi.menu_item_id = ? AND mi.is_deleted = FALSE`,
+     WHERE mi.menu_item_id = ?`,
     [id]
   ));
 

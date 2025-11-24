@@ -174,16 +174,15 @@ export const getSalesAnalytics = async (req: AuthRequest, res: Response) => {
 
   const sql = `
     SELECT
-      DATE(order_datetime) as date,
+      DATE(created_at) as date,
       COUNT(*) as total_orders,
-      SUM(final_amount) as total_revenue,
-      AVG(final_amount) as avg_order_value,
+      SUM(total_amount) as total_revenue,
+      AVG(total_amount) as avg_order_value,
       SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) as paid_orders,
       SUM(CASE WHEN order_status = 'completed' THEN 1 ELSE 0 END) as completed_orders
     FROM customer_order
-    WHERE is_deleted = FALSE
-      AND DATE(order_datetime) BETWEEN ? AND ?
-    GROUP BY DATE(order_datetime)
+    WHERE DATE(created_at) BETWEEN ? AND ?
+    GROUP BY DATE(created_at)
     ORDER BY date DESC
   `;
 

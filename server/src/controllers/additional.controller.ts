@@ -99,10 +99,10 @@ export const getCustomer = async (req: AuthRequest, res: Response) => {
 
   // Get recent orders
   const orders = await query(
-    `SELECT order_id, order_number, order_datetime, order_status, final_amount
+    `SELECT order_id, order_number, created_at as order_datetime, order_status, total_amount as final_amount
      FROM customer_order
      WHERE customer_id = ?
-     ORDER BY order_datetime DESC
+     ORDER BY created_at DESC
      LIMIT 10`,
     [id]
   );
