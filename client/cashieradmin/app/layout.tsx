@@ -1,8 +1,10 @@
 import "@/styles/globals.css";
+import "@/styles/glassmorphism.css";
 import { Metadata, Viewport } from "next";
 import clsx from "clsx";
 
 import { Providers } from "./providers";
+import AnimatedBackground from "@/components/AnimatedBackground";
 
 import { fontSans } from "@/config/fonts";
 
@@ -34,11 +36,12 @@ export default function RootLayout({
       <head />
       <body
         className={clsx(
-          "min-h-screen text-foreground bg-background font-sans antialiased",
+          "min-h-screen text-foreground font-sans antialiased",
           fontSans.variable,
         )}
       >
-        <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
+        <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+          <AnimatedBackground />
           {children}
         </Providers>
       </body>
