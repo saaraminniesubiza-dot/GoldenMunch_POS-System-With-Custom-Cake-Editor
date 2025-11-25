@@ -1,29 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-  Input,
-  Textarea,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Chip,
-  Select,
-  SelectItem,
-  useDisclosure,
-} from '@heroui/react';
+import { Card, CardBody, CardHeader } from '@heroui/card';
+import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
+import { Textarea } from '@heroui/input';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal';
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
+import { Chip } from '@heroui/chip';
+import { Select, SelectItem } from '@heroui/select';
+import { useDisclosure } from '@heroui/modal';
 import { MenuService } from '@/services/menu.service';
 import type { Category, MenuItem } from '@/types/api';
 
