@@ -1005,7 +1005,67 @@ function MenuManagementContent() {
                 }}
                 min="0"
                 step="1"
+                description="Alert threshold for low stock notifications"
               />
+
+              {/* Feature Toggles */}
+              <div className="space-y-3 p-4 bg-default-50 rounded-lg border border-default-200">
+                <p className="text-sm font-semibold text-default-700">Item Features</p>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.is_infinite_stock || false}
+                      onChange={(e) => setFormData({ ...formData, is_infinite_stock: e.target.checked })}
+                      className="w-4 h-4 rounded border-default-300 text-primary focus:ring-2 focus:ring-primary"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-default-700">Infinite Stock</span>
+                      <p className="text-xs text-default-500">Item is always available regardless of stock quantity</p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.can_customize || false}
+                      onChange={(e) => setFormData({ ...formData, can_customize: e.target.checked })}
+                      className="w-4 h-4 rounded border-default-300 text-primary focus:ring-2 focus:ring-primary"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-default-700">Customizable</span>
+                      <p className="text-xs text-default-500">Allow customers to customize this item</p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.can_preorder || false}
+                      onChange={(e) => setFormData({ ...formData, can_preorder: e.target.checked })}
+                      className="w-4 h-4 rounded border-default-300 text-primary focus:ring-2 focus:ring-primary"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-default-700">Pre-order Available</span>
+                      <p className="text-xs text-default-500">Enable pre-ordering for this item</p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.is_featured || false}
+                      onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                      className="w-4 h-4 rounded border-default-300 text-primary focus:ring-2 focus:ring-primary"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-default-700">Featured Item</span>
+                      <p className="text-xs text-default-500">Display prominently on the kiosk home screen</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <Input
                 label="Preparation Time (minutes)"
                 type="number"

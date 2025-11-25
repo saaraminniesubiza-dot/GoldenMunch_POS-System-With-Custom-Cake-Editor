@@ -166,17 +166,19 @@ export interface MenuItem {
   created_at: string;
   updated_at: string;
   current_price?: number;
+  categories?: Category[]; // Array of categories this item belongs to
 }
 
 export interface Category {
   category_id: number;
-  category_name: string;
+  name: string;
   description?: string;
   image_url?: string;
-  parent_category_id?: number;
   display_order: number;
   is_active: boolean;
+  admin_id?: number;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface MenuItemPrice {

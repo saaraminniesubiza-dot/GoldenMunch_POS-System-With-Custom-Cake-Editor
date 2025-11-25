@@ -80,11 +80,43 @@ export class MenuService {
     return apiClient.post<MenuItemPrice>('/admin/menu/prices', data);
   }
 
-  static async createCategory(data: CreateCategoryRequest) {
+  static async createCategory(data: CreateCategoryRequest, imageFile?: File) {
+    if (imageFile) {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (typeof value === 'boolean') {
+            formData.append(key, value ? '1' : '0');
+          } else if (typeof value === 'number') {
+            formData.append(key, value.toString());
+          } else {
+            formData.append(key, String(value));
+          }
+        }
+      });
+      formData.append('image', imageFile);
+      return apiClient.postFormData<Category>('/admin/categories', formData);
+    }
     return apiClient.post<Category>('/admin/categories', data);
   }
 
-  static async updateCategory(id: number, data: Partial<CreateCategoryRequest>) {
+  static async updateCategory(id: number, data: Partial<CreateCategoryRequest>, imageFile?: File) {
+    if (imageFile) {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (typeof value === 'boolean') {
+            formData.append(key, value ? '1' : '0');
+          } else if (typeof value === 'number') {
+            formData.append(key, value.toString());
+          } else {
+            formData.append(key, String(value));
+          }
+        }
+      });
+      formData.append('image', imageFile);
+      return apiClient.postFormData<Category>(`/admin/categories/${id}`, formData);
+    }
     return apiClient.put<Category>(`/admin/categories/${id}`, data);
   }
 
