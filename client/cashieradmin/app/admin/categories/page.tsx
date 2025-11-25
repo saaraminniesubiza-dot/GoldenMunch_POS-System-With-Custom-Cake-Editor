@@ -13,6 +13,18 @@ import { useDisclosure } from '@heroui/modal';
 import { MenuService } from '@/services/menu.service';
 import type { Category, MenuItem } from '@/types/api';
 
+// Utility function to safely format prices
+const formatPrice = (price: any): string => {
+  if (price === null || price === undefined || price === '') {
+    return '0.00';
+  }
+  const numPrice = typeof price === 'string' ? parseFloat(price) : Number(price);
+  if (isNaN(numPrice)) {
+    return '0.00';
+  }
+  return numPrice.toFixed(2);
+};
+
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -430,7 +442,7 @@ export default function CategoriesPage() {
                     </div>
                   </div>
                   <Chip size="sm" variant="flat">
-                    ₱{item.current_price?.toFixed(2) || '0.00'}
+                    ₱{formatPrice(item.current_price)}
                   </Chip>
                 </label>
               ))}
