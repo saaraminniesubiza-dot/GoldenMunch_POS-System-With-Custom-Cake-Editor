@@ -10,6 +10,12 @@ export class InventoryService {
     return apiClient.get<InventoryAlert[]>('/admin/inventory/alerts', { params });
   }
 
+  static async getLowStockAlerts() {
+    return apiClient.get<InventoryAlert[]>('/admin/inventory/alerts', {
+      params: { is_acknowledged: false }
+    });
+  }
+
   static async acknowledgeAlert(id: number) {
     return apiClient.patch(`/admin/inventory/alerts/${id}/acknowledge`);
   }
