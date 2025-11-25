@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@heroui/button';
-import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
+import { Card, CardBody } from '@heroui/card';
 import { Chip } from '@heroui/chip';
 import { Spinner } from '@heroui/spinner';
-import { Badge } from '@heroui/badge';
 import { Input } from '@heroui/input';
 import { useCart } from '@/contexts/CartContext';
 import { MenuService } from '@/services/menu.service';
 import type { MenuItem, Category } from '@/types/api';
 import NextLink from 'next/link';
+import Image from 'next/image';
 
-export default function MenuPage() {
+export default function HomePage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
@@ -106,8 +106,9 @@ export default function MenuPage() {
     let filtered = menuItems;
 
     if (selectedCategory !== null) {
-      // Filter by category (would need proper category mapping)
-      filtered = menuItems;
+      filtered = menuItems.filter(item =>
+        item.categories?.some(cat => cat.category_id === selectedCategory)
+      );
     }
 
     if (searchQuery) {
@@ -132,42 +133,21 @@ export default function MenuPage() {
     return cartItem?.quantity || 0;
   };
 
-  const getItemEmoji = (itemType: string): string => {
-    const emojiMap: Record<string, string> = {
-      cake: '🍰',
-      pastry: '🥐',
-      beverage: '☕',
-      snack: '🍪',
-      main_dish: '🍽️',
-      appetizer: '🥗',
-      dessert: '🍨',
-      bread: '🍞',
-      other: '🍴'
-    };
-    return emojiMap[itemType] || '🍴';
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen  flex items-center justify-center">
-        <div className="text-center animate-scale-in">
-          <div className="relative">
-            <Spinner
-              size="lg"
-              color="warning"
-              classNames={{
-                wrapper: "w-24 h-24"
-              }}
-            />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative mb-8">
+            <Spinner size="lg" color="warning" className="w-24 h-24" />
             <div className="absolute inset-0 animate-ping opacity-20">
               <div className="w-24 h-24 rounded-full bg-golden-orange/30"></div>
             </div>
           </div>
-          <p className="text-3xl text-chocolate-brown mt-6 font-bold">
-            Loading delicious menu...
-          </p>
-          <p className="text-lg text-chocolate-brown/60 mt-2">
-            Preparing something amazing for you
+          <h2 className="text-4xl font-bold text-chocolate-brown mb-3 animate-pulse">
+            ✨ Loading Delights...
+          </h2>
+          <p className="text-xl text-chocolate-brown/70">
+            Preparing something amazing
           </p>
         </div>
       </div>
@@ -176,22 +156,20 @@ export default function MenuPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen  flex items-center justify-center p-6">
-        <Card className="max-w-md card-transparent animate-scale-in">
-          <CardBody className="text-center p-8">
-            <div className="text-8xl mb-6 animate-bounce-slow">⚠️</div>
-            <h1 className="text-4xl font-bold text-chocolate-brown mb-4">
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <Card className="card-transparent max-w-xl">
+          <CardBody className="text-center p-12">
+            <div className="text-9xl mb-6">⚠️</div>
+            <h2 className="text-4xl font-bold text-chocolate-brown mb-4">
               Oops! Something went wrong
-            </h1>
-            <p className="text-xl text-chocolate-brown/70 mb-8">
-              {error}
-            </p>
+            </h2>
+            <p className="text-xl text-chocolate-brown/70 mb-8">{error}</p>
             <Button
               size="lg"
-              className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-xl px-8 shadow-xl-golden"
+              className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-xl px-12 py-6 shadow-xl-golden"
               onClick={() => window.location.reload()}
             >
-              Try Again
+              🔄 Try Again
             </Button>
           </CardBody>
         </Card>
@@ -200,72 +178,69 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen ">
-      {/* Modern Header with Glassmorphism */}
-      <div className="sticky top-0 z-40 bg-glass border-b border-golden-orange/20 shadow-lg backdrop-blur-lg">
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div className="text-6xl animate-float">🍰</div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent">
-                  Golden Munch
-                </h1>
-                <p className="text-lg text-chocolate-brown/70">Fresh. Delicious. Made with Love.</p>
-              </div>
+    <div className="min-h-screen pb-32">
+      {/* Hero Header - Portrait Optimized */}
+      <div className="relative">
+        <div className="card-glass border-b-4 border-golden-orange/30 p-8">
+          <div className="text-center space-y-4">
+            {/* Logo / Branding */}
+            <div className="text-8xl animate-float mx-auto">🍰</div>
+            <h1 className="text-6xl font-black bg-gradient-to-br from-golden-orange via-deep-amber to-orange-600 bg-clip-text text-transparent">
+              Golden Munch
+            </h1>
+            <p className="text-2xl text-chocolate-brown/80 font-semibold">
+              Fresh • Delicious • Made with Love
+            </p>
+
+            {/* Search Bar */}
+            <div className="pt-4 max-w-2xl mx-auto">
+              <Input
+                placeholder="🔍 Search for treats..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                size="lg"
+                classNames={{
+                  input: "text-2xl py-4",
+                  inputWrapper: "card-glass border-2 border-golden-orange/30 hover:border-golden-orange shadow-lg h-20"
+                }}
+              />
             </div>
-
-            {/* Cart Button */}
-            {getItemCount() > 0 && (
-              <Badge content={getItemCount()} color="danger" size="lg" placement="top-right" className="animate-scale-in">
-                <Button
-                  as={NextLink}
-                  href="/cart"
-                  size="lg"
-                  className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-xl px-8 shadow-xl-golden hover:scale-105 transition-transform"
-                >
-                  🛒 ${getTotal().toFixed(2)}
-                </Button>
-              </Badge>
-            )}
-          </div>
-
-          {/* Search Bar */}
-          <div className="max-w-xl">
-            <Input
-              placeholder="Search for delicious treats..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              size="lg"
-              startContent={<span className="text-2xl">🔍</span>}
-              classNames={{
-                input: "text-lg",
-                inputWrapper: "bg-white shadow-lg border-2 border-golden-orange/20 hover:border-golden-orange/40 transition-colors"
-              }}
-            />
           </div>
         </div>
+
+        {/* Floating Cart Badge */}
+        {getItemCount() > 0 && (
+          <Button
+            as={NextLink}
+            href="/cart"
+            size="lg"
+            className="absolute top-8 right-8 bg-gradient-to-br from-golden-orange to-deep-amber text-white font-bold text-xl px-8 py-6 shadow-xl-golden animate-glow rounded-full"
+          >
+            <span className="text-3xl mr-2">🛒</span>
+            <span className="text-2xl">{getItemCount()}</span>
+            <Chip size="lg" color="danger" className="ml-3 text-xl px-4">
+              ₱{getTotal().toFixed(0)}
+            </Chip>
+          </Button>
+        )}
       </div>
 
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Category Pills with Modern Design */}
+      <div className="px-8 pt-8 space-y-8">
+        {/* Categories - Horizontal Scroll */}
         {categories.length > 0 && (
-          <div className="animate-slide-right">
-            <h2 className="text-2xl font-bold text-chocolate-brown mb-4 flex items-center gap-2">
-              <span className="text-3xl">📂</span>
+          <div>
+            <h2 className="text-3xl font-bold text-chocolate-brown mb-6 flex items-center gap-3">
+              <span className="text-5xl">📂</span>
               Categories
             </h2>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
               <Button
                 size="lg"
-                variant={selectedCategory === null ? "solid" : "bordered"}
-                className={`
-                  ${selectedCategory === null
-                    ? 'bg-gradient-to-r from-golden-orange to-deep-amber text-white shadow-xl-golden scale-105'
-                    : 'bg-white border-2 border-golden-orange/30 text-chocolate-brown hover:border-golden-orange hover:shadow-lg'
-                  }
-                  font-semibold text-lg px-6 py-3 rounded-full transition-all duration-300
-                `}
+                className={`${
+                  selectedCategory === null
+                    ? 'bg-gradient-to-br from-golden-orange to-deep-amber text-white shadow-xl-golden scale-110'
+                    : 'card-transparent border-2 border-golden-orange/40 text-chocolate-brown'
+                } font-bold text-2xl px-8 py-7 rounded-2xl min-w-[200px] snap-center transition-all`}
                 onClick={() => setSelectedCategory(null)}
               >
                 ✨ All Items
@@ -274,14 +249,11 @@ export default function MenuPage() {
                 <Button
                   key={category.category_id}
                   size="lg"
-                  variant={selectedCategory === category.category_id ? "solid" : "bordered"}
-                  className={`
-                    ${selectedCategory === category.category_id
-                      ? 'bg-gradient-to-r from-golden-orange to-deep-amber text-white shadow-xl-golden scale-105'
-                      : 'bg-white border-2 border-golden-orange/30 text-chocolate-brown hover:border-golden-orange hover:shadow-lg'
-                    }
-                    font-semibold text-lg px-6 py-3 rounded-full transition-all duration-300
-                  `}
+                  className={`${
+                    selectedCategory === category.category_id
+                      ? 'bg-gradient-to-br from-golden-orange to-deep-amber text-white shadow-xl-golden scale-110'
+                      : 'card-transparent border-2 border-golden-orange/40 text-chocolate-brown'
+                  } font-bold text-2xl px-8 py-7 rounded-2xl min-w-[200px] snap-center transition-all`}
                   onClick={() => setSelectedCategory(category.category_id)}
                 >
                   {category.name}
@@ -291,24 +263,23 @@ export default function MenuPage() {
           </div>
         )}
 
-        {/* Menu Items Grid with Staggered Animation */}
+        {/* Menu Items Grid - 2 Column for Portrait */}
         {filteredItems.length === 0 ? (
-          <Card className="card-transparent animate-scale-in">
-            <CardBody className="text-center py-16">
+          <Card className="card-transparent">
+            <CardBody className="text-center py-20">
               <div className="text-9xl mb-6 animate-float">🍽️</div>
-              <h3 className="text-4xl font-bold text-chocolate-brown mb-4">
+              <h3 className="text-5xl font-bold text-chocolate-brown mb-4">
                 No items found
               </h3>
-              <p className="text-xl text-chocolate-brown/70 mb-6">
+              <p className="text-2xl text-chocolate-brown/70 mb-8">
                 {searchQuery
                   ? `No results for "${searchQuery}"`
-                  : "No items in this category right now."
-                }
+                  : "No items in this category"}
               </p>
               {(searchQuery || selectedCategory !== null) && (
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold px-8 shadow-xl"
+                  className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold px-12 py-6 text-2xl"
                   onClick={() => {
                     setSearchQuery('');
                     setSelectedCategory(null);
@@ -320,16 +291,15 @@ export default function MenuPage() {
             </CardBody>
           </Card>
         ) : (
-          <>
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-chocolate-brown flex items-center gap-2">
-                <span className="text-3xl">🍴</span>
-                {filteredItems.length} Delicious Items
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-chocolate-brown">
+                🍴 {filteredItems.length} Delicious Items
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredItems.map((item, index) => {
+            <div className="grid grid-cols-2 gap-6">
+              {filteredItems.map((item) => {
                 const cartQty = getCartQuantity(item.menu_item_id);
                 const isAvailable = item.status === 'available' &&
                   (item.is_infinite_stock || item.stock_quantity > 0);
@@ -337,120 +307,90 @@ export default function MenuPage() {
                 return (
                   <Card
                     key={item.menu_item_id}
-                    className={`
-                      card-transparent
-                      ${isAvailable ? '' : 'opacity-60'}
-                      animate-slide-up
-                    `}
-                    style={{ animationDelay: `${index * 0.05}s` }}
+                    className={`card-transparent hover:scale-105 transition-transform duration-300 ${!isAvailable && 'opacity-60'}`}
                   >
-                    <CardHeader className="flex-col items-start p-0 relative">
-                      {/* Image Container with Gradient Overlay */}
-                      <div className="w-full h-48 bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 flex items-center justify-center relative overflow-hidden">
-                        <div className="text-8xl animate-float">
-                          {item.image_url || getItemEmoji(item.item_type)}
-                        </div>
+                    <CardBody className="p-0">
+                      {/* Image/Icon Section */}
+                      <div className="relative h-48 bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 flex items-center justify-center rounded-t-xl overflow-hidden">
+                        {item.image_url ? (
+                          <div className="w-full h-full relative">
+                            <Image
+                              src={item.image_url}
+                              alt={item.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="text-8xl animate-float">🍰</div>
+                        )}
 
                         {/* Badges */}
                         <div className="absolute top-3 right-3 flex flex-col gap-2">
                           {item.is_featured && (
-                            <Chip
-                              color="warning"
-                              size="md"
-                              variant="shadow"
-                              className="font-bold animate-pulse-slow"
-                            >
-                              🔥 Popular
+                            <Chip color="warning" size="lg" className="font-bold text-lg animate-pulse-slow">
+                              🔥 Hot
                             </Chip>
                           )}
                           {!isAvailable && (
-                            <Chip color="danger" size="md" variant="shadow" className="font-bold">
+                            <Chip color="danger" size="lg" className="font-bold text-lg">
                               Sold Out
                             </Chip>
                           )}
                           {cartQty > 0 && (
-                            <Chip
-                              color="success"
-                              size="md"
-                              variant="shadow"
-                              className="font-bold animate-bounce-slow"
-                            >
+                            <Chip color="success" size="lg" className="font-bold text-xl">
                               {cartQty} in cart
                             </Chip>
                           )}
                         </div>
                       </div>
-                    </CardHeader>
 
-                    <CardBody className="px-5 py-4">
-                      <div className="mb-3">
-                        <h3 className="text-xl font-bold text-chocolate-brown mb-1 line-clamp-1">
-                          {item.name}
-                        </h3>
-                        <p className="text-sm text-chocolate-brown/60 line-clamp-2 min-h-[40px]">
-                          {item.description || 'Delicious treat made fresh daily'}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-between mb-4">
+                      {/* Content Section */}
+                      <div className="p-5 space-y-4">
                         <div>
-                          <span className="text-3xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent">
-                            ${(Number(item.current_price) || 0).toFixed(2)}
-                          </span>
+                          <h3 className="text-2xl font-bold text-chocolate-brown mb-2 line-clamp-2">
+                            {item.name}
+                          </h3>
+                          <p className="text-lg text-chocolate-brown/60 line-clamp-2">
+                            {item.description || 'Delicious treat made fresh daily'}
+                          </p>
                         </div>
-                        <Chip size="sm" variant="flat" color="default">
-                          {item.item_type}
-                        </Chip>
-                      </div>
 
-                      {isAvailable ? (
-                        <Button
-                          size="lg"
-                          className="w-full bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold shadow-lg hover:shadow-xl-golden hover:scale-105 transition-all"
-                          onClick={() => handleAddToCart(item)}
-                        >
-                          {cartQty > 0 ? (
-                            <>🛒 Add Another</>
-                          ) : (
-                            <>+ Add to Cart</>
-                          )}
-                        </Button>
-                      ) : (
-                        <Button
-                          disabled
-                          size="lg"
-                          className="w-full bg-gray-200 text-gray-500 font-semibold"
-                        >
-                          Currently Unavailable
-                        </Button>
-                      )}
+                        <div className="flex items-center justify-between">
+                          <span className="text-4xl font-black bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent">
+                            ₱{(Number(item.current_price) || 0).toFixed(0)}
+                          </span>
+                          <Chip size="lg" variant="flat" className="text-lg">
+                            {item.item_type}
+                          </Chip>
+                        </div>
+
+                        {isAvailable ? (
+                          <Button
+                            size="lg"
+                            className="w-full bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-xl py-6 shadow-lg hover:shadow-xl-golden"
+                            onClick={() => handleAddToCart(item)}
+                          >
+                            {cartQty > 0 ? '🛒 Add More' : '+ Add to Cart'}
+                          </Button>
+                        ) : (
+                          <Button
+                            disabled
+                            size="lg"
+                            className="w-full bg-gray-300 text-gray-600 font-semibold text-xl py-6"
+                          >
+                            Unavailable
+                          </Button>
+                        )}
+                      </div>
                     </CardBody>
                   </Card>
                 );
               })}
             </div>
-          </>
+          </div>
         )}
       </div>
-
-      {/* Floating Cart Button for Mobile */}
-      {getItemCount() > 0 && (
-        <div className="fixed bottom-8 right-8 z-50 lg:hidden animate-scale-in">
-          <Badge content={getItemCount()} color="danger" size="lg" placement="top-left">
-            <Button
-              as={NextLink}
-              href="/cart"
-              isIconOnly
-              className="w-16 h-16 bg-gradient-to-r from-golden-orange to-deep-amber text-white text-2xl rounded-full shadow-2xl animate-glow"
-            >
-              🛒
-            </Button>
-          </Badge>
-        </div>
-      )}
-
-      {/* Spacer for bottom navigation */}
-      <div className="h-24"></div>
     </div>
   );
 }
