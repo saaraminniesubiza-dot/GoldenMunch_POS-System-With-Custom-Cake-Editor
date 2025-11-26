@@ -40,7 +40,7 @@ export default function CartPage() {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [specialInstructions, setSpecialInstructions] = useState("");
-  const [orderType, setOrderType] = useState<OrderType>('walk_in');
+  const [orderType, setOrderType] = useState<OrderType>('takeout');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [referenceNumber, setReferenceNumber] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -172,7 +172,7 @@ export default function CartPage() {
     setCustomerName("");
     setCustomerPhone("");
     setSpecialInstructions("");
-    setOrderType('walk_in');
+    setOrderType('takeout');
     setPaymentMethod('cash');
     setReferenceNumber("");
     setCompletedOrder(null);
@@ -390,9 +390,9 @@ export default function CartPage() {
                     trigger: "border-2 hover:border-golden-orange"
                   }}
                 >
-                  <SelectItem key="walk_in" value="walk_in">🏪 Walk-in</SelectItem>
-                  <SelectItem key="pickup" value="pickup">🚗 Pickup</SelectItem>
-                  <SelectItem key="pre_order" value="pre_order">📅 Pre-order</SelectItem>
+                  <SelectItem key="dine_in" value="dine_in">🍽️ Dine In</SelectItem>
+                  <SelectItem key="takeout" value="takeout">🚗 Takeout</SelectItem>
+                  <SelectItem key="delivery" value="delivery">🚚 Delivery</SelectItem>
                 </Select>
                 <Select
                   label="Payment Method"
