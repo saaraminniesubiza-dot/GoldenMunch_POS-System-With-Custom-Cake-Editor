@@ -2,15 +2,22 @@
 
 @config "../tailwind.config.js";
 
-/* Golden Munch - Modern Chocolate Luxe Design */
+/* Golden Munch - Light Caramel & Cream Design (Soft + Airy) */
 
 /* Color Palette Variables */
 :root {
-  --dark-cocoa: #3A1F0F;
-  --milk-chocolate: #7B4B28;
-  --champagne-gold: #EAD7B7;
-  --soft-white: #FAF7F2;
-  --deep-burgundy: #662B35;
+  --light-caramel: #D9B38C;
+  --cream-white: #FFF9F2;
+  --soft-sand: #E8DCC8;
+  --warm-beige: #C9B8A5;
+  --muted-clay: #C67B57;
+
+  /* Legacy variables for backward compatibility */
+  --dark-cocoa: #C67B57;
+  --milk-chocolate: #D9B38C;
+  --champagne-gold: #C9B8A5;
+  --soft-white: #FFF9F2;
+  --deep-burgundy: #C67B57;
 }
 
 /* Smooth scrolling for the kiosk */
@@ -586,58 +593,58 @@ img {
   }
 }
 
-/* Chocolate Luxe Glassmorphism Utilities */
+/* Light Caramel & Cream Glassmorphism Utilities - Soft + Airy */
 @layer utilities {
-  /* Glass Card - Champagne gold tinted glass for product cards */
+  /* Glass Card - Cream white tinted glass for product cards - MORE VISIBLE */
   .glass-card {
-    background: rgba(234, 215, 183, 0.15);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(234, 215, 183, 0.3);
-    box-shadow: 0 8px 32px 0 rgba(123, 75, 40, 0.2);
+    background: rgba(255, 249, 242, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 2px solid rgba(201, 184, 165, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(198, 123, 87, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
     border-radius: 20px;
   }
 
   .glass-card:hover {
-    background: rgba(234, 215, 183, 0.25);
-    border-color: rgba(234, 215, 183, 0.5);
-    box-shadow: 0 12px 40px 0 rgba(123, 75, 40, 0.3);
+    background: rgba(255, 249, 242, 0.80);
+    border-color: rgba(198, 123, 87, 0.6);
+    box-shadow: 0 12px 40px 0 rgba(198, 123, 87, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
     transform: translateY(-4px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Glass Header - Elegant header with soft white tint */
+  /* Glass Header - Elegant header with cream tint - MORE VISIBLE */
   .glass-header {
-    background: rgba(250, 247, 242, 0.12);
+    background: rgba(255, 249, 242, 0.50);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-bottom: 1px solid rgba(234, 215, 183, 0.25);
-    box-shadow: 0 4px 20px rgba(58, 31, 15, 0.15);
+    border-bottom: 2px solid rgba(217, 179, 140, 0.4);
+    box-shadow: 0 4px 20px rgba(198, 123, 87, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
   }
 
-  /* Glass Footer - Deep burgundy tinted footer */
+  /* Glass Footer - Warm beige tinted footer - MORE VISIBLE */
   .glass-footer {
-    background: rgba(102, 43, 53, 0.15);
+    background: rgba(255, 249, 242, 0.60);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    border-top: 1px solid rgba(234, 215, 183, 0.3);
-    box-shadow: 0 -4px 20px rgba(58, 31, 15, 0.2);
+    border-top: 2px solid rgba(217, 179, 140, 0.4);
+    box-shadow: 0 -4px 20px rgba(198, 123, 87, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
   }
 
-  /* Glass Button - Interactive milk chocolate tinted buttons */
+  /* Glass Button - Interactive caramel tinted buttons - MORE VISIBLE */
   .glass-button {
-    background: rgba(123, 75, 40, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(234, 215, 183, 0.4);
+    background: rgba(255, 249, 242, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid rgba(217, 179, 140, 0.5);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-button:hover {
-    background: rgba(123, 75, 40, 0.25);
-    border-color: rgba(234, 215, 183, 0.6);
+    background: rgba(255, 249, 242, 0.75);
+    border-color: rgba(198, 123, 87, 0.7);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(234, 215, 183, 0.3);
+    box-shadow: 0 8px 24px rgba(217, 179, 140, 0.4);
   }
 
   /* Touch Optimized - Large touch targets for 24" touchscreen */
