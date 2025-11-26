@@ -182,14 +182,14 @@ export default function CartPage() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="max-w-lg glass-card animate-scale-in">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-cream-white via-soft-sand to-warm-beige">
+        <Card className="max-w-lg shadow-caramel border-2 border-light-caramel/30 bg-cream-white/80 backdrop-blur-xl">
           <CardBody className="text-center p-12">
-            <div className="text-9xl mb-6 animate-float">🛒</div>
-            <h1 className="text-5xl font-bold text-[#FAF7F2] mb-4 drop-shadow-lg">
+            <div className="text-9xl mb-6">🛒</div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-light-caramel to-muted-clay bg-clip-text text-transparent mb-4 drop-shadow-lg">
               Your Cart is Empty
             </h1>
-            <p className="text-xl text-[#EAD7B7] mb-8">
+            <p className="text-2xl text-warm-beige font-medium mb-8">
               Looks like you haven't added any delicious treats yet!
             </p>
             <div className="flex flex-col gap-4">
@@ -197,7 +197,7 @@ export default function CartPage() {
                 as={NextLink}
                 href="/"
                 size="lg"
-                className="bg-gradient-to-r from-[#7B4B28] to-[#662B35] text-[#FAF7F2] font-bold text-xl px-10 py-7 shadow-[0_0_30px_rgba(234,215,183,0.4)] hover:scale-105 transition-transform"
+                className="bg-gradient-to-r from-light-caramel to-muted-clay text-white font-bold text-xl px-10 py-7 shadow-caramel hover:shadow-glow hover:scale-105 transition-all duration-300"
               >
                 🍰 Browse Our Menu
               </Button>
@@ -206,7 +206,7 @@ export default function CartPage() {
                 href="/specials"
                 size="lg"
                 variant="bordered"
-                className="border-2 border-[#EAD7B7]/60 text-[#FAF7F2] hover:bg-[#EAD7B7]/10 font-bold text-lg px-10"
+                className="border-2 border-light-caramel/60 text-muted-clay hover:bg-soft-sand/30 font-bold text-lg px-10"
               >
                 ⭐ View Today's Specials
               </Button>
@@ -218,15 +218,15 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-cream-white via-soft-sand to-warm-beige pb-40">
       {/* Beautiful Header */}
-      <div className="glass-header border-b-4 border-[#EAD7B7]/30">
+      <div className="bg-gradient-to-r from-cream-white via-soft-sand to-cream-white backdrop-blur-xl border-b-4 border-light-caramel/40 shadow-soft">
         <div className="max-w-7xl mx-auto p-8">
-          <div className="flex items-center gap-4 animate-slide-right">
-            <div className="text-7xl animate-bounce-slow">🛒</div>
+          <div className="flex items-center gap-4">
+            <div className="text-7xl">🛒</div>
             <div>
-              <h1 className="text-5xl font-bold text-[#FAF7F2] mb-2 drop-shadow-lg">Your Cart</h1>
-              <p className="text-xl text-[#EAD7B7]">
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-light-caramel to-muted-clay bg-clip-text text-transparent mb-2 drop-shadow-lg">Your Cart</h1>
+              <p className="text-2xl text-warm-beige font-medium">
                 {getItemCount()} {getItemCount() === 1 ? 'item' : 'items'} • Ready to checkout?
               </p>
             </div>
@@ -238,9 +238,9 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items - Takes 2 columns on large screens */}
           <div className="lg:col-span-2 space-y-4">
-            <Card className="glass-card animate-slide-up">
-              <CardHeader className="p-6 border-b border-[#EAD7B7]/20">
-                <h2 className="text-3xl font-bold text-[#FAF7F2] flex items-center gap-2 drop-shadow-lg">
+            <Card className="shadow-caramel border-2 border-light-caramel/30 bg-cream-white/80 backdrop-blur-xl">
+              <CardHeader className="p-6 border-b border-light-caramel/20 bg-gradient-to-r from-soft-sand/30 to-transparent">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-light-caramel to-muted-clay bg-clip-text text-transparent flex items-center gap-2 drop-shadow-lg">
                   <span className="text-4xl">📦</span>
                   Your Order ({getItemCount()} items)
                 </h2>
@@ -249,12 +249,10 @@ export default function CartPage() {
                 {cartItems.map((item, index) => (
                   <div
                     key={`${item.menuItem.menu_item_id}-${item.flavor_id || 0}-${item.size_id || 0}`}
-                    className="animate-slide-up"
-                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <div className="flex items-center gap-4 p-5 glass-button rounded-2xl hover:scale-[1.02] transition-all border-2 border-[#EAD7B7]/20 hover:border-[#EAD7B7]/40">
+                    <div className="flex items-center gap-4 p-5 bg-soft-sand/30 border-2 border-light-caramel/30 rounded-2xl hover:scale-[1.02] transition-all hover:shadow-soft hover:border-light-caramel/50">
                       {/* Item Image */}
-                      <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-[#7B4B28]/20 to-[#662B35]/20 flex items-center justify-center flex-shrink-0">
+                      <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-light-caramel/20 to-muted-clay/20 flex items-center justify-center flex-shrink-0">
                         <div className="text-5xl">
                           {item.menuItem.image_url || getItemEmoji(item.menuItem.item_type)}
                         </div>
@@ -262,19 +260,19 @@ export default function CartPage() {
 
                       {/* Item Details */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-bold text-[#FAF7F2] truncate drop-shadow-md">
+                        <h3 className="text-xl font-bold text-muted-clay truncate drop-shadow-md">
                           {item.menuItem.name}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
-                          <Chip size="sm" variant="flat" className="bg-[#EAD7B7]/20 text-[#FAF7F2] border border-[#EAD7B7]/30">
+                          <Chip size="sm" variant="flat" className="bg-light-caramel/20 text-muted-clay border border-light-caramel/30 font-medium">
                             {item.menuItem.item_type}
                           </Chip>
-                          <span className="text-lg font-semibold text-[#EAD7B7]">
+                          <span className="text-lg font-semibold text-warm-beige">
                             ₱{(Number(item.menuItem.current_price) || 0).toFixed(2)} each
                           </span>
                         </div>
                         {item.special_instructions && (
-                          <p className="text-sm text-[#EAD7B7]/80 mt-2 italic">
+                          <p className="text-sm text-warm-beige mt-2 italic">
                             📝 {item.special_instructions}
                           </p>
                         )}
@@ -282,23 +280,23 @@ export default function CartPage() {
 
                       {/* Quantity Controls */}
                       <div className="flex flex-col items-center gap-3">
-                        <div className="flex items-center gap-3 glass-button rounded-full px-3 py-2 border border-[#EAD7B7]/30">
+                        <div className="flex items-center gap-3 bg-cream-white/50 rounded-full px-3 py-2 border border-light-caramel/30 shadow-soft">
                           <Button
                             isIconOnly
                             size="sm"
                             variant="flat"
-                            className="rounded-full bg-[#662B35]/30 hover:bg-[#662B35] text-[#FAF7F2] font-bold transition-all"
+                            className="rounded-full bg-muted-clay/30 hover:bg-muted-clay text-white font-bold transition-all"
                             onClick={() => updateQuantity(item.menuItem.menu_item_id, item.quantity - 1)}
                           >
                             −
                           </Button>
-                          <span className="text-xl font-bold text-[#FAF7F2] min-w-[32px] text-center">
+                          <span className="text-xl font-bold text-muted-clay min-w-[32px] text-center">
                             {item.quantity}
                           </span>
                           <Button
                             isIconOnly
                             size="sm"
-                            className="rounded-full bg-gradient-to-r from-[#7B4B28] to-[#662B35] text-[#FAF7F2] font-bold shadow-lg transition-all"
+                            className="rounded-full bg-gradient-to-r from-light-caramel to-muted-clay text-white font-bold shadow-caramel transition-all"
                             onClick={() => updateQuantity(item.menuItem.menu_item_id, item.quantity + 1)}
                           >
                             +
@@ -307,13 +305,13 @@ export default function CartPage() {
 
                         {/* Item Total */}
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-[#FAF7F2] drop-shadow-lg">
+                          <p className="text-2xl font-bold bg-gradient-to-r from-light-caramel to-muted-clay bg-clip-text text-transparent drop-shadow-lg">
                             ₱{((Number(item.menuItem.current_price) || 0) * item.quantity).toFixed(2)}
                           </p>
                           <Button
                             size="sm"
                             variant="light"
-                            className="text-xs text-[#662B35] hover:text-[#FAF7F2]"
+                            className="text-xs text-muted-clay hover:text-muted-clay/70"
                             onClick={() => removeItem(item.menuItem.menu_item_id)}
                           >
                             Remove
@@ -324,14 +322,14 @@ export default function CartPage() {
                   </div>
                 ))}
 
-                <Divider className="my-6 bg-[#EAD7B7]/20" />
+                <Divider className="my-6 bg-light-caramel/20" />
 
                 <Button
                   as={NextLink}
                   href="/"
                   size="lg"
                   variant="bordered"
-                  className="w-full border-2 border-[#EAD7B7]/60 text-[#FAF7F2] hover:bg-[#EAD7B7]/10 font-bold text-lg py-6"
+                  className="w-full border-2 border-light-caramel/60 text-muted-clay hover:bg-soft-sand/30 font-bold text-lg py-6 hover:border-light-caramel transition-all"
                 >
                   + Add More Items
                 </Button>
@@ -342,9 +340,9 @@ export default function CartPage() {
           {/* Checkout Section */}
           <div className="space-y-6">
             {/* Order Information */}
-            <Card className="glass-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <CardHeader className="p-6 bg-gradient-to-r from-[#7B4B28]/20 to-[#662B35]/20 border-b border-[#EAD7B7]/20">
-                <h2 className="text-2xl font-bold text-[#FAF7F2] flex items-center gap-2 drop-shadow-lg">
+            <Card className="shadow-caramel border-2 border-light-caramel/30 bg-cream-white/80 backdrop-blur-xl">
+              <CardHeader className="p-6 bg-gradient-to-r from-light-caramel/20 to-muted-clay/10 border-b border-light-caramel/20">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-light-caramel to-muted-clay bg-clip-text text-transparent flex items-center gap-2 drop-shadow-lg">
                   <span className="text-3xl">📋</span>
                   Order Details
                 </h2>
@@ -358,9 +356,9 @@ export default function CartPage() {
                   size="lg"
                   variant="bordered"
                   classNames={{
-                    input: "text-[#FAF7F2]",
-                    label: "text-[#EAD7B7] font-semibold",
-                    inputWrapper: "border-2 border-[#EAD7B7]/40 hover:border-[#EAD7B7] bg-[#3A1F0F]/20"
+                    input: "text-muted-clay",
+                    label: "text-warm-beige font-semibold",
+                    inputWrapper: "border-2 border-light-caramel/40 hover:border-light-caramel bg-cream-white/50"
                   }}
                 />
                 <Input
@@ -371,9 +369,9 @@ export default function CartPage() {
                   size="lg"
                   variant="bordered"
                   classNames={{
-                    input: "text-[#FAF7F2]",
-                    label: "text-[#EAD7B7] font-semibold",
-                    inputWrapper: "border-2 border-[#EAD7B7]/40 hover:border-[#EAD7B7] bg-[#3A1F0F]/20"
+                    input: "text-muted-clay",
+                    label: "text-warm-beige font-semibold",
+                    inputWrapper: "border-2 border-light-caramel/40 hover:border-light-caramel bg-cream-white/50"
                   }}
                 />
                 <Select
@@ -384,9 +382,9 @@ export default function CartPage() {
                   size="lg"
                   variant="bordered"
                   classNames={{
-                    label: "text-[#EAD7B7] font-semibold",
-                    value: "text-[#FAF7F2]",
-                    trigger: "border-2 border-[#EAD7B7]/40 hover:border-[#EAD7B7] bg-[#3A1F0F]/20"
+                    label: "text-warm-beige font-semibold",
+                    value: "text-muted-clay",
+                    trigger: "border-2 border-light-caramel/40 hover:border-light-caramel bg-cream-white/50"
                   }}
                 >
                   <SelectItem key="dine_in" value="dine_in">🍽️ Dine In</SelectItem>
@@ -401,9 +399,9 @@ export default function CartPage() {
                   size="lg"
                   variant="bordered"
                   classNames={{
-                    label: "text-[#EAD7B7] font-semibold",
-                    value: "text-[#FAF7F2]",
-                    trigger: "border-2 border-[#EAD7B7]/40 hover:border-[#EAD7B7] bg-[#3A1F0F]/20"
+                    label: "text-warm-beige font-semibold",
+                    value: "text-muted-clay",
+                    trigger: "border-2 border-light-caramel/40 hover:border-light-caramel bg-cream-white/50"
                   }}
                 >
                   <SelectItem key="cash" value="cash">💵 Cash</SelectItem>
@@ -419,7 +417,7 @@ export default function CartPage() {
                     {!showReferenceInput && (
                       <Button
                         size="lg"
-                        className="w-full bg-gradient-to-r from-[#7B4B28] to-[#662B35] text-[#FAF7F2] font-bold"
+                        className="w-full bg-gradient-to-r from-light-caramel to-muted-clay text-white font-bold shadow-caramel hover:shadow-glow transition-all"
                         onPress={handleShowQRCode}
                         isLoading={loadingQR}
                       >
@@ -430,8 +428,8 @@ export default function CartPage() {
                     {/* Reference Number Input - shows after payment */}
                     {showReferenceInput && (
                       <div className="space-y-3">
-                        <div className="glass-button p-4 rounded-lg border-2 border-[#7B4B28]/50">
-                          <p className="text-sm text-[#FAF7F2] font-semibold">
+                        <div className="bg-soft-sand/50 p-4 rounded-lg border-2 border-light-caramel/50">
+                          <p className="text-sm text-muted-clay font-semibold">
                             ✅ Payment Complete? Enter your reference number below:
                           </p>
                         </div>
@@ -444,16 +442,16 @@ export default function CartPage() {
                           variant="bordered"
                           required
                           classNames={{
-                            input: "text-[#FAF7F2]",
-                            label: "text-[#EAD7B7] font-semibold",
-                            inputWrapper: "border-2 border-[#EAD7B7]/40 hover:border-[#EAD7B7] bg-[#3A1F0F]/20"
+                            input: "text-muted-clay",
+                            label: "text-warm-beige font-semibold",
+                            inputWrapper: "border-2 border-light-caramel/40 hover:border-light-caramel bg-cream-white/50"
                           }}
                           description="Enter the reference number from your payment confirmation"
                         />
                         <Button
                           size="sm"
                           variant="flat"
-                          className="w-full bg-[#EAD7B7]/20 text-[#FAF7F2]"
+                          className="w-full bg-soft-sand/30 text-muted-clay border border-light-caramel/30"
                           onPress={() => setShowReferenceInput(false)}
                         >
                           View QR Code Again
@@ -471,18 +469,18 @@ export default function CartPage() {
                   size="lg"
                   variant="bordered"
                   classNames={{
-                    input: "text-[#FAF7F2]",
-                    label: "text-[#EAD7B7] font-semibold",
-                    inputWrapper: "border-2 border-[#EAD7B7]/40 hover:border-[#EAD7B7] bg-[#3A1F0F]/20"
+                    input: "text-muted-clay",
+                    label: "text-warm-beige font-semibold",
+                    inputWrapper: "border-2 border-light-caramel/40 hover:border-light-caramel bg-cream-white/50"
                   }}
                 />
               </CardBody>
             </Card>
 
             {/* Order Summary */}
-            <Card className="glass-card animate-slide-up sticky top-24" style={{ animationDelay: '0.3s' }}>
-              <CardHeader className="p-6 bg-gradient-to-r from-[#7B4B28] to-[#662B35]">
-                <h2 className="text-2xl font-bold text-[#FAF7F2] flex items-center gap-2 drop-shadow-lg">
+            <Card className="shadow-caramel border-2 border-light-caramel/30 bg-cream-white/80 backdrop-blur-xl sticky top-24">
+              <CardHeader className="p-6 bg-gradient-to-r from-light-caramel to-muted-clay">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
                   <span className="text-3xl">💰</span>
                   Order Summary
                 </h2>
@@ -490,29 +488,29 @@ export default function CartPage() {
               <CardBody className="p-6">
                 <div className="space-y-4">
                   <div className="flex justify-between text-2xl font-bold">
-                    <span className="text-[#FAF7F2]">Total ({getItemCount()} items)</span>
-                    <span className="bg-gradient-to-r from-[#EAD7B7] to-[#7B4B28] bg-clip-text text-transparent drop-shadow-lg">
+                    <span className="text-muted-clay">Total ({getItemCount()} items)</span>
+                    <span className="bg-gradient-to-r from-light-caramel to-muted-clay bg-clip-text text-transparent drop-shadow-lg">
                       ₱{getTotal().toFixed(2)}
                     </span>
                   </div>
                 </div>
 
                 {error && (
-                  <div className="mt-4 p-4 bg-[#662B35]/30 border-2 border-[#662B35] rounded-xl animate-scale-in">
-                    <p className="text-[#FAF7F2] font-semibold">⚠️ {error}</p>
+                  <div className="mt-4 p-4 bg-red-100 border-2 border-red-300 rounded-xl">
+                    <p className="text-red-700 font-semibold">⚠️ {error}</p>
                   </div>
                 )}
 
                 <Button
                   size="lg"
-                  className="w-full mt-6 bg-gradient-to-r from-[#7B4B28] to-[#662B35] text-[#FAF7F2] font-bold text-xl py-7 shadow-[0_0_30px_rgba(234,215,183,0.4)] hover:scale-105 transition-transform"
+                  className="w-full mt-6 bg-gradient-to-r from-light-caramel to-muted-clay text-white font-bold text-xl py-7 shadow-caramel hover:shadow-glow hover:scale-105 transition-all duration-300"
                   onClick={handleCheckout}
                   isLoading={isProcessing}
                 >
                   {isProcessing ? "Processing..." : `💳 Place Order - ₱${getTotal().toFixed(2)}`}
                 </Button>
 
-                <p className="text-xs text-[#EAD7B7] text-center mt-3">
+                <p className="text-xs text-warm-beige text-center mt-3 font-medium">
                   🔒 Secure checkout • By placing this order, you agree to our terms
                 </p>
               </CardBody>
@@ -528,7 +526,7 @@ export default function CartPage() {
         size="2xl"
         isDismissable={false}
         classNames={{
-          base: "glass-card",
+          base: "shadow-caramel border-2 border-light-caramel/30 bg-cream-white/95 backdrop-blur-xl",
           header: "border-b-0",
           body: "py-8",
           footer: "border-t-0"
@@ -538,52 +536,52 @@ export default function CartPage() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1 text-center pt-8">
-                <div className="text-8xl mb-4 animate-bounce-slow">🎉</div>
-                <h2 className="text-4xl font-bold bg-gradient-to-r from-[#EAD7B7] to-[#7B4B28] bg-clip-text text-transparent drop-shadow-lg">
+                <div className="text-8xl mb-4">🎉</div>
+                <h2 className="text-4xl font-bold bg-gradient-to-r from-light-caramel to-muted-clay bg-clip-text text-transparent drop-shadow-lg">
                   Order Successful!
                 </h2>
               </ModalHeader>
               <ModalBody className="text-center px-8">
                 {completedOrder && (
                   <>
-                    <p className="text-2xl text-[#FAF7F2] mb-6 font-semibold">
+                    <p className="text-2xl text-muted-clay mb-6 font-semibold">
                       Thank you for your order! 🙏
                     </p>
-                    <Card className="glass-button mb-6 animate-scale-in border-2 border-[#EAD7B7]/30">
+                    <Card className="bg-soft-sand/30 border-2 border-light-caramel/30 shadow-soft mb-6">
                       <CardBody className="p-8">
-                        <p className="text-[#EAD7B7] text-lg mb-3">
+                        <p className="text-warm-beige text-lg mb-3 font-medium">
                           Order Number
                         </p>
-                        <p className="text-2xl font-bold text-[#FAF7F2] mb-6 drop-shadow-lg">
+                        <p className="text-2xl font-bold text-muted-clay mb-6 drop-shadow-lg">
                           #{completedOrder.order_number}
                         </p>
 
-                        <div className="bg-gradient-to-r from-[#7B4B28] to-[#662B35] p-6 rounded-2xl mb-4 shadow-[0_0_30px_rgba(234,215,183,0.3)]">
-                          <p className="text-[#EAD7B7] text-sm mb-2">
+                        <div className="bg-gradient-to-r from-light-caramel to-muted-clay p-6 rounded-2xl mb-4 shadow-caramel">
+                          <p className="text-cream-white text-sm mb-2 font-medium">
                             Your Verification Code
                           </p>
-                          <p className="text-5xl font-black text-[#FAF7F2] tracking-wider selectable drop-shadow-lg">
+                          <p className="text-5xl font-black text-white tracking-wider selectable drop-shadow-lg">
                             {completedOrder.verification_code}
                           </p>
-                          <p className="text-[#EAD7B7] text-xs mt-3">
+                          <p className="text-cream-white text-xs mt-3">
                             📋 Please save this code
                           </p>
                         </div>
 
-                        <div className="flex items-center justify-between p-4 glass-button rounded-xl border border-[#EAD7B7]/30">
-                          <span className="text-[#FAF7F2] font-semibold">Total Amount</span>
-                          <span className="text-2xl font-bold bg-gradient-to-r from-[#EAD7B7] to-[#7B4B28] bg-clip-text text-transparent">
+                        <div className="flex items-center justify-between p-4 bg-cream-white/50 rounded-xl border border-light-caramel/30 shadow-soft">
+                          <span className="text-muted-clay font-semibold">Total Amount</span>
+                          <span className="text-2xl font-bold bg-gradient-to-r from-light-caramel to-muted-clay bg-clip-text text-transparent">
                             ₱{completedOrder.final_amount.toFixed(2)}
                           </span>
                         </div>
                       </CardBody>
                     </Card>
 
-                    <div className="glass-button border-2 border-[#7B4B28]/50 rounded-xl p-6 mb-4">
-                      <p className="text-[#FAF7F2] font-semibold mb-2">
+                    <div className="bg-soft-sand/30 border-2 border-light-caramel/50 rounded-xl p-6 mb-4">
+                      <p className="text-muted-clay font-semibold mb-2">
                         ✨ Your order is being prepared!
                       </p>
-                      <p className="text-[#EAD7B7] text-sm">
+                      <p className="text-warm-beige text-sm font-medium">
                         Present your verification code at the counter when ready
                       </p>
                     </div>
@@ -593,7 +591,7 @@ export default function CartPage() {
               <ModalFooter className="flex justify-center gap-4 pb-8">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-[#7B4B28] to-[#662B35] text-[#FAF7F2] font-bold px-10 shadow-[0_0_30px_rgba(234,215,183,0.4)]"
+                  className="bg-gradient-to-r from-light-caramel to-muted-clay text-white font-bold px-10 shadow-caramel hover:shadow-glow transition-all"
                   onClick={handleNewOrder}
                 >
                   🏠 Back to Menu
@@ -611,14 +609,14 @@ export default function CartPage() {
         size="2xl"
         backdrop="blur"
         classNames={{
-          backdrop: "bg-[#3A1F0F]/90",
-          base: "glass-card"
+          backdrop: "bg-warm-beige/90",
+          base: "shadow-caramel border-2 border-light-caramel/30 bg-cream-white/95 backdrop-blur-xl"
         }}
       >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
-            <h2 className="text-2xl font-bold capitalize text-[#FAF7F2]">{paymentMethod} Payment</h2>
-            <p className="text-sm text-[#EAD7B7] font-normal">
+            <h2 className="text-2xl font-bold capitalize bg-gradient-to-r from-light-caramel to-muted-clay bg-clip-text text-transparent">{paymentMethod} Payment</h2>
+            <p className="text-sm text-warm-beige font-normal font-medium">
               Scan this QR code with your {paymentMethod === 'gcash' ? 'GCash' : 'PayMaya'} app
             </p>
           </ModalHeader>
@@ -627,7 +625,7 @@ export default function CartPage() {
               <div className="space-y-6">
                 {/* QR Code Display */}
                 <div className="flex justify-center">
-                  <div className="relative w-full max-w-md aspect-square bg-[#FAF7F2] rounded-xl p-6 shadow-lg border-4 border-[#7B4B28]">
+                  <div className="relative w-full max-w-md aspect-square bg-cream-white rounded-xl p-6 shadow-caramel border-4 border-light-caramel">
                     <Image
                       src={qrCodeUrl}
                       alt={`${paymentMethod.toUpperCase()} QR Code`}
@@ -639,17 +637,17 @@ export default function CartPage() {
                 </div>
 
                 {/* Amount Display */}
-                <div className="glass-button p-6 rounded-xl border-2 border-[#7B4B28]/50 text-center">
-                  <p className="text-sm text-[#EAD7B7] mb-2">Amount to Pay:</p>
-                  <p className="text-4xl font-bold text-[#FAF7F2] drop-shadow-lg">
+                <div className="bg-soft-sand/30 border-2 border-light-caramel/50 p-6 rounded-xl text-center">
+                  <p className="text-sm text-warm-beige font-medium mb-2">Amount to Pay:</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-light-caramel to-muted-clay bg-clip-text text-transparent drop-shadow-lg">
                     ₱{getTotal().toFixed(2)}
                   </p>
                 </div>
 
                 {/* Instructions */}
-                <div className="glass-button p-4 rounded-lg border-2 border-[#EAD7B7]/30">
-                  <h3 className="font-semibold text-[#FAF7F2] mb-3">Payment Instructions:</h3>
-                  <ol className="text-sm text-[#EAD7B7] space-y-2 list-decimal list-inside">
+                <div className="bg-cream-white/50 border-2 border-light-caramel/30 p-4 rounded-lg">
+                  <h3 className="font-semibold text-muted-clay mb-3">Payment Instructions:</h3>
+                  <ol className="text-sm text-warm-beige space-y-2 list-decimal list-inside">
                     <li>Open your {paymentMethod === 'gcash' ? 'GCash' : 'PayMaya'} app</li>
                     <li>Tap "Scan QR" in your app</li>
                     <li>Scan the QR code shown above</li>
@@ -660,16 +658,16 @@ export default function CartPage() {
                   </ol>
                 </div>
 
-                <div className="glass-button p-3 rounded-lg border-2 border-[#EAD7B7]/30">
-                  <p className="text-sm text-[#EAD7B7] text-center">
+                <div className="bg-soft-sand/30 border-2 border-light-caramel/30 p-3 rounded-lg">
+                  <p className="text-sm text-muted-clay text-center">
                     ⚠️ <strong>Important:</strong> Make sure to complete the payment and get your reference number before clicking "I've Paid"
                   </p>
                 </div>
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-lg text-[#662B35]">QR Code not available</p>
-                <p className="text-sm text-[#EAD7B7] mt-2">
+                <p className="text-lg text-muted-clay font-semibold">QR Code not available</p>
+                <p className="text-sm text-warm-beige mt-2">
                   Please contact staff for assistance with {paymentMethod} payments
                 </p>
               </div>
@@ -678,14 +676,14 @@ export default function CartPage() {
           <ModalFooter>
             <Button
               variant="light"
-              className="text-[#EAD7B7]"
+              className="text-warm-beige hover:text-muted-clay"
               onPress={onQRClose}
             >
               Cancel
             </Button>
             <Button
               size="lg"
-              className="bg-gradient-to-r from-[#7B4B28] to-[#662B35] text-[#FAF7F2] font-bold"
+              className="bg-gradient-to-r from-light-caramel to-muted-clay text-white font-bold shadow-caramel hover:shadow-glow transition-all"
               onPress={handlePaymentComplete}
               isDisabled={!qrCodeUrl}
             >
@@ -694,9 +692,6 @@ export default function CartPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-
-      {/* Spacer */}
-      <div className="h-20"></div>
     </div>
   );
 }
