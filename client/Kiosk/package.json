@@ -29,8 +29,6 @@
     "npm": ">=9.0.0"
   },
   "dependencies": {
-    "@react-three/drei": "^9.114.3",
-    "@react-three/fiber": "^8.17.10",
     "@heroui/accordion": "2.2.23",
     "@heroui/alert": "2.2.26",
     "@heroui/autocomplete": "2.3.28",
@@ -73,11 +71,14 @@
     "@heroui/user": "2.2.21",
     "@react-aria/ssr": "3.9.10",
     "@react-aria/visually-hidden": "3.8.27",
+    "@react-three/drei": "^9.114.3",
+    "@react-three/fiber": "^8.17.10",
     "axios": "^1.13.2",
     "clsx": "2.1.1",
     "escpos": "^3.0.0-alpha.6",
     "framer-motion": "11.18.2",
     "intl-messageformat": "10.7.16",
+    "lucide-react": "^0.555.0",
     "next": "15.3.1",
     "next-themes": "0.4.6",
     "react": "18.3.1",
