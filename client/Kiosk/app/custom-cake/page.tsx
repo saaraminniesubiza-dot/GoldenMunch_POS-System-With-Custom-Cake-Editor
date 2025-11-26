@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
@@ -16,6 +16,7 @@ export default function CustomCakePage() {
   const [error, setError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [step, setStep] = useState<'welcome' | 'generating' | 'qr' | 'expired' | 'success'>('welcome');
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Generate QR Code
   const generateQR = useCallback(async () => {
@@ -30,9 +31,6 @@ export default function CustomCakePage() {
       setQrSession(session);
       setTimeRemaining(session.expiresIn);
       setStep('qr');
-
-      // Start polling for success status
-      pollForSuccess(session.sessionId);
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Failed to generate QR code');
       setStep('welcome');
@@ -41,14 +39,30 @@ export default function CustomCakePage() {
     }
   }, []);
 
-  // Poll for QR scan success
-  const pollForSuccess = useCallback(async (sessionId: string) => {
-    const pollInterval = setInterval(async () => {
+  // Poll for QR scan success using useEffect
+  useEffect(() => {
+    // Only poll when we have a session and are on the QR step
+    if (!qrSession?.sessionId || step !== 'qr') {
+      // Clear any existing polling interval
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      return;
+    }
+
+    // Start polling
+    pollIntervalRef.current = setInterval(async () => {
       try {
-        const status = await CustomCakeService.pollSessionStatus(sessionId);
+        const status = await CustomCakeService.pollSessionStatus(qrSession.sessionId);
 
         if (status.status === 'completed') {
-          clearInterval(pollInterval);
+          // Clear the polling interval
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+
           setStep('success');
 
           // Redirect to menu after 5 seconds
@@ -61,8 +75,14 @@ export default function CustomCakePage() {
       }
     }, 2000); // Poll every 2 seconds
 
-    return () => clearInterval(pollInterval);
-  }, [router]);
+    // Cleanup function
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [qrSession?.sessionId, step, router]);
 
   // Countdown timer
   useEffect(() => {
