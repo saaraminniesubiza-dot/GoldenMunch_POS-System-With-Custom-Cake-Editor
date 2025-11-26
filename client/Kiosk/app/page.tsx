@@ -5,7 +5,6 @@ import { Button } from '@heroui/button';
 import { Card, CardBody } from '@heroui/card';
 import { Chip } from '@heroui/chip';
 import { Spinner } from '@heroui/spinner';
-import { Input } from '@heroui/input';
 import { useCart } from '@/contexts/CartContext';
 import { MenuService } from '@/services/menu.service';
 import type { MenuItem, Category } from '@/types/api';
@@ -17,7 +16,6 @@ export default function HomePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { addItem, items: cartItems, getItemCount, getTotal } = useCart();
@@ -101,7 +99,7 @@ export default function HomePage() {
     };
   }, []);
 
-  // Filter items by category and search
+  // Filter items by category
   useEffect(() => {
     let filtered = menuItems;
 
@@ -111,15 +109,8 @@ export default function HomePage() {
       );
     }
 
-    if (searchQuery) {
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
     setFilteredItems(filtered);
-  }, [menuItems, selectedCategory, searchQuery]);
+  }, [menuItems, selectedCategory]);
 
   const handleAddToCart = (item: MenuItem) => {
     addItem({
@@ -157,7 +148,7 @@ export default function HomePage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-8">
-        <Card className="card-transparent max-w-xl">
+        <Card className="glass-card max-w-xl">
           <CardBody className="text-center p-12">
             <div className="text-9xl mb-6">⚠️</div>
             <h2 className="text-4xl font-bold text-chocolate-brown mb-4">
@@ -166,7 +157,7 @@ export default function HomePage() {
             <p className="text-xl text-chocolate-brown/70 mb-8">{error}</p>
             <Button
               size="lg"
-              className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-xl px-12 py-6 shadow-xl-golden"
+              className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-xl px-12 py-6 shadow-xl-golden touch-target"
               onClick={() => window.location.reload()}
             >
               🔄 Try Again
@@ -181,7 +172,7 @@ export default function HomePage() {
     <div className="min-h-screen pb-32">
       {/* Hero Header - Portrait Optimized */}
       <div className="relative">
-        <div className="card-glass border-b-4 border-golden-orange/30 p-8">
+        <div className="glass-header border-b-4 border-golden-orange/30 p-8">
           <div className="text-center space-y-4">
             {/* Logo / Branding */}
             <div className="text-8xl animate-float mx-auto">🍰</div>
@@ -191,20 +182,6 @@ export default function HomePage() {
             <p className="text-2xl text-chocolate-brown/80 font-semibold">
               Fresh • Delicious • Made with Love
             </p>
-
-            {/* Search Bar */}
-            <div className="pt-4 max-w-2xl mx-auto">
-              <Input
-                placeholder="🔍 Search for treats..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                size="lg"
-                classNames={{
-                  input: "text-2xl py-4",
-                  inputWrapper: "card-glass border-2 border-golden-orange/30 hover:border-golden-orange shadow-lg h-20"
-                }}
-              />
-            </div>
           </div>
         </div>
 
@@ -214,7 +191,7 @@ export default function HomePage() {
             as={NextLink}
             href="/cart"
             size="lg"
-            className="absolute top-8 right-8 bg-gradient-to-br from-golden-orange to-deep-amber text-white font-bold text-xl px-8 py-6 shadow-xl-golden animate-glow rounded-full"
+            className="absolute top-8 right-8 bg-gradient-to-br from-golden-orange to-deep-amber text-white font-bold text-xl px-8 py-6 shadow-xl-golden animate-glow rounded-full touch-target"
           >
             <span className="text-3xl mr-2">🛒</span>
             <span className="text-2xl">{getItemCount()}</span>
@@ -239,8 +216,8 @@ export default function HomePage() {
                 className={`${
                   selectedCategory === null
                     ? 'bg-gradient-to-br from-golden-orange to-deep-amber text-white shadow-xl-golden scale-110'
-                    : 'card-transparent border-2 border-golden-orange/40 text-chocolate-brown'
-                } font-bold text-2xl px-8 py-7 rounded-2xl min-w-[200px] snap-center transition-all`}
+                    : 'glass-button border-2 border-golden-orange/40 text-chocolate-brown'
+                } font-bold text-2xl px-8 py-7 rounded-2xl min-w-[200px] snap-center transition-all touch-target`}
                 onClick={() => setSelectedCategory(null)}
               >
                 ✨ All Items
@@ -252,8 +229,8 @@ export default function HomePage() {
                   className={`${
                     selectedCategory === category.category_id
                       ? 'bg-gradient-to-br from-golden-orange to-deep-amber text-white shadow-xl-golden scale-110'
-                      : 'card-transparent border-2 border-golden-orange/40 text-chocolate-brown'
-                  } font-bold text-2xl px-8 py-7 rounded-2xl min-w-[200px] snap-center transition-all`}
+                      : 'glass-button border-2 border-golden-orange/40 text-chocolate-brown'
+                  } font-bold text-2xl px-8 py-7 rounded-2xl min-w-[200px] snap-center transition-all touch-target`}
                   onClick={() => setSelectedCategory(category.category_id)}
                 >
                   {category.name}
@@ -265,27 +242,22 @@ export default function HomePage() {
 
         {/* Menu Items Grid - 2 Column for Portrait */}
         {filteredItems.length === 0 ? (
-          <Card className="card-transparent">
+          <Card className="glass-card">
             <CardBody className="text-center py-20">
               <div className="text-9xl mb-6 animate-float">🍽️</div>
               <h3 className="text-5xl font-bold text-chocolate-brown mb-4">
                 No items found
               </h3>
               <p className="text-2xl text-chocolate-brown/70 mb-8">
-                {searchQuery
-                  ? `No results for "${searchQuery}"`
-                  : "No items in this category"}
+                No items in this category
               </p>
-              {(searchQuery || selectedCategory !== null) && (
+              {selectedCategory !== null && (
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold px-12 py-6 text-2xl"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory(null);
-                  }}
+                  className="bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold px-12 py-6 text-2xl touch-target"
+                  onClick={() => setSelectedCategory(null)}
                 >
-                  Clear Filters
+                  Clear Filter
                 </Button>
               )}
             </CardBody>
@@ -307,7 +279,7 @@ export default function HomePage() {
                 return (
                   <Card
                     key={item.menu_item_id}
-                    className={`card-transparent hover:scale-105 transition-transform duration-300 ${!isAvailable && 'opacity-60'}`}
+                    className={`glass-card hover:scale-105 transition-transform duration-300 ${!isAvailable && 'opacity-60'}`}
                   >
                     <CardBody className="p-0">
                       {/* Image/Icon Section */}
@@ -368,7 +340,7 @@ export default function HomePage() {
                         {isAvailable ? (
                           <Button
                             size="lg"
-                            className="w-full bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-xl py-6 shadow-lg hover:shadow-xl-golden"
+                            className="w-full bg-gradient-to-r from-golden-orange to-deep-amber text-white font-bold text-xl py-6 shadow-lg hover:shadow-xl-golden touch-target touch-feedback"
                             onClick={() => handleAddToCart(item)}
                           >
                             {cartQty > 0 ? '🛒 Add More' : '+ Add to Cart'}
@@ -377,7 +349,7 @@ export default function HomePage() {
                           <Button
                             disabled
                             size="lg"
-                            className="w-full bg-gray-300 text-gray-600 font-semibold text-xl py-6"
+                            className="w-full bg-gray-300 text-gray-600 font-semibold text-xl py-6 touch-target"
                           >
                             Unavailable
                           </Button>

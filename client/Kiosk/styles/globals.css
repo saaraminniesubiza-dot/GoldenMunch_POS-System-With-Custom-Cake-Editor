@@ -577,13 +577,114 @@ img {
   }
 }
 
+/* Enhanced Glassmorphism Utilities for Kiosk Redesign */
+@layer utilities {
+  /* Glass Card - For product cards and content containers */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(249, 160, 63, 0.15);
+    border-radius: 16px;
+  }
+
+  /* Glass Header - For header sections */
+  .glass-header {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 16px rgba(249, 160, 63, 0.1);
+  }
+
+  /* Glass Footer - For footer sections */
+  .glass-footer {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 -4px 16px rgba(249, 160, 63, 0.1);
+  }
+
+  /* Glass Button - For button overlays */
+  .glass-button {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(249, 160, 63, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(249, 160, 63, 0.2);
+  }
+
+  /* Touch Optimized - Large touch targets for 24" touchscreen */
+  .touch-target {
+    min-height: 80px;
+    min-width: 80px;
+  }
+
+  /* Touch Feedback - Visual feedback for touch interactions */
+  .touch-feedback:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease-out;
+  }
+
+  /* Gentle Float Animation - For background elements */
+  @keyframes float-gentle {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-20px) rotate(5deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(-5deg);
+    }
+    75% {
+      transform: translateY(-15px) rotate(3deg);
+    }
+  }
+
+  .animate-float-gentle {
+    animation: float-gentle 20s ease-in-out infinite;
+  }
+
+  /* Scroll Shadow - Show shadow when content is scrollable */
+  .scroll-shadow {
+    background:
+      linear-gradient(white 30%, rgba(255, 255, 255, 0)),
+      linear-gradient(rgba(255, 255, 255, 0), white 70%) 0 100%,
+      radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0)),
+      radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0)) 0 100%;
+    background-repeat: no-repeat;
+    background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
+    background-attachment: local, local, scroll, scroll;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Print styles (for receipts) */
 @media print {
   body {
     background: white !important;
     color: black !important;
   }
-  
+
   .no-print {
     display: none !important;
   }
