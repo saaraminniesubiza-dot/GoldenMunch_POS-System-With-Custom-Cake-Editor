@@ -3,6 +3,23 @@
  */
 
 /**
+ * Get the API base URL with validation
+ */
+const getApiBaseUrl = (): string => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  // In production, API URL must be set
+  if (process.env.NODE_ENV === 'production' && !apiUrl) {
+    throw new Error(
+      'NEXT_PUBLIC_API_URL environment variable is required in production'
+    );
+  }
+
+  // Development fallback
+  return apiUrl || 'http://localhost:5000/api';
+};
+
+/**
  * Get the full image URL from a relative path
  * @param imageUrl - Relative image URL from database (e.g., "/uploads/products/image.jpg")
  * @returns Full URL pointing to backend server
@@ -15,8 +32,8 @@ export function getImageUrl(imageUrl: string | null | undefined): string | null 
     return imageUrl;
   }
 
-  // Get backend URL from environment or use default
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  // Get backend URL from environment
+  const apiUrl = getApiBaseUrl();
   // Remove '/api' suffix to get base URL
   const baseUrl = apiUrl.replace('/api', '');
 

@@ -1,13 +1,37 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import type { ApiResponse } from '@/types/api';
 
+// Validate API URL configuration
+const getApiBaseUrl = (): string => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  // In production, API URL must be set
+  if (process.env.NODE_ENV === 'production' && !apiUrl) {
+    throw new Error(
+      'NEXT_PUBLIC_API_URL environment variable is required in production. ' +
+      'Please set it in your Render environment variables.'
+    );
+  }
+
+  // Development fallback with warning
+  if (!apiUrl) {
+    console.warn(
+      '⚠️  NEXT_PUBLIC_API_URL not set, using localhost fallback. ' +
+      'Set NEXT_PUBLIC_API_URL in your .env file for production deployment.'
+    );
+    return 'http://localhost:5000/api';
+  }
+
+  return apiUrl;
+};
+
 class ApiClient {
   private client: AxiosInstance;
 
   constructor() {
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
-      timeout: Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 30000,
+      baseURL: getApiBaseUrl(),
+      timeout: Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 60000,
       headers: {
         'Content-Type': 'application/json',
       },
