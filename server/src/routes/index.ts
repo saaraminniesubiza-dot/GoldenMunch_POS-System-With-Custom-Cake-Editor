@@ -470,6 +470,7 @@ router.post(
 
 router.put('/admin/categories/:id', authenticateAdmin, asyncHandler(adminController.updateCategory));
 router.post('/admin/categories/assign', authenticateAdmin, asyncHandler(adminController.assignItemToCategory));
+router.post('/admin/categories/unassign', authenticateAdmin, asyncHandler(adminController.unassignItemFromCategory));
 
 // Inventory
 router.get('/admin/inventory/alerts', authenticateAdmin, asyncHandler(adminController.getInventoryAlerts));

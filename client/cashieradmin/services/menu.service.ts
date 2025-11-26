@@ -127,4 +127,11 @@ export class MenuService {
   }) {
     return apiClient.post('/admin/categories/assign', data);
   }
+
+  static async unassignItemFromCategory(data: {
+    menu_item_id: number;
+    category_id: number;
+  }) {
+    return apiClient.post('/admin/categories/unassign', data);
+  }
 }

@@ -312,6 +312,19 @@ export const assignItemToCategory = async (req: AuthRequest, res: Response) => {
   res.json(successResponse('Item assigned to category'));
 };
 
+// Unassign item from category
+export const unassignItemFromCategory = async (req: AuthRequest, res: Response) => {
+  const { category_id, menu_item_id } = req.body;
+
+  await query(
+    `DELETE FROM category_has_menu_item
+     WHERE category_id = ? AND menu_item_id = ?`,
+    [category_id, menu_item_id]
+  );
+
+  res.json(successResponse('Item unassigned from category'));
+};
+
 // ==== CUSTOMER FEEDBACK ====
 
 // Get feedback

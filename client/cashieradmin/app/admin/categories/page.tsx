@@ -41,6 +41,7 @@ export default function CategoriesPage() {
 
   const [selectedCategoryForAssign, setSelectedCategoryForAssign] = useState<Category | null>(null);
   const [selectedMenuItems, setSelectedMenuItems] = useState<Set<number>>(new Set());
+  const [originallyAssignedItems, setOriginallyAssignedItems] = useState<Set<number>>(new Set());
 
   const [formData, setFormData] = useState({
     name: '',
@@ -149,7 +150,9 @@ export default function CategoriesPage() {
       .filter(item => item.categories?.some(cat => cat.category_id === category.category_id))
       .map(item => item.menu_item_id);
 
-    setSelectedMenuItems(new Set(assignedItems));
+    const assignedSet = new Set(assignedItems);
+    setSelectedMenuItems(assignedSet);
+    setOriginallyAssignedItems(assignedSet);
     onAssignOpen();
   };
 
@@ -160,8 +163,26 @@ export default function CategoriesPage() {
       setSaving(true);
       setError(null);
 
-      // Assign selected items
-      for (const itemId of Array.from(selectedMenuItems)) {
+      // Find items to unassign (were in original but not in new selection)
+      const itemsToUnassign = Array.from(originallyAssignedItems).filter(
+        id => !selectedMenuItems.has(id)
+      );
+
+      // Find items to assign (are in new selection but not in original)
+      const itemsToAssign = Array.from(selectedMenuItems).filter(
+        id => !originallyAssignedItems.has(id)
+      );
+
+      // Unassign removed items
+      for (const itemId of itemsToUnassign) {
+        await MenuService.unassignItemFromCategory({
+          category_id: selectedCategoryForAssign.category_id,
+          menu_item_id: itemId,
+        });
+      }
+
+      // Assign new items
+      for (const itemId of itemsToAssign) {
         await MenuService.assignItemToCategory({
           category_id: selectedCategoryForAssign.category_id,
           menu_item_id: itemId,
@@ -172,8 +193,8 @@ export default function CategoriesPage() {
       onAssignClose();
       loadData();
     } catch (error: any) {
-      console.error('Failed to assign items:', error);
-      setError(error?.message || 'Failed to assign items');
+      console.error('Failed to update category assignments:', error);
+      setError(error?.message || 'Failed to update category assignments');
     } finally {
       setSaving(false);
     }
