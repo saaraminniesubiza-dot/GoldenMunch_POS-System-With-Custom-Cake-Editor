@@ -10,6 +10,7 @@ import { MenuService } from '@/services/menu.service';
 import type { MenuItem, Category } from '@/types/api';
 import NextLink from 'next/link';
 import Image from 'next/image';
+import { getImageUrl } from '@/utils/imageUtils';
 
 export default function HomePage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -284,10 +285,10 @@ export default function HomePage() {
                     <CardBody className="p-0">
                       {/* Image/Icon Section */}
                       <div className="relative h-48 bg-gradient-to-br from-golden-orange/20 to-deep-amber/20 flex items-center justify-center rounded-t-xl overflow-hidden">
-                        {item.image_url ? (
+                        {getImageUrl(item.image_url) ? (
                           <div className="w-full h-full relative">
                             <Image
-                              src={item.image_url}
+                              src={getImageUrl(item.image_url) || ''}
                               alt={item.name}
                               fill
                               className="object-cover"

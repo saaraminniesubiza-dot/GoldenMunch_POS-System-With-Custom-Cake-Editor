@@ -15,6 +15,7 @@ import { ProtectedRoute } from '@/components/protected-route';
 import type { MenuItem, CreateMenuItemRequest } from '@/types/api';
 import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { Checkbox } from '@heroui/checkbox';
+import { getImageUrl } from '@/utils/imageUtils';
 
 // Utility function to safely format price
 const formatPrice = (price: any): string => {
@@ -1100,7 +1101,7 @@ function MenuManagementContent() {
                   <p className="text-sm font-medium">Current Image</p>
                   <div className="relative w-32 h-32 border-2 border-default-200 rounded-lg overflow-hidden">
                     <img
-                      src={editingItem.image_url}
+                      src={getImageUrl(editingItem.image_url) || ''}
                       alt={editingItem.name}
                       className="w-full h-full object-cover"
                     />
