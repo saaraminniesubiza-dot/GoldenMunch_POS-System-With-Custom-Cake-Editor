@@ -18,7 +18,7 @@ interface Bubble {
   size: number;
 }
 
-interface GoldSparkle {
+interface Sparkle {
   left: number;
   top: number;
   delay: number;
@@ -30,77 +30,77 @@ export const AnimatedBackground: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
-  const [goldSparkles, setGoldSparkles] = useState<GoldSparkle[]>([]);
+  const [sparkles, setSparkles] = useState<Sparkle[]>([]);
 
   useEffect(() => {
     setMounted(true);
 
-    // Luxurious chocolate-themed emojis
-    const emojis = ['🍫', '☕', '🍰', '🧁', '🥐', '✨', '⭐', '💎', '🌟'];
+    // Light, fresh food emojis
+    const emojis = ['🥐', '🍰', '🧁', '☕', '🥖', '✨', '🌼', '🌸', '☀️'];
 
-    // Generate floating chocolate particles
-    const generatedParticles = [...Array(15)].map(() => ({
+    // Generate floating particles
+    const generatedParticles = [...Array(12)].map(() => ({
       left: Math.random() * 100,
       top: Math.random() * 100,
       delay: Math.random() * 10,
-      duration: 20 + Math.random() * 15,
-      size: 25 + Math.random() * 35,
+      duration: 25 + Math.random() * 20,
+      size: 30 + Math.random() * 40,
       emoji: emojis[Math.floor(Math.random() * emojis.length)],
     }));
 
-    // Generate champagne bubbles
-    const generatedBubbles = [...Array(20)].map(() => ({
+    // Generate cream bubbles
+    const generatedBubbles = [...Array(25)].map(() => ({
       left: Math.random() * 100,
-      delay: Math.random() * 12,
-      duration: 10 + Math.random() * 8,
-      size: 30 + Math.random() * 80,
+      delay: Math.random() * 15,
+      duration: 12 + Math.random() * 10,
+      size: 40 + Math.random() * 100,
     }));
 
-    // Generate gold sparkles
-    const generatedSparkles = [...Array(40)].map(() => ({
+    // Generate sparkles
+    const generatedSparkles = [...Array(50)].map(() => ({
       left: Math.random() * 100,
       top: Math.random() * 100,
-      delay: Math.random() * 4,
+      delay: Math.random() * 5,
       duration: 2 + Math.random() * 3,
-      size: 2 + Math.random() * 3,
+      size: 2 + Math.random() * 4,
     }));
 
     setParticles(generatedParticles);
     setBubbles(generatedBubbles);
-    setGoldSparkles(generatedSparkles);
+    setSparkles(generatedSparkles);
   }, []);
 
   // Prevent hydration mismatch
   if (!mounted) {
     return (
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#3A1F0F] via-[#7B4B28] to-[#662B35]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#FFF9F2] via-[#E8DCC8] to-[#D9B38C]" />
       </div>
     );
   }
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
-      {/* Rich Chocolate Gradient Base */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#3A1F0F] via-[#7B4B28] to-[#662B35]" />
+      {/* Light Cream Gradient Base - Emphasizing light colors */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#FFF9F2] via-[#E8DCC8] to-[#D9B38C]" />
 
-      {/* Layered Gradient Waves */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#662B35]/40 via-transparent to-[#3A1F0F]/40 animate-wave" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#EAD7B7]/10 via-transparent to-[#7B4B28]/20 animate-wave-reverse" />
+      {/* Layered Soft Waves */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#C9B8A5]/30 via-transparent to-[#FFF9F2]/40 animate-wave" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#D9B38C]/20 via-transparent to-[#E8DCC8]/30 animate-wave-reverse" />
 
-      {/* Large Animated Orbs - Champagne Gold & Burgundy */}
-      <div className="absolute -top-40 left-1/4 w-96 h-96 bg-gradient-to-br from-[#EAD7B7]/30 to-[#7B4B28]/20 rounded-full mix-blend-soft-light filter blur-3xl animate-pulse-slow" />
-      <div className="absolute top-1/3 -left-32 w-80 h-80 bg-gradient-to-br from-[#662B35]/25 to-[#EAD7B7]/15 rounded-full mix-blend-soft-light filter blur-3xl animate-blob" />
-      <div className="absolute top-1/3 -right-32 w-80 h-80 bg-gradient-to-br from-[#7B4B28]/30 to-[#EAD7B7]/20 rounded-full mix-blend-soft-light filter blur-3xl animate-blob animation-delay-2000" />
-      <div className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-gradient-to-br from-[#EAD7B7]/25 to-[#662B35]/15 rounded-full mix-blend-soft-light filter blur-3xl animate-blob animation-delay-4000" />
-      <div className="absolute -bottom-40 right-1/4 w-96 h-96 bg-gradient-to-br from-[#7B4B28]/30 to-[#3A1F0F]/20 rounded-full mix-blend-soft-light filter blur-3xl animate-pulse-slow animation-delay-3000" />
+      {/* Large Animated Orbs - Light & Airy */}
+      <div className="absolute -top-40 left-1/4 w-96 h-96 bg-gradient-to-br from-[#FFF9F2]/60 to-[#E8DCC8]/40 rounded-full mix-blend-soft-light filter blur-3xl animate-pulse-slow" />
+      <div className="absolute top-1/3 -left-32 w-80 h-80 bg-gradient-to-br from-[#D9B38C]/40 to-[#FFF9F2]/50 rounded-full mix-blend-soft-light filter blur-3xl animate-blob" />
+      <div className="absolute top-1/3 -right-32 w-80 h-80 bg-gradient-to-br from-[#E8DCC8]/50 to-[#C9B8A5]/30 rounded-full mix-blend-soft-light filter blur-3xl animate-blob animation-delay-2000" />
+      <div className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-gradient-to-br from-[#FFF9F2]/50 to-[#D9B38C]/35 rounded-full mix-blend-soft-light filter blur-3xl animate-blob animation-delay-4000" />
+      <div className="absolute -bottom-40 right-1/4 w-96 h-96 bg-gradient-to-br from-[#C9B8A5]/40 to-[#FFF9F2]/60 rounded-full mix-blend-soft-light filter blur-3xl animate-pulse-slow animation-delay-3000" />
 
-      {/* Champagne Bubbles Rising */}
+      {/* Cream Bubbles Rising */}
       <div className="absolute inset-0">
         {bubbles.map((bubble, i) => (
           <div
             key={`bubble-${i}`}
-            className="absolute bottom-0 rounded-full bg-[#EAD7B7]/15 backdrop-blur-sm animate-rise-bubble border border-[#EAD7B7]/20"
+            className="absolute bottom-0 rounded-full bg-[#FFF9F2]/40 backdrop-blur-sm animate-rise-bubble border border-[#D9B38C]/25"
             style={{
               left: `${bubble.left}%`,
               width: `${bubble.size}px`,
@@ -112,19 +112,19 @@ export const AnimatedBackground: React.FC = () => {
         ))}
       </div>
 
-      {/* Floating Chocolate Particles */}
+      {/* Floating Particles */}
       <div className="absolute inset-0">
         {particles.map((particle, i) => (
           <div
             key={`particle-${i}`}
-            className="absolute animate-float-gentle opacity-50 hover:opacity-100 transition-opacity duration-700 drop-shadow-lg"
+            className="absolute animate-float-gentle opacity-40 hover:opacity-90 transition-opacity duration-700 drop-shadow-lg"
             style={{
               left: `${particle.left}%`,
               top: `${particle.top}%`,
               fontSize: `${particle.size}px`,
               animationDelay: `${particle.delay}s`,
               animationDuration: `${particle.duration}s`,
-              filter: 'drop-shadow(0 0 8px rgba(234, 215, 183, 0.3))',
+              filter: 'drop-shadow(0 0 6px rgba(217, 179, 140, 0.3))',
             }}
           >
             {particle.emoji}
@@ -132,12 +132,12 @@ export const AnimatedBackground: React.FC = () => {
         ))}
       </div>
 
-      {/* Gold Sparkle Effect */}
+      {/* Caramel Sparkle Effect */}
       <div className="absolute inset-0">
-        {goldSparkles.map((sparkle, i) => (
+        {sparkles.map((sparkle, i) => (
           <div
             key={`sparkle-${i}`}
-            className="absolute rounded-full bg-[#EAD7B7] animate-twinkle shadow-[0_0_10px_rgba(234,215,183,0.6)]"
+            className="absolute rounded-full bg-[#D9B38C] animate-twinkle shadow-[0_0_8px_rgba(217,179,140,0.5)]"
             style={{
               left: `${sparkle.left}%`,
               top: `${sparkle.top}%`,
@@ -150,17 +150,17 @@ export const AnimatedBackground: React.FC = () => {
         ))}
       </div>
 
-      {/* Elegant Shimmer Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#FAF7F2]/5 via-transparent to-transparent animate-shimmer-down" />
+      {/* Light Shimmer Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#FFF9F2]/30 via-transparent to-transparent animate-shimmer-down" />
 
-      {/* Subtle Vignette */}
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-[#3A1F0F]/40" />
+      {/* Soft Vignette */}
+      <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-[#C9B8A5]/20" />
 
-      {/* Bottom Glow */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#662B35]/20 to-transparent" />
+      {/* Bottom Soft Glow */}
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#E8DCC8]/30 to-transparent" />
 
-      {/* Top Glow */}
-      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#3A1F0F]/30 to-transparent" />
+      {/* Top Light Glow */}
+      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#FFF9F2]/40 to-transparent" />
     </div>
   );
 };
