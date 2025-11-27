@@ -299,6 +299,25 @@ export const updateCategory = async (req: AuthRequest, res: Response) => {
   res.json(successResponse('Category updated'));
 };
 
+// Delete category
+export const deleteCategory = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+
+  // First, unassign all items from this category
+  await query(
+    `DELETE FROM category_has_menu_item WHERE category_id = ?`,
+    [id]
+  );
+
+  // Then delete the category
+  await query(
+    `DELETE FROM category WHERE category_id = ?`,
+    [id]
+  );
+
+  res.json(successResponse('Category deleted successfully'));
+};
+
 // Assign item to category
 export const assignItemToCategory = async (req: AuthRequest, res: Response) => {
   const { category_id, menu_item_id, display_order } = req.body;

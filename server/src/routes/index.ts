@@ -469,6 +469,7 @@ router.post(
 );
 
 router.put('/admin/categories/:id', authenticateAdmin, asyncHandler(adminController.updateCategory));
+router.delete('/admin/categories/:id', authenticateAdmin, asyncHandler(adminController.deleteCategory));
 router.post('/admin/categories/assign', authenticateAdmin, asyncHandler(adminController.assignItemToCategory));
 router.post('/admin/categories/unassign', authenticateAdmin, asyncHandler(adminController.unassignItemFromCategory));
 
