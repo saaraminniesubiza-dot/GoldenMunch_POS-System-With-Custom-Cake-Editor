@@ -30,10 +30,20 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-# Copy built application
+# Copy built application and necessary files
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/.env.production ./.env.production
+COPY --from=builder /app/app ./app
+COPY --from=builder /app/components ./components
+COPY --from=builder /app/config ./config
+COPY --from=builder /app/contexts ./contexts
+COPY --from=builder /app/lib ./lib
+COPY --from=builder /app/services ./services
+COPY --from=builder /app/types ./types
+COPY --from=builder /app/utils ./utils
+COPY --from=builder /app/styles ./styles
 
 # Change ownership
 RUN chown -R nodejs:nodejs /app
@@ -52,4 +62,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 ENTRYPOINT ["dumb-init", "--"]
 
 # Start the application on PORT from env or default to 3000
-CMD ["sh", "-c", "next start -p ${PORT:-3000}"]
+CMD ["sh", "-c", "npx next start -p ${PORT:-3000}"]
