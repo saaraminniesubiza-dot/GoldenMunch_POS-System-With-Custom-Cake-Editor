@@ -544,7 +544,7 @@ export interface UpdateMenuItemRequest extends Partial<CreateMenuItemRequest> {
 }
 
 export interface CreateCategoryRequest {
-  category_name: string;
+  name: string;
   description?: string;
   parent_category_id?: number;
   display_order?: number;

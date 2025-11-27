@@ -118,7 +118,7 @@ export default function CategoriesPage() {
 
       // Map form data to API format
       const apiData = {
-        category_name: formData.name,
+        name: formData.name,
         description: formData.description,
         display_order: formData.display_order,
         is_active: formData.is_active,
