@@ -14,28 +14,32 @@ const config = {
         mono: ["var(--font-mono)"],
       },
       colors: {
-        // Light Caramel & Cream Color Scheme
-        'light-caramel': '#D9B38C',
-        'cream-white': '#FFF9F2',
-        'soft-sand': '#E8DCC8',
-        'warm-beige': '#C9B8A5',
-        'muted-clay': '#C67B57',
-        // Legacy colors for compatibility
-        'golden-orange': '#D9B38C',
-        'deep-amber': '#C9B8A5',
-        'chocolate-brown': '#C67B57',
+        // Sunny Yellow Color Scheme
+        'sunny-yellow': '#FBCD2F',      // Primary - Warm and bright
+        'pure-white': '#FFFFFF',        // Primary - Crisp contrast
+        'charcoal-gray': '#2B2B2B',     // Text - Deep neutral
+        'soft-warm-gray': '#F3F3F3',    // Background Alt - Soft spacing
+        'deep-orange-yellow': '#F5A623', // Accent - Secondary contrast
+        // Legacy colors for backward compatibility
+        'light-caramel': '#FBCD2F',     // Maps to sunny-yellow
+        'cream-white': '#FFFFFF',       // Maps to pure-white
+        'soft-sand': '#F3F3F3',         // Maps to soft-warm-gray
+        'warm-beige': '#F5A623',        // Maps to deep-orange-yellow
+        'muted-clay': '#F5A623',        // Maps to deep-orange-yellow
       },
       backgroundImage: {
-        'mesh-gradient': 'linear-gradient(135deg, rgba(217, 179, 140, 0.15) 0%, rgba(232, 220, 200, 0.15) 50%, rgba(201, 184, 165, 0.15) 100%)',
-        'caramel-gradient': 'linear-gradient(135deg, #FFF9F2 0%, #E8DCC8 50%, #D9B38C 100%)',
-        'cream-gradient': 'linear-gradient(to bottom, #FFF9F2, #F5EFE6)',
-        'warm-gradient': 'radial-gradient(circle at top right, rgba(217, 179, 140, 0.3), transparent 70%)',
+        'mesh-gradient': 'linear-gradient(135deg, rgba(251, 205, 47, 0.15) 0%, rgba(245, 166, 35, 0.15) 50%, rgba(243, 243, 243, 0.15) 100%)',
+        'caramel-gradient': 'linear-gradient(135deg, #FFFFFF 0%, #F3F3F3 50%, #FBCD2F 100%)',
+        'cream-gradient': 'linear-gradient(to bottom, #FFFFFF, #F3F3F3)',
+        'warm-gradient': 'radial-gradient(circle at top right, rgba(251, 205, 47, 0.3), transparent 70%)',
+        'yellow-glow': 'radial-gradient(circle at center, rgba(251, 205, 47, 0.4), transparent 60%)',
       },
       boxShadow: {
-        'xl-golden': '0 20px 25px -5px rgba(217, 179, 140, 0.3), 0 10px 10px -5px rgba(198, 123, 87, 0.2)',
-        'caramel': '0 4px 20px rgba(217, 179, 140, 0.25)',
-        'cream': '0 2px 15px rgba(232, 220, 200, 0.3)',
-        'soft': '0 8px 30px rgba(201, 184, 165, 0.2)',
+        'xl-golden': '0 20px 25px -5px rgba(251, 205, 47, 0.3), 0 10px 10px -5px rgba(245, 166, 35, 0.2)',
+        'caramel': '0 4px 20px rgba(251, 205, 47, 0.25)',
+        'cream': '0 2px 15px rgba(243, 243, 243, 0.3)',
+        'soft': '0 8px 30px rgba(245, 166, 35, 0.2)',
+        'yellow': '0 4px 20px rgba(251, 205, 47, 0.4)',
       },
       animation: {
         'float': 'float 3s ease-in-out infinite',
@@ -74,12 +78,12 @@ const config = {
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         glow: {
-          '0%': { boxShadow: '0 0 5px rgba(217, 179, 140, 0.5)' },
-          '100%': { boxShadow: '0 0 20px rgba(217, 179, 140, 0.8), 0 0 30px rgba(198, 123, 87, 0.6)' },
+          '0%': { boxShadow: '0 0 5px rgba(251, 205, 47, 0.5)' },
+          '100%': { boxShadow: '0 0 20px rgba(251, 205, 47, 0.8), 0 0 30px rgba(245, 166, 35, 0.6)' },
         },
         glowSoft: {
-          '0%': { boxShadow: '0 0 10px rgba(217, 179, 140, 0.3)' },
-          '100%': { boxShadow: '0 0 25px rgba(217, 179, 140, 0.5), 0 0 40px rgba(232, 220, 200, 0.4)' },
+          '0%': { boxShadow: '0 0 10px rgba(251, 205, 47, 0.3)' },
+          '100%': { boxShadow: '0 0 25px rgba(251, 205, 47, 0.5), 0 0 40px rgba(245, 166, 35, 0.4)' },
         },
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
@@ -105,29 +109,29 @@ const config = {
       light: {
         colors: {
           primary: {
-            DEFAULT: "#D9B38C",
-            foreground: "#000000",
+            DEFAULT: "#FBCD2F",  // Sunny Yellow
+            foreground: "#2B2B2B",  // Charcoal Gray
           },
           secondary: {
-            DEFAULT: "#C67B57",
+            DEFAULT: "#F5A623",  // Deep Orange Yellow
             foreground: "#FFFFFF",
           },
-          background: "#FFF9F2",
-          foreground: "#2D2D2D",
+          background: "#FFFFFF",  // Pure White
+          foreground: "#2B2B2B",  // Charcoal Gray
         },
       },
       dark: {
         colors: {
           primary: {
-            DEFAULT: "#D9B38C",
-            foreground: "#000000",
+            DEFAULT: "#FBCD2F",  // Sunny Yellow
+            foreground: "#2B2B2B",  // Charcoal Gray
           },
           secondary: {
-            DEFAULT: "#C67B57",
+            DEFAULT: "#F5A623",  // Deep Orange Yellow
             foreground: "#FFFFFF",
           },
-          background: "#E8DCC8",
-          foreground: "#1A1A1A",
+          background: "#F3F3F3",  // Soft Warm Gray
+          foreground: "#2B2B2B",  // Charcoal Gray
         },
       },
     },

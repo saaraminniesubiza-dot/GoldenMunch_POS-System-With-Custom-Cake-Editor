@@ -10,12 +10,18 @@ const config = {
   theme: {
     extend: {
       colors: {
-        // Golden Munch Brand Colors
-        'golden-orange': '#F9A03F',
-        'deep-amber': '#D97706',
-        'cream-white': '#FFF8F0',
-        'chocolate-brown': '#4B2E2E',
-        'caramel-beige': '#E6C89C',
+        // Sunny Yellow Color Scheme
+        'sunny-yellow': '#FBCD2F',      // Primary - Warm and bright
+        'pure-white': '#FFFFFF',        // Primary - Crisp contrast
+        'charcoal-gray': '#2B2B2B',     // Text - Deep neutral
+        'soft-warm-gray': '#F3F3F3',    // Background Alt - Soft spacing
+        'deep-orange-yellow': '#F5A623', // Accent - Secondary contrast
+        // Legacy colors for backward compatibility
+        'golden-orange': '#FBCD2F',
+        'deep-amber': '#F5A623',
+        'cream-white': '#FFFFFF',
+        'chocolate-brown': '#2B2B2B',
+        'caramel-beige': '#F3F3F3',
         'mint-green': '#A8D5BA',
       },
       fontFamily: {
@@ -40,35 +46,35 @@ const config = {
     themes: {
       light: {
         colors: {
-          background: '#FFF8F0', // cream-white
-          foreground: '#4B2E2E', // chocolate-brown
+          background: '#FFFFFF',     // pure-white
+          foreground: '#2B2B2B',     // charcoal-gray
           primary: {
-            50: '#FEF7ED',
-            100: '#FDEDD3',
-            200: '#FBD7A5',
-            300: '#F9C06D',
-            400: '#F9A03F', // golden-orange
-            500: '#F59E0B',
-            600: '#D97706', // deep-amber
-            700: '#B45309',
-            800: '#92400E',
-            900: '#78350F',
-            DEFAULT: '#F9A03F',
+            50: '#FFFDF0',
+            100: '#FFF9E0',
+            200: '#FFF3C1',
+            300: '#FFED9F',
+            400: '#FBCD2F',          // sunny-yellow
+            500: '#F9C41E',
+            600: '#F5A623',          // deep-orange-yellow
+            700: '#E89113',
+            800: '#C77A0D',
+            900: '#A66408',
+            DEFAULT: '#FBCD2F',      // sunny-yellow
           },
           secondary: {
-            DEFAULT: '#E6C89C', // caramel-beige
+            DEFAULT: '#F5A623',      // deep-orange-yellow
           },
           success: {
-            DEFAULT: '#A8D5BA', // mint-green
+            DEFAULT: '#A8D5BA',      // mint-green (kept)
           }
         }
       },
       dark: {
         colors: {
-          background: '#4B2E2E', // chocolate-brown
-          foreground: '#FFF8F0', // cream-white
+          background: '#F3F3F3',     // soft-warm-gray
+          foreground: '#2B2B2B',     // charcoal-gray
           primary: {
-            DEFAULT: '#F9A03F', // golden-orange
+            DEFAULT: '#FBCD2F',      // sunny-yellow
           }
         }
       }
