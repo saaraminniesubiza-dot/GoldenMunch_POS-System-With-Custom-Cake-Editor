@@ -188,7 +188,7 @@ export default function CashierOrdersPage() {
           <div className="flex gap-4">
             <Input
               placeholder="Search by order number or verification code..."
-              value={searchTerm}
+             
               onChange={(e) => setSearchTerm(e.target.value)}
               startContent={<MagnifyingGlassIcon className="h-5 w-5 text-default-400" />}
               className="max-w-md"
@@ -199,12 +199,12 @@ export default function CashierOrdersPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="max-w-xs"
             >
-              <SelectItem key="" value="">All Status</SelectItem>
-              <SelectItem key="pending" value="pending">Pending</SelectItem>
-              <SelectItem key="confirmed" value="confirmed">Confirmed</SelectItem>
-              <SelectItem key="preparing" value="preparing">Preparing</SelectItem>
-              <SelectItem key="ready" value="ready">Ready</SelectItem>
-              <SelectItem key="completed" value="completed">Completed</SelectItem>
+              <SelectItem key="">All Status</SelectItem>
+              <SelectItem key="pending">Pending</SelectItem>
+              <SelectItem key="confirmed">Confirmed</SelectItem>
+              <SelectItem key="preparing">Preparing</SelectItem>
+              <SelectItem key="ready">Ready</SelectItem>
+              <SelectItem key="completed">Completed</SelectItem>
             </Select>
           </div>
         </CardBody>
@@ -542,7 +542,7 @@ export default function CashierOrdersPage() {
                   <Input
                     label="Reference Number"
                     placeholder="Enter payment reference number"
-                    value={referenceNumber}
+                   
                     onChange={(e) => setReferenceNumber(e.target.value)}
                     isRequired
                     size="lg"

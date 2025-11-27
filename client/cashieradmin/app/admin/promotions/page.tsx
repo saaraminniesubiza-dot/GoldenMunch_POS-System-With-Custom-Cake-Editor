@@ -333,7 +333,7 @@ export default function PromotionsPage() {
       {/* Search */}
       <Input
         placeholder="Search promotions by name or description..."
-        value={searchTerm}
+       
         onValueChange={setSearchTerm}
         startContent={<MagnifyingGlassIcon className="h-5 w-5 text-default-400" />}
         className="max-w-md"
@@ -440,7 +440,7 @@ export default function PromotionsPage() {
               <Input
                 label="Promotion Name"
                 placeholder="e.g., Summer Sale"
-                value={formState.promotion_name}
+               
                 onValueChange={(v) => setFormState({ ...formState, promotion_name: v })}
                 isRequired
               />
@@ -448,7 +448,7 @@ export default function PromotionsPage() {
               <Input
                 label="Description"
                 placeholder="e.g., 20% off all items"
-                value={formState.description || ''}
+               
                 onValueChange={(v) => setFormState({ ...formState, description: v })}
               />
 
@@ -460,19 +460,19 @@ export default function PromotionsPage() {
                 }}
                 isRequired
               >
-                <SelectItem key={PromotionType.PERCENTAGE} value={PromotionType.PERCENTAGE}>
+                <SelectItem key={PromotionType.PERCENTAGE}>
                   Percentage
                 </SelectItem>
-                <SelectItem key={PromotionType.FIXED_AMOUNT} value={PromotionType.FIXED_AMOUNT}>
+                <SelectItem key={PromotionType.FIXED_AMOUNT}>
                   Fixed Amount
                 </SelectItem>
-                <SelectItem key={PromotionType.BUY_X_GET_Y} value={PromotionType.BUY_X_GET_Y}>
+                <SelectItem key={PromotionType.BUY_X_GET_Y}>
                   Buy X Get Y
                 </SelectItem>
-                <SelectItem key={PromotionType.BUNDLE} value={PromotionType.BUNDLE}>
+                <SelectItem key={PromotionType.BUNDLE}>
                   Bundle
                 </SelectItem>
-                <SelectItem key={PromotionType.SEASONAL} value={PromotionType.SEASONAL}>
+                <SelectItem key={PromotionType.SEASONAL}>
                   Seasonal
                 </SelectItem>
               </Select>
@@ -481,7 +481,7 @@ export default function PromotionsPage() {
                 label="Discount Value"
                 type="number"
                 placeholder={formState.promotion_type === PromotionType.PERCENTAGE ? "20" : "100"}
-                value={formState.discount_value.toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, discount_value: parseFloat(v) || 0 })}
                 isRequired
               />
@@ -490,7 +490,7 @@ export default function PromotionsPage() {
                 label="Minimum Purchase Amount (optional)"
                 type="number"
                 placeholder="0"
-                value={(formState.min_purchase_amount || '').toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, min_purchase_amount: v ? parseFloat(v) : undefined })}
               />
 
@@ -498,7 +498,7 @@ export default function PromotionsPage() {
                 label="Minimum Quantity (optional)"
                 type="number"
                 placeholder="1"
-                value={(formState.min_quantity || '').toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, min_quantity: v ? parseInt(v) : undefined })}
               />
 
@@ -506,14 +506,14 @@ export default function PromotionsPage() {
                 label="Maximum Quantity (optional)"
                 type="number"
                 placeholder="No limit"
-                value={(formState.max_quantity || '').toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, max_quantity: v ? parseInt(v) : undefined })}
               />
 
               <Input
                 label="Start Date"
                 type="date"
-                value={formState.start_date}
+               
                 onValueChange={(v) => setFormState({ ...formState, start_date: v })}
                 isRequired
               />
@@ -521,21 +521,21 @@ export default function PromotionsPage() {
               <Input
                 label="End Date (optional)"
                 type="date"
-                value={formState.end_date || ''}
+               
                 onValueChange={(v) => setFormState({ ...formState, end_date: v || undefined })}
               />
 
               <Input
                 label="Start Time (optional)"
                 type="time"
-                value={formState.start_time || ''}
+               
                 onValueChange={(v) => setFormState({ ...formState, start_time: v || undefined })}
               />
 
               <Input
                 label="End Time (optional)"
                 type="time"
-                value={formState.end_time || ''}
+               
                 onValueChange={(v) => setFormState({ ...formState, end_time: v || undefined })}
               />
 
@@ -543,7 +543,7 @@ export default function PromotionsPage() {
                 label="Max Uses Per Customer (optional)"
                 type="number"
                 placeholder="Unlimited"
-                value={(formState.max_uses_per_customer || '').toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, max_uses_per_customer: v ? parseInt(v) : undefined })}
               />
 
@@ -551,7 +551,7 @@ export default function PromotionsPage() {
                 label="Total Usage Limit (optional)"
                 type="number"
                 placeholder="Unlimited"
-                value={(formState.total_usage_limit || '').toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, total_usage_limit: v ? parseInt(v) : undefined })}
               />
 
@@ -612,7 +612,7 @@ export default function PromotionsPage() {
               <Input
                 label="Promotion Name"
                 placeholder="e.g., Summer Sale"
-                value={formState.promotion_name}
+               
                 onValueChange={(v) => setFormState({ ...formState, promotion_name: v })}
                 isRequired
               />
@@ -620,7 +620,7 @@ export default function PromotionsPage() {
               <Input
                 label="Description"
                 placeholder="e.g., 20% off all items"
-                value={formState.description || ''}
+               
                 onValueChange={(v) => setFormState({ ...formState, description: v })}
               />
 
@@ -632,19 +632,19 @@ export default function PromotionsPage() {
                 }}
                 isRequired
               >
-                <SelectItem key={PromotionType.PERCENTAGE} value={PromotionType.PERCENTAGE}>
+                <SelectItem key={PromotionType.PERCENTAGE}>
                   Percentage
                 </SelectItem>
-                <SelectItem key={PromotionType.FIXED_AMOUNT} value={PromotionType.FIXED_AMOUNT}>
+                <SelectItem key={PromotionType.FIXED_AMOUNT}>
                   Fixed Amount
                 </SelectItem>
-                <SelectItem key={PromotionType.BUY_X_GET_Y} value={PromotionType.BUY_X_GET_Y}>
+                <SelectItem key={PromotionType.BUY_X_GET_Y}>
                   Buy X Get Y
                 </SelectItem>
-                <SelectItem key={PromotionType.BUNDLE} value={PromotionType.BUNDLE}>
+                <SelectItem key={PromotionType.BUNDLE}>
                   Bundle
                 </SelectItem>
-                <SelectItem key={PromotionType.SEASONAL} value={PromotionType.SEASONAL}>
+                <SelectItem key={PromotionType.SEASONAL}>
                   Seasonal
                 </SelectItem>
               </Select>
@@ -653,7 +653,7 @@ export default function PromotionsPage() {
                 label="Discount Value"
                 type="number"
                 placeholder={formState.promotion_type === PromotionType.PERCENTAGE ? "20" : "100"}
-                value={formState.discount_value.toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, discount_value: parseFloat(v) || 0 })}
                 isRequired
               />
@@ -662,7 +662,7 @@ export default function PromotionsPage() {
                 label="Minimum Purchase Amount (optional)"
                 type="number"
                 placeholder="0"
-                value={(formState.min_purchase_amount || '').toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, min_purchase_amount: v ? parseFloat(v) : undefined })}
               />
 
@@ -670,7 +670,7 @@ export default function PromotionsPage() {
                 label="Minimum Quantity (optional)"
                 type="number"
                 placeholder="1"
-                value={(formState.min_quantity || '').toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, min_quantity: v ? parseInt(v) : undefined })}
               />
 
@@ -678,14 +678,14 @@ export default function PromotionsPage() {
                 label="Maximum Quantity (optional)"
                 type="number"
                 placeholder="No limit"
-                value={(formState.max_quantity || '').toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, max_quantity: v ? parseInt(v) : undefined })}
               />
 
               <Input
                 label="Start Date"
                 type="date"
-                value={formState.start_date}
+               
                 onValueChange={(v) => setFormState({ ...formState, start_date: v })}
                 isRequired
               />
@@ -693,21 +693,21 @@ export default function PromotionsPage() {
               <Input
                 label="End Date (optional)"
                 type="date"
-                value={formState.end_date || ''}
+               
                 onValueChange={(v) => setFormState({ ...formState, end_date: v || undefined })}
               />
 
               <Input
                 label="Start Time (optional)"
                 type="time"
-                value={formState.start_time || ''}
+               
                 onValueChange={(v) => setFormState({ ...formState, start_time: v || undefined })}
               />
 
               <Input
                 label="End Time (optional)"
                 type="time"
-                value={formState.end_time || ''}
+               
                 onValueChange={(v) => setFormState({ ...formState, end_time: v || undefined })}
               />
 
@@ -715,7 +715,7 @@ export default function PromotionsPage() {
                 label="Max Uses Per Customer (optional)"
                 type="number"
                 placeholder="Unlimited"
-                value={(formState.max_uses_per_customer || '').toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, max_uses_per_customer: v ? parseInt(v) : undefined })}
               />
 
@@ -723,7 +723,7 @@ export default function PromotionsPage() {
                 label="Total Usage Limit (optional)"
                 type="number"
                 placeholder="Unlimited"
-                value={(formState.total_usage_limit || '').toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, total_usage_limit: v ? parseInt(v) : undefined })}
               />
 

@@ -244,7 +244,7 @@ export default function TaxPage() {
       {/* Search */}
       <Input
         placeholder="Search tax rules by name..."
-        value={searchTerm}
+       
         onValueChange={setSearchTerm}
         startContent={<MagnifyingGlassIcon className="h-5 w-5 text-default-400" />}
         className="max-w-md"
@@ -352,7 +352,7 @@ export default function TaxPage() {
               <Input
                 label="Tax Name"
                 placeholder="e.g., VAT, Sales Tax"
-                value={formState.tax_name}
+               
                 onValueChange={(v) => setFormState({ ...formState, tax_name: v })}
                 isRequired
               />
@@ -365,10 +365,10 @@ export default function TaxPage() {
                 }}
                 isRequired
               >
-                <SelectItem key={TaxType.PERCENTAGE} value={TaxType.PERCENTAGE}>
+                <SelectItem key={TaxType.PERCENTAGE}>
                   Percentage
                 </SelectItem>
-                <SelectItem key={TaxType.FIXED} value={TaxType.FIXED}>
+                <SelectItem key={TaxType.FIXED}>
                   Fixed Amount
                 </SelectItem>
               </Select>
@@ -377,7 +377,7 @@ export default function TaxPage() {
                 label={formState.tax_type === TaxType.PERCENTAGE ? 'Tax Rate (%)' : 'Tax Amount (₱)'}
                 type="number"
                 placeholder={formState.tax_type === TaxType.PERCENTAGE ? '12' : '50'}
-                value={formState.tax_value.toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, tax_value: parseFloat(v) || 0 })}
                 isRequired
               />
@@ -414,7 +414,7 @@ export default function TaxPage() {
               <Input
                 label="Effective Date"
                 type="date"
-                value={formState.effective_date}
+               
                 onValueChange={(v) => setFormState({ ...formState, effective_date: v })}
                 isRequired
               />
@@ -452,7 +452,7 @@ export default function TaxPage() {
               <Input
                 label="Tax Name"
                 placeholder="e.g., VAT, Sales Tax"
-                value={formState.tax_name}
+               
                 onValueChange={(v) => setFormState({ ...formState, tax_name: v })}
                 isRequired
               />
@@ -465,10 +465,10 @@ export default function TaxPage() {
                 }}
                 isRequired
               >
-                <SelectItem key={TaxType.PERCENTAGE} value={TaxType.PERCENTAGE}>
+                <SelectItem key={TaxType.PERCENTAGE}>
                   Percentage
                 </SelectItem>
-                <SelectItem key={TaxType.FIXED} value={TaxType.FIXED}>
+                <SelectItem key={TaxType.FIXED}>
                   Fixed Amount
                 </SelectItem>
               </Select>
@@ -477,7 +477,7 @@ export default function TaxPage() {
                 label={formState.tax_type === TaxType.PERCENTAGE ? 'Tax Rate (%)' : 'Tax Amount (₱)'}
                 type="number"
                 placeholder={formState.tax_type === TaxType.PERCENTAGE ? '12' : '50'}
-                value={formState.tax_value.toString()}
+               
                 onValueChange={(v) => setFormState({ ...formState, tax_value: parseFloat(v) || 0 })}
                 isRequired
               />
@@ -514,7 +514,7 @@ export default function TaxPage() {
               <Input
                 label="Effective Date"
                 type="date"
-                value={formState.effective_date}
+               
                 onValueChange={(v) => setFormState({ ...formState, effective_date: v })}
                 isRequired
               />

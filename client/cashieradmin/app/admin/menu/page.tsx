@@ -540,7 +540,7 @@ export default function AdminMenuPage() {
               <Input
                 className="flex-1"
                 placeholder="Search by name or description..."
-                value={searchQuery}
+               
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1); // Reset to first page on search
@@ -558,10 +558,10 @@ export default function AdminMenuPage() {
                 }}
                 className="w-32"
               >
-                <SelectItem key="10" value="10">10</SelectItem>
-                <SelectItem key="25" value="25">25</SelectItem>
-                <SelectItem key="50" value="50">50</SelectItem>
-                <SelectItem key="100" value="100">100</SelectItem>
+                <SelectItem key="10">10</SelectItem>
+                <SelectItem key="25">25</SelectItem>
+                <SelectItem key="50">50</SelectItem>
+                <SelectItem key="100">100</SelectItem>
               </Select>
             </div>
 
@@ -580,16 +580,16 @@ export default function AdminMenuPage() {
                 }}
                 className="w-40"
               >
-                <SelectItem key="all" value="all">All Types</SelectItem>
-                <SelectItem key="cake" value="cake">Cake</SelectItem>
-                <SelectItem key="pastry" value="pastry">Pastry</SelectItem>
-                <SelectItem key="beverage" value="beverage">Beverage</SelectItem>
-                <SelectItem key="coffee" value="coffee">Coffee</SelectItem>
-                <SelectItem key="sandwich" value="sandwich">Sandwich</SelectItem>
-                <SelectItem key="bread" value="bread">Bread</SelectItem>
-                <SelectItem key="dessert" value="dessert">Dessert</SelectItem>
-                <SelectItem key="snack" value="snack">Snack</SelectItem>
-                <SelectItem key="other" value="other">Other</SelectItem>
+                <SelectItem key="all">All Types</SelectItem>
+                <SelectItem key="cake">Cake</SelectItem>
+                <SelectItem key="pastry">Pastry</SelectItem>
+                <SelectItem key="beverage">Beverage</SelectItem>
+                <SelectItem key="coffee">Coffee</SelectItem>
+                <SelectItem key="sandwich">Sandwich</SelectItem>
+                <SelectItem key="bread">Bread</SelectItem>
+                <SelectItem key="dessert">Dessert</SelectItem>
+                <SelectItem key="snack">Snack</SelectItem>
+                <SelectItem key="other">Other</SelectItem>
               </Select>
               <Select
                 label="Status"
@@ -600,10 +600,10 @@ export default function AdminMenuPage() {
                 }}
                 className="w-40"
               >
-                <SelectItem key="all" value="all">All Status</SelectItem>
-                <SelectItem key="available" value="available">Available</SelectItem>
-                <SelectItem key="unavailable" value="unavailable">Unavailable</SelectItem>
-                <SelectItem key="out_of_stock" value="out_of_stock">Out of Stock</SelectItem>
+                <SelectItem key="all">All Status</SelectItem>
+                <SelectItem key="available">Available</SelectItem>
+                <SelectItem key="unavailable">Unavailable</SelectItem>
+                <SelectItem key="out_of_stock">Out of Stock</SelectItem>
               </Select>
               <Select
                 label="Sort By"
@@ -611,10 +611,10 @@ export default function AdminMenuPage() {
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="w-40"
               >
-                <SelectItem key="name" value="name">Name</SelectItem>
-                <SelectItem key="price" value="price">Price</SelectItem>
-                <SelectItem key="stock" value="stock">Stock</SelectItem>
-                <SelectItem key="popularity" value="popularity">Popularity</SelectItem>
+                <SelectItem key="name">Name</SelectItem>
+                <SelectItem key="price">Price</SelectItem>
+                <SelectItem key="stock">Stock</SelectItem>
+                <SelectItem key="popularity">Popularity</SelectItem>
               </Select>
               <Button
                 size="sm"
@@ -906,7 +906,7 @@ export default function AdminMenuPage() {
               <Input
                 label="Name"
                 placeholder="Enter item name"
-                value={formData.name || ''}
+               
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
                 isRequired
@@ -915,7 +915,7 @@ export default function AdminMenuPage() {
               <Textarea
                 label="Description"
                 placeholder="Enter item description"
-                value={formData.description || ''}
+               
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 minRows={3}
               />
@@ -927,15 +927,15 @@ export default function AdminMenuPage() {
                 isRequired
                 errorMessage={!formData.item_type && 'Item type is required'}
               >
-                <SelectItem key="cake" value="cake">Cake</SelectItem>
-                <SelectItem key="pastry" value="pastry">Pastry</SelectItem>
-                <SelectItem key="beverage" value="beverage">Beverage</SelectItem>
-                <SelectItem key="snack" value="snack">Snack</SelectItem>
-                <SelectItem key="main_dish" value="main_dish">Main Dish</SelectItem>
-                <SelectItem key="appetizer" value="appetizer">Appetizer</SelectItem>
-                <SelectItem key="dessert" value="dessert">Dessert</SelectItem>
-                <SelectItem key="bread" value="bread">Bread</SelectItem>
-                <SelectItem key="other" value="other">Other</SelectItem>
+                <SelectItem key="cake">Cake</SelectItem>
+                <SelectItem key="pastry">Pastry</SelectItem>
+                <SelectItem key="beverage">Beverage</SelectItem>
+                <SelectItem key="snack">Snack</SelectItem>
+                <SelectItem key="main_dish">Main Dish</SelectItem>
+                <SelectItem key="appetizer">Appetizer</SelectItem>
+                <SelectItem key="dessert">Dessert</SelectItem>
+                <SelectItem key="bread">Bread</SelectItem>
+                <SelectItem key="other">Other</SelectItem>
               </Select>
               <Select
                 label="Unit of Measure"
@@ -944,23 +944,23 @@ export default function AdminMenuPage() {
                 onChange={(e) => setFormData({ ...formData, unit_of_measure: e.target.value })}
                 defaultSelectedKeys={['piece']}
               >
-                <SelectItem key="piece" value="piece">Piece</SelectItem>
-                <SelectItem key="dozen" value="dozen">Dozen</SelectItem>
-                <SelectItem key="half_dozen" value="half_dozen">Half Dozen</SelectItem>
-                <SelectItem key="kilogram" value="kilogram">Kilogram</SelectItem>
-                <SelectItem key="gram" value="gram">Gram</SelectItem>
-                <SelectItem key="liter" value="liter">Liter</SelectItem>
-                <SelectItem key="milliliter" value="milliliter">Milliliter</SelectItem>
-                <SelectItem key="serving" value="serving">Serving</SelectItem>
-                <SelectItem key="box" value="box">Box</SelectItem>
-                <SelectItem key="pack" value="pack">Pack</SelectItem>
+                <SelectItem key="piece">Piece</SelectItem>
+                <SelectItem key="dozen">Dozen</SelectItem>
+                <SelectItem key="half_dozen">Half Dozen</SelectItem>
+                <SelectItem key="kilogram">Kilogram</SelectItem>
+                <SelectItem key="gram">Gram</SelectItem>
+                <SelectItem key="liter">Liter</SelectItem>
+                <SelectItem key="milliliter">Milliliter</SelectItem>
+                <SelectItem key="serving">Serving</SelectItem>
+                <SelectItem key="box">Box</SelectItem>
+                <SelectItem key="pack">Pack</SelectItem>
               </Select>
               {!editingItem && (
                 <Input
                   label="Initial Price (₱)"
                   type="number"
                   placeholder="Enter price (e.g., 99.00)"
-                  value={initialPrice}
+                 
                   onChange={(e) => setInitialPrice(e.target.value)}
                   startContent={<span className="text-default-400 text-sm">₱</span>}
                   description="Set the base price for this item. You can adjust it later."
@@ -972,7 +972,7 @@ export default function AdminMenuPage() {
                 label="Stock Quantity"
                 type="number"
                 placeholder="Enter stock quantity"
-                value={formData.stock_quantity?.toString() || '0'}
+               
                 onChange={(e) => {
                   const value = e.target.value;
                   setFormData({
@@ -987,7 +987,7 @@ export default function AdminMenuPage() {
                 label="Minimum Stock Level"
                 type="number"
                 placeholder="Enter minimum stock level for alerts"
-                value={formData.min_stock_level?.toString() || '0'}
+               
                 onChange={(e) => {
                   const value = e.target.value;
                   setFormData({
@@ -1062,7 +1062,7 @@ export default function AdminMenuPage() {
                 label="Preparation Time (minutes)"
                 type="number"
                 placeholder="Enter preparation time in minutes"
-                value={formData.preparation_time_minutes?.toString() || '0'}
+               
                 onChange={(e) => {
                   const value = e.target.value;
                   setFormData({
@@ -1076,14 +1076,14 @@ export default function AdminMenuPage() {
               <Textarea
                 label="Allergen Information"
                 placeholder="e.g., Contains nuts, eggs, dairy"
-                value={formData.allergen_info || ''}
+               
                 onChange={(e) => setFormData({ ...formData, allergen_info: e.target.value })}
                 minRows={2}
               />
               <Textarea
                 label="Nutritional Information"
                 placeholder="e.g., Calories: 250, Protein: 5g, Carbs: 30g"
-                value={formData.nutritional_info || ''}
+               
                 onChange={(e) => setFormData({ ...formData, nutritional_info: e.target.value })}
                 minRows={2}
               />
@@ -1161,7 +1161,7 @@ export default function AdminMenuPage() {
                 type="number"
                 label="New Price"
                 placeholder="Enter new price"
-                value={newPrice}
+               
                 onChange={(e) => setNewPrice(e.target.value)}
                 startContent={
                   <span className="text-default-400 text-sm">₱</span>

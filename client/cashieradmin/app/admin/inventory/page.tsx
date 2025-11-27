@@ -185,7 +185,7 @@ export default function InventoryPage() {
       {/* Search */}
       <Input
         placeholder="Search items..."
-        value={searchTerm}
+       
         onValueChange={setSearchTerm}
         startContent={<MagnifyingGlassIcon className="h-5 w-5 text-default-400" />}
         className="max-w-md"
@@ -272,13 +272,13 @@ export default function InventoryPage() {
               <Input
                 label="Menu Item ID"
                 type="number"
-                value={adjustmentForm.menu_item_id.toString()}
+               
                 onValueChange={(v) => setAdjustmentForm({ ...adjustmentForm, menu_item_id: parseInt(v) || 0 })}
               />
               <Input
                 label="Quantity Change (use negative for decrease)"
                 type="number"
-                value={adjustmentForm.quantity_change.toString()}
+               
                 onValueChange={(v) => setAdjustmentForm({ ...adjustmentForm, quantity_change: parseInt(v) || 0 })}
               />
               <Select
@@ -291,14 +291,14 @@ export default function InventoryPage() {
                 }}
               >
                 {reasons.map((reason) => (
-                  <SelectItem key={reason.reason_id} value={reason.reason_id}>
+                  <SelectItem key={reason.reason_id}>
                     {reason.reason_name}
                   </SelectItem>
                 ))}
               </Select>
               <Input
                 label="Notes (optional)"
-                value={adjustmentForm.notes}
+               
                 onValueChange={(v) => setAdjustmentForm({ ...adjustmentForm, notes: v })}
               />
             </div>
@@ -322,7 +322,7 @@ export default function InventoryPage() {
             <div className="space-y-4">
               <Input
                 label="Reason Name"
-                value={reasonForm.reason_name}
+               
                 onValueChange={(v) => setReasonForm({ ...reasonForm, reason_name: v })}
               />
               <label className="flex items-center gap-2">

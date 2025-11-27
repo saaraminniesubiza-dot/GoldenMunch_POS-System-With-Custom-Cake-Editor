@@ -276,7 +276,7 @@ export default function RefundsPage() {
       <div className="flex flex-wrap gap-4">
         <Input
           placeholder="Search by order number or reason..."
-          value={searchTerm}
+         
           onValueChange={setSearchTerm}
           startContent={<MagnifyingGlassIcon className="h-5 w-5 text-default-400" />}
           className="max-w-md"
@@ -291,17 +291,17 @@ export default function RefundsPage() {
           }}
           className="max-w-xs"
         >
-          <SelectItem key="" value="">All Statuses</SelectItem>
-          <SelectItem key={RefundStatus.PENDING} value={RefundStatus.PENDING}>
+          <SelectItem key="">All Statuses</SelectItem>
+          <SelectItem key={RefundStatus.PENDING}>
             Pending
           </SelectItem>
-          <SelectItem key={RefundStatus.APPROVED} value={RefundStatus.APPROVED}>
+          <SelectItem key={RefundStatus.APPROVED}>
             Approved
           </SelectItem>
-          <SelectItem key={RefundStatus.REJECTED} value={RefundStatus.REJECTED}>
+          <SelectItem key={RefundStatus.REJECTED}>
             Rejected
           </SelectItem>
-          <SelectItem key={RefundStatus.COMPLETED} value={RefundStatus.COMPLETED}>
+          <SelectItem key={RefundStatus.COMPLETED}>
             Completed
           </SelectItem>
         </Select>
@@ -476,7 +476,7 @@ export default function RefundsPage() {
             <Input
               label="Rejection Reason"
               placeholder="Enter reason for rejection"
-              value={rejectReason}
+             
               onValueChange={setRejectReason}
               isRequired
             />
@@ -513,22 +513,22 @@ export default function RefundsPage() {
                 }}
                 isRequired
               >
-                <SelectItem key={RefundMethod.CASH} value={RefundMethod.CASH}>
+                <SelectItem key={RefundMethod.CASH}>
                   Cash
                 </SelectItem>
-                <SelectItem key={RefundMethod.GCASH} value={RefundMethod.GCASH}>
+                <SelectItem key={RefundMethod.GCASH}>
                   GCash
                 </SelectItem>
-                <SelectItem key={RefundMethod.PAYMAYA} value={RefundMethod.PAYMAYA}>
+                <SelectItem key={RefundMethod.PAYMAYA}>
                   PayMaya
                 </SelectItem>
-                <SelectItem key={RefundMethod.CARD} value={RefundMethod.CARD}>
+                <SelectItem key={RefundMethod.CARD}>
                   Card
                 </SelectItem>
-                <SelectItem key={RefundMethod.BANK_TRANSFER} value={RefundMethod.BANK_TRANSFER}>
+                <SelectItem key={RefundMethod.BANK_TRANSFER}>
                   Bank Transfer
                 </SelectItem>
-                <SelectItem key={RefundMethod.STORE_CREDIT} value={RefundMethod.STORE_CREDIT}>
+                <SelectItem key={RefundMethod.STORE_CREDIT}>
                   Store Credit
                 </SelectItem>
               </Select>
@@ -536,7 +536,7 @@ export default function RefundsPage() {
               <Input
                 label="Reference Number (optional)"
                 placeholder="Enter reference number"
-                value={completeForm.refund_reference}
+               
                 onValueChange={(v) => setCompleteForm({ ...completeForm, refund_reference: v })}
               />
 
