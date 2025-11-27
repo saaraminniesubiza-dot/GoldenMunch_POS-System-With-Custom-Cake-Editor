@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 
 // Payment Gateway Configuration
 interface PaymentConfig {

@@ -61,6 +61,72 @@ interface QRCodeSession {
   expires_at: Date;
 }
 
+// Database row types for query results
+interface QRSessionRow {
+  session_id: number;
+  session_token: string;
+  qr_code_data: string;
+  editor_url: string;
+  kiosk_id?: string;
+  ip_address?: string;
+  user_agent?: string;
+  status: string;
+  expires_at: Date;
+  created_at: Date;
+  accessed_at?: Date;
+  request_id?: number;
+}
+
+interface CustomCakeRequestRow {
+  request_id: number;
+  session_token: string;
+  customer_name?: string;
+  customer_phone?: string;
+  customer_email?: string;
+  num_layers: number;
+  layer_1_flavor_id?: number;
+  layer_2_flavor_id?: number;
+  layer_3_flavor_id?: number;
+  layer_4_flavor_id?: number;
+  layer_5_flavor_id?: number;
+  layer_1_size_id?: number;
+  layer_2_size_id?: number;
+  layer_3_size_id?: number;
+  layer_4_size_id?: number;
+  layer_5_size_id?: number;
+  total_height_cm?: number;
+  base_diameter_cm?: number;
+  theme_id?: number;
+  frosting_color?: string;
+  frosting_type?: string;
+  candles_count?: number;
+  candle_type?: string;
+  candle_numbers?: string;
+  cake_text?: string;
+  text_color?: string;
+  text_font?: string;
+  text_position?: string;
+  decorations_3d?: string;
+  special_instructions?: string;
+  dietary_restrictions?: string;
+  event_type?: string;
+  event_date?: string;
+  status: string;
+  estimated_price?: number;
+  approved_price?: number;
+  preparation_days?: number;
+  scheduled_pickup_date?: string;
+  scheduled_pickup_time?: string;
+  admin_notes?: string;
+  rejection_reason?: string;
+  reviewed_by?: number;
+  reviewed_at?: Date;
+  submitted_at?: Date;
+  created_at: Date;
+  updated_at: Date;
+  order_id?: number;
+}
+
 // ============================================================================
 // 1. GENERATE QR CODE SESSION (Kiosk)
 // ============================================================================
@@ -141,7 +207,7 @@ export const validateSession = async (req: AuthRequest, res: Response) => {
     [token]
   );
 
-  const session = getFirstRow(sessions);
+  const session = getFirstRow<QRSessionRow>(sessions);
 
   if (!session) {
     throw new AppError('Invalid or expired session', 404);
@@ -241,7 +307,7 @@ export const saveDraft = async (req: AuthRequest, res: Response) => {
     [draftData.session_token]
   );
 
-  const session = getFirstRow(sessions);
+  const session = getFirstRow<QRSessionRow>(sessions);
   if (!session) {
     throw new AppError('Invalid or expired session', 404);
   }
@@ -252,7 +318,7 @@ export const saveDraft = async (req: AuthRequest, res: Response) => {
     [draftData.session_token]
   );
 
-  const existingDraft = getFirstRow(existingDrafts);
+  const existingDraft = getFirstRow<CustomCakeRequestRow>(existingDrafts);
 
   if (existingDraft) {
     // Update existing draft
@@ -445,7 +511,7 @@ export const submitForReview = async (req: AuthRequest, res: Response) => {
       [request_id]
     );
 
-    const request = getFirstRow(requests);
+    const request = getFirstRow<CustomCakeRequestRow>(requests);
 
     if (!request) {
       throw new AppError('Request not found', 404);
@@ -587,7 +653,7 @@ export const approveRequest = async (req: AuthRequest, res: Response) => {
       [requestId]
     );
 
-    const request = getFirstRow(requests);
+    const request = getFirstRow<CustomCakeRequestRow>(requests);
 
     if (request?.customer_email) {
       // Create notification
@@ -644,7 +710,7 @@ export const rejectRequest = async (req: AuthRequest, res: Response) => {
       [requestId]
     );
 
-    const request = getFirstRow(requests);
+    const request = getFirstRow<CustomCakeRequestRow>(requests);
 
     if (request?.customer_email) {
       // Create notification
@@ -685,7 +751,7 @@ export const checkStatus = async (req: AuthRequest, res: Response) => {
     [requestId]
   );
 
-  const request = getFirstRow(requests);
+  const request = getFirstRow<CustomCakeRequestRow>(requests);
 
   if (!request) {
     throw new AppError('Request not found', 404);
@@ -736,7 +802,7 @@ export const processPayment = async (req: AuthRequest, res: Response) => {
       [requestId]
     );
 
-    const request = getFirstRow(requests);
+    const request = getFirstRow<CustomCakeRequestRow>(requests);
 
     if (!request) {
       throw new AppError('Approved request not found', 404);
