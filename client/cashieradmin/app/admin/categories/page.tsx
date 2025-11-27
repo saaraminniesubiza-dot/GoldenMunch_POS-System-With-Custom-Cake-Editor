@@ -282,23 +282,6 @@ export default function CategoriesPage() {
                     {/* Category Header */}
                     <div className="bg-gradient-to-r from-cream-white to-soft-sand/50 p-4">
                       <div className="flex items-center gap-4">
-                        {/* Image */}
-                        <div className="flex-shrink-0">
-                          {category.image_url ? (
-                            <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-light-caramel/30 shadow-sm">
-                              <img
-                                src={category.image_url}
-                                alt={category.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-16 h-16 rounded-xl bg-soft-sand/50 flex items-center justify-center border-2 border-light-caramel/20">
-                              <span className="text-warm-beige text-xs font-medium">No image</span>
-                            </div>
-                          )}
-                        </div>
-
                         {/* Category Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-1">
