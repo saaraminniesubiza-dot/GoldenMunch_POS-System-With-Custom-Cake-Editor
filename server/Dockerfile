@@ -37,6 +37,9 @@ COPY --from=builder /app/dist ./dist
 # Copy environment configuration
 COPY .env.production ./.env.production
 
+# Set NODE_ENV so app.ts loads the correct env file
+ENV NODE_ENV=production
+
 # Create uploads directory
 RUN mkdir -p uploads && chown -R nodejs:nodejs uploads
 
