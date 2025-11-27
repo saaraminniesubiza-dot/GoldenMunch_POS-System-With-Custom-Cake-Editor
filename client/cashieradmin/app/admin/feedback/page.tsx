@@ -70,9 +70,8 @@ export default function AdminFeedbackPage() {
       };
 
       const response = await FeedbackService.getAllFeedback(params);
-      if (response.data) {
-        const feedback = Array.isArray(response.data) ? response.data : response.data.data || [];
-        setFeedbackList(feedback);
+      if (response.success) {
+        setFeedbackList(Array.isArray(response.data) ? response.data : []);
       }
     } catch (error) {
       console.error('Failed to load feedback:', error);
@@ -84,16 +83,15 @@ export default function AdminFeedbackPage() {
   const loadStats = async () => {
     try {
       const response = await FeedbackService.getFeedbackStats();
-      if (response.data) {
-        const statsData = response.data.data || response.data;
+      if (response.success && response.data) {
         setStats({
-          totalFeedback: statsData.total_feedback || 0,
-          averageRating: statsData.average_rating || 0,
-          positiveCount: statsData.positive_count || 0,
-          neutralCount: statsData.neutral_count || 0,
-          negativeCount: statsData.negative_count || 0,
-          respondedCount: statsData.responded_count || 0,
-          pendingResponseCount: statsData.pending_response_count || 0,
+          totalFeedback: response.data.total_feedback || 0,
+          averageRating: response.data.average_rating || 0,
+          positiveCount: response.data.positive_count || 0,
+          neutralCount: response.data.neutral_count || 0,
+          negativeCount: response.data.negative_count || 0,
+          respondedCount: response.data.responded_count || 0,
+          pendingResponseCount: response.data.pending_response_count || 0,
         });
       }
     } catch (error) {
