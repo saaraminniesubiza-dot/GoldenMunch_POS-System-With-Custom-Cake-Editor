@@ -81,33 +81,33 @@ export const AnimatedBackground: React.FC = () => {
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
-      {/* Light Caramel & Cream Gradient Base - Soft and Airy */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#FFF9F2] via-[#E8DCC8] to-[#D9B38C]" />
+      {/* Sunny Yellow & White Gradient Base - Bright and Clean */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#FFFFFF] via-[#FFF9E0] to-[#FBCD2F]/20" />
 
-      {/* Layered Gradient Waves - More visible */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#C9B8A5]/30 via-transparent to-[#FFF9F2]/40 animate-wave" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#D9B38C]/25 via-transparent to-[#E8DCC8]/30 animate-wave-reverse" />
+      {/* Layered Gradient Waves - Sunny yellow accents */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#F5A623]/15 via-transparent to-[#FFFFFF]/60 animate-wave" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#FBCD2F]/20 via-transparent to-[#F3F3F3]/30 animate-wave-reverse" />
 
-      {/* Large Animated Orbs - Warm Caramel Tones - MORE PROMINENT */}
-      <div className="absolute -top-40 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#D9B38C]/50 to-[#C67B57]/40 rounded-full mix-blend-multiply filter blur-3xl animate-pulse-slow" />
-      <div className="absolute top-1/3 -left-32 w-96 h-96 bg-gradient-to-br from-[#C9B8A5]/45 to-[#E8DCC8]/35 rounded-full mix-blend-multiply filter blur-3xl animate-blob" />
-      <div className="absolute top-1/3 -right-32 w-96 h-96 bg-gradient-to-br from-[#D9B38C]/50 to-[#C67B57]/35 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000" />
-      <div className="absolute bottom-1/4 left-1/2 w-[500px] h-[500px] bg-gradient-to-br from-[#C67B57]/40 to-[#C9B8A5]/45 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000" />
-      <div className="absolute -bottom-40 right-1/4 w-96 h-96 bg-gradient-to-br from-[#E8DCC8]/45 to-[#D9B38C]/40 rounded-full mix-blend-multiply filter blur-3xl animate-pulse-slow animation-delay-3000" />
+      {/* Large Animated Orbs - Sunny Yellow Tones - MORE PROMINENT */}
+      <div className="absolute -top-40 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#FBCD2F]/50 to-[#F5A623]/40 rounded-full mix-blend-multiply filter blur-3xl animate-pulse-slow" />
+      <div className="absolute top-1/3 -left-32 w-96 h-96 bg-gradient-to-br from-[#F9C41E]/45 to-[#FFF9E0]/35 rounded-full mix-blend-multiply filter blur-3xl animate-blob" />
+      <div className="absolute top-1/3 -right-32 w-96 h-96 bg-gradient-to-br from-[#FBCD2F]/50 to-[#F5A623]/35 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000" />
+      <div className="absolute bottom-1/4 left-1/2 w-[500px] h-[500px] bg-gradient-to-br from-[#F5A623]/40 to-[#F9C41E]/45 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000" />
+      <div className="absolute -bottom-40 right-1/4 w-96 h-96 bg-gradient-to-br from-[#FFF3C1]/45 to-[#FBCD2F]/40 rounded-full mix-blend-multiply filter blur-3xl animate-pulse-slow animation-delay-3000" />
 
-      {/* Soft Cream Bubbles Rising - MORE VISIBLE */}
+      {/* Sunny Yellow Bubbles Rising - MORE VISIBLE */}
       <div className="absolute inset-0">
         {bubbles.map((bubble, i) => (
           <div
             key={`bubble-${i}`}
-            className="absolute bottom-0 rounded-full bg-[#D9B38C]/30 backdrop-blur-sm animate-rise-bubble border-2 border-[#C9B8A5]/40"
+            className="absolute bottom-0 rounded-full bg-[#FBCD2F]/30 backdrop-blur-sm animate-rise-bubble border-2 border-[#F5A623]/40"
             style={{
               left: `${bubble.left}%`,
               width: `${bubble.size}px`,
               height: `${bubble.size}px`,
               animationDelay: `${bubble.delay}s`,
               animationDuration: `${bubble.duration}s`,
-              boxShadow: '0 0 20px rgba(217, 179, 140, 0.4)',
+              boxShadow: '0 0 20px rgba(251, 205, 47, 0.4)',
             }}
           />
         ))}
@@ -125,7 +125,7 @@ export const AnimatedBackground: React.FC = () => {
               fontSize: `${particle.size}px`,
               animationDelay: `${particle.delay}s`,
               animationDuration: `${particle.duration}s`,
-              filter: 'drop-shadow(0 0 15px rgba(217, 179, 140, 0.6)) drop-shadow(0 0 25px rgba(217, 179, 140, 0.3))',
+              filter: 'drop-shadow(0 0 15px rgba(251, 205, 47, 0.6)) drop-shadow(0 0 25px rgba(245, 166, 35, 0.3))',
             }}
           >
             {particle.emoji}
@@ -133,12 +133,12 @@ export const AnimatedBackground: React.FC = () => {
         ))}
       </div>
 
-      {/* Caramel Sparkle Effect - MORE PROMINENT */}
+      {/* Sunny Yellow Sparkle Effect - MORE PROMINENT */}
       <div className="absolute inset-0">
         {goldSparkles.map((sparkle, i) => (
           <div
             key={`sparkle-${i}`}
-            className="absolute rounded-full bg-[#C67B57] animate-twinkle"
+            className="absolute rounded-full bg-[#F5A623] animate-twinkle"
             style={{
               left: `${sparkle.left}%`,
               top: `${sparkle.top}%`,
@@ -146,23 +146,23 @@ export const AnimatedBackground: React.FC = () => {
               height: `${sparkle.size}px`,
               animationDelay: `${sparkle.delay}s`,
               animationDuration: `${sparkle.duration}s`,
-              boxShadow: '0 0 15px rgba(198, 123, 87, 0.8), 0 0 25px rgba(217, 179, 140, 0.5)',
+              boxShadow: '0 0 15px rgba(245, 166, 35, 0.8), 0 0 25px rgba(251, 205, 47, 0.5)',
             }}
           />
         ))}
       </div>
 
       {/* Elegant Shimmer Overlay - More visible */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#FFF9F2]/15 via-transparent to-transparent animate-shimmer-down" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#FFFFFF]/15 via-transparent to-transparent animate-shimmer-down" />
 
       {/* Soft Vignette - Lighter */}
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-[#C9B8A5]/20" />
+      <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-[#F5A623]/15" />
 
-      {/* Bottom Glow - Warm Caramel */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#D9B38C]/25 to-transparent" />
+      {/* Bottom Glow - Warm Yellow */}
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#FBCD2F]/20 to-transparent" />
 
-      {/* Top Glow - Soft Cream */}
-      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#E8DCC8]/20 to-transparent" />
+      {/* Top Glow - Soft White */}
+      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#FFF9E0]/20 to-transparent" />
     </div>
   );
 };

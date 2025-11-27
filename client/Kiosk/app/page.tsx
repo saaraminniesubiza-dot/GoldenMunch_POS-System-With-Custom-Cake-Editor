@@ -90,17 +90,17 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="h-[1920px] flex items-center justify-center">
         <div className="text-center">
           <Spinner
             size="lg"
             classNames={{
               wrapper: "w-32 h-32",
-              circle1: "border-b-[#D9B38C]",
-              circle2: "border-b-[#C67B57]"
+              circle1: "border-b-sunny-yellow",
+              circle2: "border-b-deep-orange-yellow"
             }}
           />
-          <p className="text-4xl font-bold text-[#C67B57] mt-8">
+          <p className="text-4xl font-bold text-charcoal-gray mt-8">
             Loading Menu...
           </p>
         </div>
@@ -110,17 +110,17 @@ export default function HomePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="max-w-2xl bg-[#FFF9F2]/90 backdrop-blur-lg border-2 border-[#D9B38C]">
+      <div className="h-[1920px] flex items-center justify-center p-6">
+        <Card className="max-w-2xl bg-pure-white/20 backdrop-blur-lg border-2 border-sunny-yellow/40">
           <CardBody className="text-center p-12">
             <div className="text-9xl mb-8">⚠️</div>
-            <h1 className="text-5xl font-bold text-[#C67B57] mb-6">
+            <h1 className="text-5xl font-bold text-charcoal-gray mb-6">
               Oops! Something went wrong
             </h1>
-            <p className="text-2xl text-[#C9B8A5] mb-10">{error}</p>
+            <p className="text-2xl text-charcoal-gray/70 mb-10">{error}</p>
             <Button
               size="lg"
-              className="bg-gradient-to-r from-[#D9B38C] to-[#C67B57] text-white font-bold text-2xl px-12 py-8 shadow-lg hover:shadow-xl transition-all"
+              className="bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-charcoal-gray font-bold text-2xl px-12 py-8 shadow-lg hover:shadow-xl transition-all"
               onClick={() => window.location.reload()}
             >
               Try Again
@@ -133,15 +133,15 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="min-h-screen pr-[30vw] max-pr-[576px]">
+      <div className="h-[1920px] overflow-y-auto pr-[30vw] max-pr-[576px] flex flex-col">
         {/* Hero Header */}
-        <div className="glass-header border-b-4 border-[#D9B38C]/40 py-10 px-12 mb-10">
+        <div className="bg-pure-white/10 backdrop-blur-sm border-b-4 border-sunny-yellow/30 py-10 px-12 mb-6">
           <div className="max-w-[1400px] mx-auto text-center">
             <div className="text-9xl mb-6 animate-float">🍰</div>
-            <h1 className="text-8xl font-black bg-gradient-to-br from-[#C67B57] via-[#D9B38C] to-[#C9B8A5] bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(198,123,87,0.4)] mb-4">
+            <h1 className="text-8xl font-black bg-gradient-to-br from-sunny-yellow via-deep-orange-yellow to-sunny-yellow bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(251,205,47,0.5)] mb-4">
               Golden Munch
             </h1>
-            <p className="text-3xl text-[#C67B57] font-semibold drop-shadow-lg">
+            <p className="text-3xl text-charcoal-gray font-semibold drop-shadow-lg">
               Fresh • Delicious • Made with Love
             </p>
           </div>
@@ -150,14 +150,14 @@ export default function HomePage() {
         <div className="max-w-[1400px] mx-auto px-12">
           {/* Categories */}
           {categories.length > 0 && (
-            <div className="mb-10">
+            <div className="mb-6">
               <div className="flex gap-4 justify-center flex-wrap">
                 <Button
                   size="lg"
                   className={`${
                     selectedCategory === null
-                      ? 'bg-gradient-to-br from-[#D9B38C] to-[#C67B57] text-white scale-105 shadow-lg'
-                      : 'bg-white/80 backdrop-blur-sm border-2 border-[#D9B38C]/30 text-[#C67B57] hover:border-[#D9B38C]'
+                      ? 'bg-gradient-to-br from-sunny-yellow to-deep-orange-yellow text-charcoal-gray scale-105 shadow-lg shadow-sunny-yellow/30'
+                      : 'bg-pure-white/20 backdrop-blur-sm border-2 border-sunny-yellow/30 text-charcoal-gray hover:border-sunny-yellow/60'
                   } font-bold text-xl px-10 py-7 rounded-2xl transition-all touch-target`}
                   onClick={() => setSelectedCategory(null)}
                 >
@@ -169,8 +169,8 @@ export default function HomePage() {
                     size="lg"
                     className={`${
                       selectedCategory === category.category_id
-                        ? 'bg-gradient-to-br from-[#D9B38C] to-[#C67B57] text-white scale-105 shadow-lg'
-                        : 'bg-white/80 backdrop-blur-sm border-2 border-[#D9B38C]/30 text-[#C67B57] hover:border-[#D9B38C]'
+                        ? 'bg-gradient-to-br from-sunny-yellow to-deep-orange-yellow text-charcoal-gray scale-105 shadow-lg shadow-sunny-yellow/30'
+                        : 'bg-pure-white/20 backdrop-blur-sm border-2 border-sunny-yellow/30 text-charcoal-gray hover:border-sunny-yellow/60'
                     } font-bold text-xl px-10 py-7 rounded-2xl transition-all touch-target`}
                     onClick={() => setSelectedCategory(category.category_id)}
                   >
@@ -183,19 +183,19 @@ export default function HomePage() {
 
           {/* Menu Items Grid */}
           {filteredItems.length === 0 ? (
-            <Card className="bg-white/80 backdrop-blur-lg border-2 border-[#D9B38C]/30">
+            <Card className="bg-pure-white/15 backdrop-blur-lg border-2 border-sunny-yellow/30">
               <CardBody className="text-center py-24">
                 <div className="text-[120px] mb-8 animate-float">🍽️</div>
-                <h3 className="text-5xl font-bold text-[#C67B57] mb-6 drop-shadow-lg">
+                <h3 className="text-5xl font-bold text-charcoal-gray mb-6 drop-shadow-lg">
                   No items found
                 </h3>
-                <p className="text-2xl text-[#D9B38C] mb-10">
+                <p className="text-2xl text-charcoal-gray/70 mb-10">
                   No items in this category
                 </p>
                 {selectedCategory !== null && (
                   <Button
                     size="lg"
-                    className="bg-gradient-to-r from-[#D9B38C] to-[#C67B57] text-white font-bold px-12 py-8 text-2xl touch-target"
+                    className="bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-charcoal-gray font-bold px-12 py-8 text-2xl touch-target shadow-lg"
                     onClick={() => setSelectedCategory(null)}
                   >
                     Clear Filter
@@ -205,14 +205,14 @@ export default function HomePage() {
             </Card>
           ) : (
             <>
-              <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold text-[#C67B57] drop-shadow-lg">
+              <div className="text-center mb-6">
+                <h2 className="text-4xl font-bold text-charcoal-gray drop-shadow-lg">
                   {filteredItems.length} Delicious {filteredItems.length === 1 ? 'Item' : 'Items'}
                 </h2>
               </div>
 
-              {/* 4 Column Grid */}
-              <div className="grid grid-cols-4 gap-8 pb-16">
+              {/* 4 Column Grid - Flexible height for scrolling */}
+              <div className="grid grid-cols-4 gap-8 pb-6 flex-1">
                 {filteredItems.map((item) => (
                   <MenuCard
                     key={item.menu_item_id}
@@ -224,6 +224,29 @@ export default function HomePage() {
               </div>
             </>
           )}
+        </div>
+
+        {/* Promotional Section - Fixed at Bottom */}
+        <div className="mt-auto bg-gradient-to-r from-sunny-yellow/20 via-deep-orange-yellow/20 to-sunny-yellow/20 backdrop-blur-md border-t-4 border-sunny-yellow/40 py-8 px-12">
+          <div className="max-w-[1400px] mx-auto">
+            <div className="flex items-center justify-between gap-8">
+              <div className="flex-1">
+                <h3 className="text-4xl font-black text-charcoal-gray mb-2 drop-shadow-lg">
+                  🎂 Design Your Dream Cake!
+                </h3>
+                <p className="text-xl text-charcoal-gray/80 font-semibold">
+                  Create a custom cake perfectly tailored to your celebration
+                </p>
+              </div>
+              <Button
+                size="lg"
+                className="bg-gradient-to-br from-sunny-yellow via-deep-orange-yellow to-sunny-yellow text-charcoal-gray font-black text-3xl px-16 py-12 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all touch-target border-4 border-deep-orange-yellow/30 animate-pulse-slow"
+                onClick={() => window.location.href = '/cake-editor'}
+              >
+                🍰 Custom Cake Editor
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
