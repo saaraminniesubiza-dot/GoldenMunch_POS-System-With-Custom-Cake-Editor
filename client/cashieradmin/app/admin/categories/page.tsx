@@ -116,15 +116,23 @@ export default function CategoriesPage() {
       setSaving(true);
       setError(null);
 
+      // Map form data to API format
+      const apiData = {
+        category_name: formData.name,
+        description: formData.description,
+        display_order: formData.display_order,
+        is_active: formData.is_active,
+      };
+
       let response;
       if (editingCategory) {
         response = await MenuService.updateCategory(
           editingCategory.category_id,
-          formData,
+          apiData,
           imageFile || undefined
         );
       } else {
-        response = await MenuService.createCategory(formData, imageFile || undefined);
+        response = await MenuService.createCategory(apiData, imageFile || undefined);
       }
 
       if (response.success) {
