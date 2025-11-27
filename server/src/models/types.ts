@@ -321,7 +321,7 @@ export interface TaxRule {
   is_inclusive: boolean;
   apply_to_item_types: string | null;
   is_active: boolean;
-  effective_date: Date;
+  effective_date?: Date;
   created_by: number;
   created_at: Date;
   updated_at: Date;

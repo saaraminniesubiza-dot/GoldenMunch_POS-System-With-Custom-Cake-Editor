@@ -235,13 +235,13 @@ export const deleteCashier = async (req: AuthRequest, res: Response) => {
 // ==== TAX RULES MANAGEMENT ====
 
 export const createTaxRule = async (req: AuthRequest, res: Response) => {
-  const { tax_name, tax_type, tax_rate, fixed_amount, is_inclusive, effective_date } = req.body;
+  const { tax_name, tax_type, tax_rate, fixed_amount, is_inclusive } = req.body;
   const admin_id = req.user?.id;
 
   const result = await query(
-    `INSERT INTO tax_rules (tax_name, tax_type, tax_rate, fixed_amount, is_inclusive, effective_date, created_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [tax_name, tax_type, tax_rate || 0, fixed_amount || 0, is_inclusive || false, effective_date, admin_id]
+    `INSERT INTO tax_rules (tax_name, tax_type, tax_rate, fixed_amount, is_inclusive, created_by)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [tax_name, tax_type, tax_rate || 0, fixed_amount || 0, is_inclusive || false, admin_id]
   );
 
   res.status(201).json(successResponse('Tax rule created', { id: getInsertId(result) }));
@@ -258,7 +258,7 @@ export const getTaxRules = async (req: AuthRequest, res: Response) => {
     params.push(is_active === 'true');
   }
 
-  sql += ' ORDER BY effective_date DESC';
+  sql += ' ORDER BY created_at DESC';
 
   const rules = await query(sql, params);
 
@@ -269,7 +269,7 @@ export const updateTaxRule = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const updates = req.body;
 
-  const allowedColumns = ['tax_name', 'tax_type', 'tax_rate', 'fixed_amount', 'is_inclusive', 'is_active', 'effective_date'];
+  const allowedColumns = ['tax_name', 'tax_type', 'tax_rate', 'fixed_amount', 'is_inclusive', 'is_active'];
 
   const { setClause, values } = buildSafeUpdateQuery(updates, allowedColumns);
   await query(`UPDATE tax_rules SET ${setClause} WHERE tax_id = ?`, [...values, id]);

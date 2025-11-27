@@ -123,8 +123,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     const [taxRuleRows] = await conn.query(
       `SELECT * FROM tax_rules
        WHERE is_active = TRUE
-       AND effective_date <= CURDATE()
-       ORDER BY effective_date DESC
+       ORDER BY created_at DESC
        LIMIT 1`
     );
 
