@@ -41,7 +41,7 @@ export default function AnalyticsPage() {
       }
 
       if (trendingRes.success) {
-        setTrendingItems(trendingRes.data || []);
+        setTrendingItems(Array.isArray(trendingRes.data) ? trendingRes.data : []);
       }
 
       if (wasteRes.success) {
