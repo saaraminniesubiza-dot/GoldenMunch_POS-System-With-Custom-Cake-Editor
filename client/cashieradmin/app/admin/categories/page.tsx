@@ -451,8 +451,9 @@ export default function CategoriesPage() {
                 description="Lower numbers appear first"
                 min="0"
               />
-              <label className="flex items-center gap-3 cursor-pointer p-3 bg-default-50 rounded-lg">
+              <label htmlFor="category-active" className="flex items-center gap-3 cursor-pointer p-3 bg-default-50 rounded-lg">
                 <input
+                  id="category-active"
                   type="checkbox"
                   checked={formData.is_active}
                   onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
