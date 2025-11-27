@@ -269,8 +269,8 @@ export default function AdminMenuPage() {
       stock_quantity: item.stock_quantity,
       min_stock_level: item.min_stock_level,
       is_infinite_stock: item.is_infinite_stock,
-      can_customize: item.can_customize,
-      can_preorder: item.can_preorder,
+      can_customize: false, // Disabled feature
+      can_preorder: false, // Disabled feature
       preparation_time_minutes: item.preparation_time_minutes,
       allergen_info: item.allergen_info,
       nutritional_info: item.nutritional_info,
@@ -1005,37 +1005,41 @@ export default function AdminMenuPage() {
                   step="0.01"
                 />
               )}
-              <Input
-                label="Stock Quantity"
-                type="number"
-                placeholder="Enter stock quantity"
-               
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData({
-                    ...formData,
-                    stock_quantity: value === '' ? 0 : parseInt(value, 10) || 0
-                  });
-                }}
-                min="0"
-                step="1"
-              />
-              <Input
-                label="Minimum Stock Level"
-                type="number"
-                placeholder="Enter minimum stock level for alerts"
-               
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData({
-                    ...formData,
-                    min_stock_level: value === '' ? 0 : parseInt(value, 10) || 0
-                  });
-                }}
-                min="0"
-                step="1"
-                description="Alert threshold for low stock notifications"
-              />
+              {!formData.is_infinite_stock && (
+                <>
+                  <Input
+                    label="Stock Quantity"
+                    type="number"
+                    placeholder="Enter stock quantity"
+
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFormData({
+                        ...formData,
+                        stock_quantity: value === '' ? 0 : parseInt(value, 10) || 0
+                      });
+                    }}
+                    min="0"
+                    step="1"
+                  />
+                  <Input
+                    label="Minimum Stock Level"
+                    type="number"
+                    placeholder="Enter minimum stock level for alerts"
+
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFormData({
+                        ...formData,
+                        min_stock_level: value === '' ? 0 : parseInt(value, 10) || 0
+                      });
+                    }}
+                    min="0"
+                    step="1"
+                    description="Alert threshold for low stock notifications"
+                  />
+                </>
+              )}
 
               {/* Feature Toggles */}
               <div className="space-y-3 p-4 bg-default-50 rounded-lg border border-default-200">
@@ -1054,29 +1058,29 @@ export default function AdminMenuPage() {
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 cursor-pointer">
+                  <label className="flex items-center gap-3 cursor-not-allowed opacity-50">
                     <input
                       type="checkbox"
-                      checked={formData.can_customize || false}
-                      onChange={(e) => setFormData({ ...formData, can_customize: e.target.checked })}
-                      className="w-4 h-4 rounded border-default-300 text-primary focus:ring-2 focus:ring-primary"
+                      checked={false}
+                      disabled
+                      className="w-4 h-4 rounded border-default-300 text-primary focus:ring-2 focus:ring-primary cursor-not-allowed"
                     />
                     <div>
-                      <span className="text-sm font-medium text-default-700">Customizable</span>
-                      <p className="text-xs text-default-500">Allow customers to customize this item</p>
+                      <span className="text-sm font-medium text-default-500">Customizable</span>
+                      <p className="text-xs text-default-400">Feature disabled - Allow customers to customize this item</p>
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 cursor-pointer">
+                  <label className="flex items-center gap-3 cursor-not-allowed opacity-50">
                     <input
                       type="checkbox"
-                      checked={formData.can_preorder || false}
-                      onChange={(e) => setFormData({ ...formData, can_preorder: e.target.checked })}
-                      className="w-4 h-4 rounded border-default-300 text-primary focus:ring-2 focus:ring-primary"
+                      checked={false}
+                      disabled
+                      className="w-4 h-4 rounded border-default-300 text-primary focus:ring-2 focus:ring-primary cursor-not-allowed"
                     />
                     <div>
-                      <span className="text-sm font-medium text-default-700">Pre-order Available</span>
-                      <p className="text-xs text-default-500">Enable pre-ordering for this item</p>
+                      <span className="text-sm font-medium text-default-500">Pre-order Available</span>
+                      <p className="text-xs text-default-400">Feature disabled - Enable pre-ordering for this item</p>
                     </div>
                   </label>
 
