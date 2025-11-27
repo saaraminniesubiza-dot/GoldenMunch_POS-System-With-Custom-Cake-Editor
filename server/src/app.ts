@@ -29,6 +29,11 @@ if (process.env.NODE_ENV === 'production') {
 
 const app: Express = express();
 
+// ==== PROXY CONFIGURATION ====
+// Trust proxy - required when behind reverse proxy (Render, AWS, etc.)
+// This allows Express to correctly read X-Forwarded-* headers
+app.set('trust proxy', 1);
+
 // ==== SECURITY MIDDLEWARE ====
 
 // Helmet - Security headers
