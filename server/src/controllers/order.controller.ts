@@ -398,7 +398,7 @@ export const getOrders = async (req: AuthRequest, res: Response) => {
   const offset = (pageNum - 1) * limitNum;
 
   let sql = `
-    SELECT co.*, c.first_name, c.last_name, c.phone
+    SELECT co.*, c.name, c.phone
     FROM customer_order co
     LEFT JOIN customer c ON co.customer_id = c.customer_id
     WHERE 1=1

@@ -9,18 +9,16 @@ import bcrypt from 'bcrypt';
 // ==== CUSTOMER MANAGEMENT ====
 
 export const createCustomer = async (req: AuthRequest, res: Response) => {
-  const { first_name, last_name, phone, email, date_of_birth } = req.body as {
-    first_name: string;
-    last_name: string;
+  const { name, phone, email } = req.body as {
+    name: string;
     phone: string;
     email?: string;
-    date_of_birth?: string;
   };
 
   const result = await query(
-    `INSERT INTO customer (first_name, last_name, phone, email, date_of_birth)
-     VALUES (?, ?, ?, ?, ?)`,
-    [first_name, last_name, phone, email || null, date_of_birth || null]
+    `INSERT INTO customer (name, phone, email)
+     VALUES (?, ?, ?)`,
+    [name, phone, email || null]
   );
 
   res.status(201).json(successResponse('Customer created', { id: getInsertId(result) }));
@@ -42,8 +40,8 @@ export const getCustomers = async (req: AuthRequest, res: Response) => {
   const params: any[] = [];
 
   if (search) {
-    sql += ` AND (first_name LIKE ? OR last_name LIKE ? OR phone LIKE ? OR email LIKE ?)`;
-    params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+    sql += ` AND (name LIKE ? OR phone LIKE ? OR email LIKE ?)`;
+    params.push(`%${search}%`, `%${search}%`, `%${search}%`);
   }
 
   if (is_active !== undefined) {
@@ -53,10 +51,10 @@ export const getCustomers = async (req: AuthRequest, res: Response) => {
 
   // Get total count
   const countSql = 'SELECT COUNT(*) as total FROM customer WHERE 1=1' +
-    (search ? ` AND (first_name LIKE ? OR last_name LIKE ? OR phone LIKE ? OR email LIKE ?)` : '') +
+    (search ? ` AND (name LIKE ? OR phone LIKE ? OR email LIKE ?)` : '') +
     (is_active !== undefined ? ' AND is_active = ?' : '');
   const countParams: any[] = search
-    ? [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`]
+    ? [`%${search}%`, `%${search}%`, `%${search}%`]
     : [];
   if (is_active !== undefined) {
     countParams.push(parseQueryBoolean(is_active));

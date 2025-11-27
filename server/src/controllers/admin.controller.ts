@@ -337,7 +337,7 @@ export const getFeedback = async (req: AuthRequest, res: Response) => {
   }
 
   let sql = `
-    SELECT cf.*, co.order_number, c.first_name, c.last_name
+    SELECT cf.*, co.order_number, c.name
     FROM customer_feedback cf
     JOIN customer_order co ON cf.order_id = co.order_id
     LEFT JOIN customer c ON cf.customer_id = c.customer_id
