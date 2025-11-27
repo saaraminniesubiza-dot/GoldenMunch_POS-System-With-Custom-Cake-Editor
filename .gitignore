@@ -21,7 +21,6 @@ logs/
 # Locks (optional, remove if needed)
 pnpm-lock.yaml
 yarn.lock
-package-lock.json
 bun.lockb
 
 # Certificates / Keys
