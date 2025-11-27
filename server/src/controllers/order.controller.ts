@@ -156,7 +156,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
         orderData.payment_method === 'card' ? orderData.payment_reference_number : null,
         orderData.special_instructions || null,
         orderData.kiosk_session_id || generateSessionId(),
-        orderData.order_type === 'custom_cake',
+        orderData.order_type === 'custom_order',
       ]
     );
 
