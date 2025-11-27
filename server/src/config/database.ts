@@ -17,8 +17,9 @@ const dbConfig: mysql.PoolOptions = {
   keepAliveInitialDelay: 0,
   // SSL Configuration for cloud databases (Aiven, AWS RDS, etc.)
   // Only enable SSL if DB_SSL environment variable is set to 'true'
+  // Set DB_SSL_REJECT_UNAUTHORIZED=true to enforce strict certificate validation
   ssl: process.env.DB_SSL === 'true' ? {
-    rejectUnauthorized: true,
+    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true',
   } : undefined,
 };
 
