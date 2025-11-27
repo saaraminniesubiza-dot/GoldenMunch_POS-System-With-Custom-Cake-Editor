@@ -205,7 +205,7 @@ export default function AdminSuppliersPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           placeholder="Search by name, contact, email, or phone..."
-          value={searchTerm}
+         
           onValueChange={setSearchTerm}
           startContent={<MagnifyingGlassIcon className="h-5 w-5 text-default-400" />}
           isClearable
@@ -216,9 +216,9 @@ export default function AdminSuppliersPage() {
           selectedKeys={[filters.status]}
           onChange={(e) => setFilters({ status: e.target.value as FilterOptions['status'] })}
         >
-          <SelectItem key="all" value="all">All Suppliers</SelectItem>
-          <SelectItem key="active" value="active">Active</SelectItem>
-          <SelectItem key="inactive" value="inactive">Inactive</SelectItem>
+          <SelectItem key="all">All Suppliers</SelectItem>
+          <SelectItem key="active">Active</SelectItem>
+          <SelectItem key="inactive">Inactive</SelectItem>
         </Select>
       </div>
 
@@ -354,7 +354,7 @@ export default function AdminSuppliersPage() {
               <Input
                 label="Supplier Name"
                 placeholder="Enter supplier name"
-                value={formData.supplier_name || ''}
+               
                 onChange={(e) => setFormData({ ...formData, supplier_name: e.target.value })}
                 isRequired
                 description="The official name of the supplier"
@@ -363,7 +363,7 @@ export default function AdminSuppliersPage() {
               <Input
                 label="Contact Person"
                 placeholder="Enter contact person name"
-                value={formData.contact_person || ''}
+               
                 onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
                 description="Name of the primary contact"
               />
@@ -372,7 +372,7 @@ export default function AdminSuppliersPage() {
                 label="Email"
                 placeholder="Enter email address"
                 type="email"
-                value={formData.email || ''}
+               
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 description="Business email address"
               />
@@ -380,7 +380,7 @@ export default function AdminSuppliersPage() {
               <Input
                 label="Phone"
                 placeholder="Enter phone number"
-                value={formData.phone || ''}
+               
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 description="Business phone number"
               />
@@ -388,7 +388,7 @@ export default function AdminSuppliersPage() {
               <Textarea
                 label="Address"
                 placeholder="Enter supplier address"
-                value={formData.address || ''}
+               
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 description="Full business address"
               />
@@ -433,7 +433,7 @@ export default function AdminSuppliersPage() {
               <Input
                 label="Supplier Name"
                 placeholder="Enter supplier name"
-                value={formData.supplier_name || ''}
+               
                 onChange={(e) => setFormData({ ...formData, supplier_name: e.target.value })}
                 isRequired
                 description="The official name of the supplier"
@@ -442,7 +442,7 @@ export default function AdminSuppliersPage() {
               <Input
                 label="Contact Person"
                 placeholder="Enter contact person name"
-                value={formData.contact_person || ''}
+               
                 onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
                 description="Name of the primary contact"
               />
@@ -451,7 +451,7 @@ export default function AdminSuppliersPage() {
                 label="Email"
                 placeholder="Enter email address"
                 type="email"
-                value={formData.email || ''}
+               
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 description="Business email address"
               />
@@ -459,7 +459,7 @@ export default function AdminSuppliersPage() {
               <Input
                 label="Phone"
                 placeholder="Enter phone number"
-                value={formData.phone || ''}
+               
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 description="Business phone number"
               />
@@ -467,7 +467,7 @@ export default function AdminSuppliersPage() {
               <Textarea
                 label="Address"
                 placeholder="Enter supplier address"
-                value={formData.address || ''}
+               
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 description="Full business address"
               />

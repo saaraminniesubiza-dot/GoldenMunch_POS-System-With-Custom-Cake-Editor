@@ -269,7 +269,7 @@ export default function SettingsPage() {
       {/* Search */}
       <Input
         placeholder="Search settings by key or description..."
-        value={searchTerm}
+       
         onValueChange={setSearchTerm}
         startContent={<MagnifyingGlassIcon className="h-5 w-5 text-default-400" />}
         className="max-w-md"
@@ -369,7 +369,7 @@ export default function SettingsPage() {
               <Input
                 label="Setting Key"
                 placeholder="e.g., max_order_items, enable_notifications"
-                value={formState.setting_key}
+               
                 onValueChange={(v) => setFormState({ ...formState, setting_key: v })}
                 description="Use lowercase with underscores (snake_case)"
                 isRequired
@@ -383,16 +383,16 @@ export default function SettingsPage() {
                 }}
                 isRequired
               >
-                <SelectItem key="string" value="string">
+                <SelectItem key="string">
                   String
                 </SelectItem>
-                <SelectItem key="number" value="number">
+                <SelectItem key="number">
                   Number
                 </SelectItem>
-                <SelectItem key="boolean" value="boolean">
+                <SelectItem key="boolean">
                   Boolean
                 </SelectItem>
-                <SelectItem key="json" value="json">
+                <SelectItem key="json">
                   JSON
                 </SelectItem>
               </Select>
@@ -406,10 +406,10 @@ export default function SettingsPage() {
                   }}
                   isRequired
                 >
-                  <SelectItem key="true" value="true">
+                  <SelectItem key="true">
                     True
                   </SelectItem>
-                  <SelectItem key="false" value="false">
+                  <SelectItem key="false">
                     False
                   </SelectItem>
                 </Select>
@@ -418,7 +418,7 @@ export default function SettingsPage() {
                   label="Setting Value"
                   type="number"
                   placeholder="Enter number value"
-                  value={formState.setting_value}
+                 
                   onValueChange={(v) => setFormState({ ...formState, setting_value: v })}
                   isRequired
                 />
@@ -428,7 +428,7 @@ export default function SettingsPage() {
                   <textarea
                     className="w-full min-h-[100px] p-2 rounded-lg border border-default-200 font-mono text-sm"
                     placeholder='{"key": "value"}'
-                    value={formState.setting_value}
+                   
                     onChange={(e) => setFormState({ ...formState, setting_value: e.target.value })}
                   />
                 </div>
@@ -436,7 +436,7 @@ export default function SettingsPage() {
                 <Input
                   label="Setting Value"
                   placeholder="Enter value"
-                  value={formState.setting_value}
+                 
                   onValueChange={(v) => setFormState({ ...formState, setting_value: v })}
                   isRequired
                 />
@@ -445,7 +445,7 @@ export default function SettingsPage() {
               <Input
                 label="Description (optional)"
                 placeholder="Brief description of this setting"
-                value={formState.description}
+               
                 onValueChange={(v) => setFormState({ ...formState, description: v })}
               />
             </div>
@@ -469,7 +469,7 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <Input
                 label="Setting Key"
-                value={formState.setting_key}
+               
                 isReadOnly
                 description="Key cannot be changed"
               />
@@ -490,10 +490,10 @@ export default function SettingsPage() {
                   }}
                   isRequired
                 >
-                  <SelectItem key="true" value="true">
+                  <SelectItem key="true">
                     True
                   </SelectItem>
-                  <SelectItem key="false" value="false">
+                  <SelectItem key="false">
                     False
                   </SelectItem>
                 </Select>
@@ -502,7 +502,7 @@ export default function SettingsPage() {
                   label="Setting Value"
                   type="number"
                   placeholder="Enter number value"
-                  value={formState.setting_value}
+                 
                   onValueChange={(v) => setFormState({ ...formState, setting_value: v })}
                   isRequired
                 />
@@ -512,7 +512,7 @@ export default function SettingsPage() {
                   <textarea
                     className="w-full min-h-[100px] p-2 rounded-lg border border-default-200 font-mono text-sm"
                     placeholder='{"key": "value"}'
-                    value={formState.setting_value}
+                   
                     onChange={(e) => setFormState({ ...formState, setting_value: e.target.value })}
                   />
                 </div>
@@ -520,7 +520,7 @@ export default function SettingsPage() {
                 <Input
                   label="Setting Value"
                   placeholder="Enter value"
-                  value={formState.setting_value}
+                 
                   onValueChange={(v) => setFormState({ ...formState, setting_value: v })}
                   isRequired
                 />
@@ -529,7 +529,7 @@ export default function SettingsPage() {
               <Input
                 label="Description (optional)"
                 placeholder="Brief description of this setting"
-                value={formState.description}
+               
                 onValueChange={(v) => setFormState({ ...formState, description: v })}
               />
             </div>

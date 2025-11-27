@@ -291,7 +291,7 @@ export default function AdminFeedbackPage() {
               <Input
                 type="date"
                 label="Start Date"
-                value={filters.startDate}
+               
                 onValueChange={(v) =>
                   setFilters({ ...filters, startDate: v })
                 }
@@ -299,7 +299,7 @@ export default function AdminFeedbackPage() {
               <Input
                 type="date"
                 label="End Date"
-                value={filters.endDate}
+               
                 onValueChange={(v) =>
                   setFilters({ ...filters, endDate: v })
                 }
@@ -312,22 +312,22 @@ export default function AdminFeedbackPage() {
                   setFilters({ ...filters, feedbackType: selected as any });
                 }}
               >
-                <SelectItem key="all" value="all">
+                <SelectItem key="all">
                   All Types
                 </SelectItem>
-                <SelectItem key="positive" value="positive">
+                <SelectItem key="positive">
                   Positive
                 </SelectItem>
-                <SelectItem key="neutral" value="neutral">
+                <SelectItem key="neutral">
                   Neutral
                 </SelectItem>
-                <SelectItem key="negative" value="negative">
+                <SelectItem key="negative">
                   Negative
                 </SelectItem>
               </Select>
               <Input
                 placeholder="Search feedback..."
-                value={filters.searchTerm}
+               
                 onValueChange={(v) =>
                   setFilters({ ...filters, searchTerm: v })
                 }
@@ -500,7 +500,7 @@ export default function AdminFeedbackPage() {
                   </label>
                   <Textarea
                     placeholder="Type your response here..."
-                    value={responseText}
+                   
                     onValueChange={setResponseText}
                     minRows={4}
                     maxRows={8}

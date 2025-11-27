@@ -188,7 +188,7 @@ export default function WastePage() {
       <div className="flex flex-wrap gap-4">
         <Input
           placeholder="Search by item or reason..."
-          value={searchTerm}
+         
           onValueChange={setSearchTerm}
           startContent={<MagnifyingGlassIcon className="h-5 w-5 text-default-400" />}
           className="max-w-md"
@@ -197,7 +197,7 @@ export default function WastePage() {
         <Input
           type="date"
           label="Filter by Date"
-          value={dateFilter}
+         
           onValueChange={setDateFilter}
           className="max-w-xs"
         />
@@ -211,20 +211,20 @@ export default function WastePage() {
           }}
           className="max-w-xs"
         >
-          <SelectItem key="" value="">All Reasons</SelectItem>
-          <SelectItem key={WasteReason.EXPIRED} value={WasteReason.EXPIRED}>
+          <SelectItem key="">All Reasons</SelectItem>
+          <SelectItem key={WasteReason.EXPIRED}>
             Expired
           </SelectItem>
-          <SelectItem key={WasteReason.DAMAGED} value={WasteReason.DAMAGED}>
+          <SelectItem key={WasteReason.DAMAGED}>
             Damaged
           </SelectItem>
-          <SelectItem key={WasteReason.OVERPRODUCTION} value={WasteReason.OVERPRODUCTION}>
+          <SelectItem key={WasteReason.OVERPRODUCTION}>
             Overproduction
           </SelectItem>
-          <SelectItem key={WasteReason.QUALITY_ISSUE} value={WasteReason.QUALITY_ISSUE}>
+          <SelectItem key={WasteReason.QUALITY_ISSUE}>
             Quality Issue
           </SelectItem>
-          <SelectItem key={WasteReason.CUSTOMER_RETURN} value={WasteReason.CUSTOMER_RETURN}>
+          <SelectItem key={WasteReason.CUSTOMER_RETURN}>
             Customer Return
           </SelectItem>
         </Select>
