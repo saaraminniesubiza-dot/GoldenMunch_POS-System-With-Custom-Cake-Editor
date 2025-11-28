@@ -817,20 +817,42 @@ export const processPayment = async (req: AuthRequest, res: Response) => {
       throw new AppError('Insufficient payment amount', 400);
     }
 
-    // Create customer order
+    // Find or create customer record
+    let customerId = null;
+    if (request.customer_phone) {
+      // Check if customer exists
+      const [existingCustomer] = await conn.query<any>(
+        `SELECT customer_id FROM customer WHERE phone = ?`,
+        [request.customer_phone]
+      );
+
+      if (existingCustomer.length > 0) {
+        customerId = existingCustomer[0].customer_id;
+      } else {
+        // Create new customer
+        const [customerResult] = await conn.query<any>(
+          `INSERT INTO customer (name, phone, email) VALUES (?, ?, ?)`,
+          [request.customer_name || 'Walk-in Customer', request.customer_phone, request.customer_email]
+        );
+        customerId = customerResult.insertId;
+      }
+    }
+
+    // Create customer order with correct column names
     const [orderResult] = await conn.query<any>(
       `INSERT INTO customer_order
-       (customer_name, customer_email, customer_phone, order_type, status,
-        total_amount, payment_method, payment_status, notes, cashier_id)
-       VALUES (?, ?, ?, 'custom_cake', 'pending', ?, ?, 'completed', ?, ?)`,
+       (customer_id, order_type, order_status, order_source,
+        total_amount, final_amount, payment_method, payment_status,
+        special_instructions, cashier_id, scheduled_pickup_datetime)
+       VALUES (?, 'custom_cake', 'pending', 'cashier', ?, ?, ?, 'paid', ?, ?, ?)`,
       [
-        request.customer_name,
-        request.customer_email,
-        request.customer_phone,
+        customerId,
         request.approved_price,
+        request.approved_price, // final_amount = total_amount
         payment_method,
         `Custom Cake - Pickup: ${request.scheduled_pickup_date}`,
         cashier_id,
+        request.scheduled_pickup_date || null,
       ]
     );
 

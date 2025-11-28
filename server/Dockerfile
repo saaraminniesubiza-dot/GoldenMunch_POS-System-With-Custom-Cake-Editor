@@ -46,12 +46,13 @@ RUN mkdir -p uploads && chown -R nodejs:nodejs uploads
 # Switch to non-root user
 USER nodejs
 
-# Expose port
-EXPOSE 3001
+# Expose port (Render will assign dynamic PORT via env variable)
+EXPOSE 5000
+ENV PORT=5000
 
-# Health check
+# Health check - uses PORT environment variable for compatibility with Render
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "const port = process.env.PORT || 5000; require('http').get('http://localhost:' + port + '/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
