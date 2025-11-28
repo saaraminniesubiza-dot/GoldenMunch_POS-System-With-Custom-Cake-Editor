@@ -104,6 +104,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
 
       orderItems.push({
         menu_item_id: item.menu_item_id,
+        item_name: menuItemData.name,
         custom_cake_design_id: designId,
         flavor_id: item.flavor_id || null,
         size_id: item.size_id || null,
@@ -169,13 +170,14 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     for (const orderItem of orderItems) {
       await conn.query(
         `INSERT INTO order_item
-         (order_id, menu_item_id, custom_cake_design_id, flavor_id, size_id,
+         (order_id, menu_item_id, item_name, custom_cake_design_id, flavor_id, size_id,
           quantity, unit_price, flavor_cost, size_multiplier, design_cost,
           item_total, special_instructions)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           orderId,
           orderItem.menu_item_id,
+          orderItem.item_name,
           orderItem.custom_cake_design_id,
           orderItem.flavor_id,
           orderItem.size_id,

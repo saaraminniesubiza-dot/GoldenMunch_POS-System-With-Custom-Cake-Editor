@@ -240,43 +240,43 @@ INSERT INTO custom_cake_design (theme_id, frosting_color, frosting_type, decorat
 INSERT INTO customer_order (order_number, verification_code, customer_id, order_datetime, order_type, order_source, total_amount, discount_amount, tax_amount, final_amount, cashier_id, payment_method, payment_status, order_status, is_printed) VALUES
 ('ORD20251116-001234', '123456', 1, '2025-11-16 08:30:00', 'walk_in', 'kiosk', 535.00, 53.50, 57.78, 539.28, 1, 'gcash', 'paid', 'completed', TRUE);
 
-INSERT INTO order_item (order_id, menu_item_id, quantity, unit_price, item_total) VALUES
-(1, 6, 5, 55.00, 275.00), -- 5 Ensaymada
-(1, 15, 2, 60.00, 120.00), -- 2 Brewed Coffee
-(1, 11, 10, 12.00, 120.00), -- 10 Pandesal
-(1, 9, 1, 75.00, 75.00); -- 1 Chocolate Croissant
+INSERT INTO order_item (order_id, menu_item_id, item_name, quantity, unit_price, item_total) VALUES
+(1, 6, 'Ensaymada', 5, 55.00, 275.00), -- 5 Ensaymada
+(1, 15, 'Brewed Coffee', 2, 60.00, 120.00), -- 2 Brewed Coffee
+(1, 11, 'Pandesal', 10, 12.00, 120.00), -- 10 Pandesal
+(1, 9, 'Chocolate Croissant', 1, 75.00, 75.00); -- 1 Chocolate Croissant
 
 -- Order 2: Pre-order (Ready for pickup)
 INSERT INTO customer_order (order_number, verification_code, customer_id, order_datetime, scheduled_pickup_datetime, order_type, order_source, is_preorder, total_amount, discount_amount, tax_amount, final_amount, cashier_id, payment_method, payment_status, order_status, gcash_reference_number, payment_verified_at, payment_verified_by) VALUES
 ('ORD20251115-002345', '234567', 2, '2025-11-15 14:00:00', '2025-11-16 16:00:00', 'pre_order', 'kiosk', TRUE, 450.00, 0.00, 54.00, 504.00, 1, 'gcash', 'paid', 'ready', 'GC-2025111512345', '2025-11-15 14:05:00', 1);
 
-INSERT INTO order_item (order_id, menu_item_id, quantity, unit_price, item_total) VALUES
-(2, 1, 1, 450.00, 450.00); -- 1 Chocolate Fudge Cake
+INSERT INTO order_item (order_id, menu_item_id, item_name, quantity, unit_price, item_total) VALUES
+(2, 1, 'Chocolate Fudge Cake', 1, 450.00, 450.00); -- 1 Chocolate Fudge Cake
 
 -- Order 3: Custom cake order (Preparing)
 INSERT INTO customer_order (order_number, verification_code, customer_id, order_datetime, scheduled_pickup_datetime, order_type, order_source, is_preorder, advance_payment_required, advance_payment_amount, total_amount, discount_amount, tax_amount, final_amount, payment_method, payment_status, order_status, special_instructions) VALUES
 ('ORD20251114-003456', '345678', 3, '2025-11-14 10:00:00', '2025-11-18 14:00:00', 'custom_order', 'kiosk', TRUE, TRUE, 400.00, 1200.00, 0.00, 144.00, 1344.00, 'gcash', 'partial_paid', 'preparing', 'Please call when ready');
 
-INSERT INTO order_item (order_id, menu_item_id, custom_cake_design_id, flavor_id, size_id, quantity, unit_price, flavor_cost, size_multiplier, design_cost, item_total) VALUES
-(3, 2, 1, 1, 3, 1, 400.00, 0.00, 2.00, 100.00, 1200.00); -- Custom Birthday Cake
+INSERT INTO order_item (order_id, menu_item_id, item_name, custom_cake_design_id, flavor_id, size_id, quantity, unit_price, flavor_cost, size_multiplier, design_cost, item_total) VALUES
+(3, 2, 'Vanilla Birthday Cake', 1, 1, 3, 1, 400.00, 0.00, 2.00, 100.00, 1200.00); -- Custom Birthday Cake
 
 -- Order 4: Pending order (Just placed)
 INSERT INTO customer_order (order_number, verification_code, customer_id, order_datetime, order_type, order_source, total_amount, discount_amount, tax_amount, final_amount, payment_method, payment_status, order_status) VALUES
 ('ORD20251116-004567', '456789', 4, '2025-11-16 11:30:00', 'walk_in', 'kiosk', 365.00, 0.00, 43.80, 408.80, 'cash', 'pending', 'pending');
 
-INSERT INTO order_item (order_id, menu_item_id, quantity, unit_price, item_total) VALUES
-(4, 21, 2, 150.00, 300.00), -- 2 Halo-Halo
-(4, 7, 5, 35.00, 175.00); -- 5 Cheese Pandesal
+INSERT INTO order_item (order_id, menu_item_id, item_name, quantity, unit_price, item_total) VALUES
+(4, 21, 'Halo-Halo', 2, 150.00, 300.00), -- 2 Halo-Halo
+(4, 7, 'Cheese Pandesal', 5, 35.00, 175.00); -- 5 Cheese Pandesal
 
 -- Order 5: Large order (Confirmed)
 INSERT INTO customer_order (order_number, verification_code, customer_id, order_datetime, scheduled_pickup_datetime, order_type, order_source, is_preorder, total_amount, discount_amount, tax_amount, final_amount, cashier_id, payment_method, payment_status, order_status, paymaya_reference_number, payment_verified_at, payment_verified_by) VALUES
 ('ORD20251115-005678', '567890', 5, '2025-11-15 09:00:00', '2025-11-16 18:00:00', 'pre_order', 'cashier', TRUE, 2150.00, 215.00, 232.20, 2167.20, 1, 'paymaya', 'paid', 'confirmed', 'PM-2025111509876', '2025-11-15 09:10:00', 1);
 
-INSERT INTO order_item (order_id, menu_item_id, quantity, unit_price, item_total) VALUES
-(5, 3, 2, 500.00, 1000.00), -- 2 Red Velvet Cakes
-(5, 5, 1, 420.00, 420.00), -- 1 Ube Cake
-(5, 6, 10, 55.00, 550.00), -- 10 Ensaymada
-(5, 16, 2, 95.00, 190.00); -- 2 Cappuccino
+INSERT INTO order_item (order_id, menu_item_id, item_name, quantity, unit_price, item_total) VALUES
+(5, 3, 'Red Velvet Cake', 2, 500.00, 1000.00), -- 2 Red Velvet Cakes
+(5, 5, 'Ube Cake', 1, 420.00, 420.00), -- 1 Ube Cake
+(5, 6, 'Ensaymada', 10, 55.00, 550.00), -- 10 Ensaymada
+(5, 16, 'Cappuccino', 2, 95.00, 190.00); -- 2 Cappuccino
 
 -- ============================================================================
 -- 12. ORDER TIMELINE
