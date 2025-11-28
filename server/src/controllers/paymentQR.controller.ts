@@ -26,7 +26,7 @@ export const uploadPaymentQR = async (req: AuthRequest, res: Response) => {
   // Check if setting exists
   const existingSetting = getFirstRow<any>(
     await query(
-      'SELECT * FROM kiosk_setting WHERE setting_key = ?',
+      'SELECT * FROM system_settings WHERE setting_key = ?',
       [settingKey]
     )
   );
@@ -34,7 +34,7 @@ export const uploadPaymentQR = async (req: AuthRequest, res: Response) => {
   if (existingSetting) {
     // Update existing setting
     await query(
-      'UPDATE kiosk_setting SET setting_value = ?, updated_by = ?, updated_at = NOW() WHERE setting_key = ?',
+      'UPDATE system_settings SET setting_value = ?, updated_by = ?, updated_at = NOW() WHERE setting_key = ?',
       [qrCodeUrl, req.user?.id, settingKey]
     );
 
@@ -48,8 +48,8 @@ export const uploadPaymentQR = async (req: AuthRequest, res: Response) => {
   } else {
     // Create new setting
     await query(
-      `INSERT INTO kiosk_setting (setting_key, setting_value, setting_type, description, updated_by)
-       VALUES (?, ?, 'string', ?, ?)`,
+      `INSERT INTO system_settings (setting_key, setting_value, setting_type, description, is_public, updated_by)
+       VALUES (?, ?, 'string', ?, TRUE, ?)`,
       [
         settingKey,
         qrCodeUrl,
@@ -79,7 +79,7 @@ export const getPaymentQR = async (req: AuthRequest, res: Response) => {
 
   const setting = getFirstRow<any>(
     await query(
-      'SELECT setting_value FROM kiosk_setting WHERE setting_key = ?',
+      'SELECT setting_value FROM system_settings WHERE setting_key = ? AND is_public = TRUE',
       [settingKey]
     )
   );
@@ -100,14 +100,14 @@ export const getPaymentQR = async (req: AuthRequest, res: Response) => {
 export const getAllPaymentQR = async (req: AuthRequest, res: Response) => {
   const gcashSetting = getFirstRow<any>(
     await query(
-      'SELECT setting_value FROM kiosk_setting WHERE setting_key = ?',
+      'SELECT setting_value FROM system_settings WHERE setting_key = ?',
       ['gcash_qr_code_url']
     )
   );
 
   const paymayaSetting = getFirstRow<any>(
     await query(
-      'SELECT setting_value FROM kiosk_setting WHERE setting_key = ?',
+      'SELECT setting_value FROM system_settings WHERE setting_key = ?',
       ['paymaya_qr_code_url']
     )
   );
