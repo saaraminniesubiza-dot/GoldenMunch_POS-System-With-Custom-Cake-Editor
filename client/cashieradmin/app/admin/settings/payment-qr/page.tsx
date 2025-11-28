@@ -144,6 +144,7 @@ export default function PaymentQRSettingsPage() {
                   width={400}
                   height={400}
                   className="object-contain"
+                  unoptimized
                 />
               </div>
               {qrFile && (
