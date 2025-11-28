@@ -36,90 +36,18 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
         throw new AppError(`Menu item ${item.menu_item_id} not found`, 404);
       }
 
-      let itemPrice = menuItemData.current_price || 0;
-      let flavorCost = 0;
-      let sizeMultiplier = 1;
-      let designCost = 0;
-      let designId = null;
-
-      // Handle custom cake design
-      if (item.custom_cake_design) {
-        // Insert custom cake design
-        const [designResult] = await conn.query(
-          `INSERT INTO custom_cake_design
-           (theme_id, frosting_color, frosting_type, decoration_details,
-            cake_text, special_instructions, design_complexity, additional_cost)
-           VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
-          [
-            item.custom_cake_design.theme_id || null,
-            item.custom_cake_design.frosting_color || null,
-            item.custom_cake_design.frosting_type,
-            item.custom_cake_design.decoration_details || null,
-            item.custom_cake_design.cake_text || null,
-            item.custom_cake_design.special_instructions || null,
-            item.custom_cake_design.design_complexity,
-          ]
-        );
-
-        designId = (designResult as any).insertId;
-
-        // Get theme cost if applicable
-        if (item.custom_cake_design.theme_id) {
-          const [themeRows] = await conn.query(
-            'SELECT base_additional_cost FROM custom_cake_theme WHERE theme_id = ?',
-            [item.custom_cake_design.theme_id]
-          );
-          if (Array.isArray(themeRows) && themeRows.length > 0) {
-            const theme = themeRows[0] as any;
-            designCost += theme.base_additional_cost || 0;
-          }
-        }
-      }
-
-      // Get flavor cost
-      if (item.flavor_id) {
-        const [flavorRows] = await conn.query(
-          'SELECT additional_cost FROM cake_flavors WHERE flavor_id = ?',
-          [item.flavor_id]
-        );
-        if (Array.isArray(flavorRows) && flavorRows.length > 0) {
-          const flavor = flavorRows[0] as any;
-          flavorCost = flavor.additional_cost || 0;
-        }
-      }
-
-      // Get size multiplier
-      if (item.size_id) {
-        const [sizeRows] = await conn.query(
-          'SELECT size_multiplier FROM cake_sizes WHERE size_id = ?',
-          [item.size_id]
-        );
-        if (Array.isArray(sizeRows) && sizeRows.length > 0) {
-          const size = sizeRows[0] as any;
-          sizeMultiplier = size.size_multiplier || 1;
-        }
-      }
-
-      const subtotal = itemPrice * item.quantity;
-      const itemTotal = (itemPrice + flavorCost + designCost) * sizeMultiplier * item.quantity;
+      const itemPrice = menuItemData.current_price || 0;
+      const itemSubtotal = itemPrice * item.quantity;
 
       orderItems.push({
         menu_item_id: item.menu_item_id,
         item_name: menuItemData.name,
-        custom_cake_design_id: designId,
-        flavor_id: item.flavor_id || null,
-        size_id: item.size_id || null,
         quantity: item.quantity,
         unit_price: itemPrice,
-        subtotal: subtotal,
-        flavor_cost: flavorCost,
-        size_multiplier: sizeMultiplier,
-        design_cost: designCost,
-        item_total: itemTotal,
-        special_instructions: item.special_instructions || null,
+        subtotal: itemSubtotal,
       });
 
-      subtotal += itemTotal;
+      subtotal += itemSubtotal;
     }
 
     // Get applicable tax
@@ -168,29 +96,21 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
 
     const orderId = (orderResult as any).insertId;
 
-    // Insert order items
+    // Insert order items (V3 schema - only required fields)
+    // Database will auto-set: flavor_cost=0, size_multiplier=1, design_cost=0
+    // Trigger will auto-set: item_total=subtotal for simple orders
     for (const orderItem of orderItems) {
       await conn.query(
         `INSERT INTO order_item
-         (order_id, menu_item_id, item_name, custom_cake_design_id, flavor_id, size_id,
-          quantity, unit_price, subtotal, flavor_cost, size_multiplier, design_cost,
-          item_total, special_instructions)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (order_id, menu_item_id, item_name, quantity, unit_price, subtotal)
+         VALUES (?, ?, ?, ?, ?, ?)`,
         [
           orderId,
           orderItem.menu_item_id,
           orderItem.item_name,
-          orderItem.custom_cake_design_id,
-          orderItem.flavor_id,
-          orderItem.size_id,
           orderItem.quantity,
           orderItem.unit_price,
           orderItem.subtotal,
-          orderItem.flavor_cost,
-          orderItem.size_multiplier,
-          orderItem.design_cost,
-          orderItem.item_total,
-          orderItem.special_instructions,
         ]
       );
     }
