@@ -5,7 +5,7 @@
 # OS files
 .DS_Store
 Thumbs.db
-
+uploads/
 # Environment files
 .env
 .env.*.local
