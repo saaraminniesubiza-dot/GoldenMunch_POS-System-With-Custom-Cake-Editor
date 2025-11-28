@@ -93,7 +93,7 @@ export default function TransactionsPage() {
       new Date(t.order_datetime).toLocaleString(),
       t.payment_method,
       t.payment_status,
-      `₱${t.final_amount.toFixed(2)}`
+      `₱${Number(t.final_amount).toFixed(2)}`
     ]);
 
     const csvContent = [
@@ -164,7 +164,7 @@ export default function TransactionsPage() {
               </div>
               <div>
                 <p className="text-sm text-default-500">Total Revenue</p>
-                <p className="text-2xl font-bold">₱{getTotalAmount().toFixed(2)}</p>
+                <p className="text-2xl font-bold">₱{Number(getTotalAmount()).toFixed(2)}</p>
               </div>
             </div>
           </CardBody>
@@ -193,7 +193,7 @@ export default function TransactionsPage() {
               <div>
                 <p className="text-sm text-default-500">Average Amount</p>
                 <p className="text-2xl font-bold">
-                  ₱{filteredTransactions.length > 0 ? (getTotalAmount() / filteredTransactions.length).toFixed(2) : '0.00'}
+                  ₱{filteredTransactions.length > 0 ? Number(getTotalAmount() / filteredTransactions.length).toFixed(2) : '0.00'}
                 </p>
               </div>
             </div>
@@ -304,7 +304,7 @@ export default function TransactionsPage() {
                     </Chip>
                   </TableCell>
                   <TableCell>
-                    <span className="font-semibold">₱{transaction.final_amount.toFixed(2)}</span>
+                    <span className="font-semibold">₱{Number(transaction.final_amount).toFixed(2)}</span>
                   </TableCell>
                 </TableRow>
               ))}
