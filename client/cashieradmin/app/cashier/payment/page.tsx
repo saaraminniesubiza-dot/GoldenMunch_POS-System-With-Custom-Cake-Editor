@@ -89,16 +89,26 @@ export default function PaymentPage() {
     try {
       setLoading(true);
 
-      // Load pending payments (orders with payment_status = 'pending')
+      // Load pending payments (orders with payment_status = 'unpaid')
       const pendingResponse = await OrderService.getOrders();
+      console.log('📥 Full API Response:', pendingResponse);
 
       if (pendingResponse.success && pendingResponse.data) {
         // Server returns { orders: [...], pagination: {...} }
         const orders = pendingResponse.data.orders || [];
-        const pending = orders.filter(
-          (order: CustomerOrder) => order.payment_status === "pending",
-        );
+        console.log('📦 Total orders received:', orders.length);
+        console.log('📋 Orders data:', orders);
 
+        // Log payment status of each order
+        orders.forEach((order: CustomerOrder, index: number) => {
+          console.log(`Order ${index + 1}: ID=${order.order_id}, Number=${order.order_number}, Payment Status="${order.payment_status}"`);
+        });
+
+        const pending = orders.filter(
+          (order: CustomerOrder) => order.payment_status === 'unpaid'
+        );
+        console.log('💰 Filtered unpaid orders:', pending.length);
+        console.log('💳 Unpaid orders:', pending);
         setPendingOrders(pending);
 
         // Calculate pending stats
@@ -120,16 +130,18 @@ export default function PaymentPage() {
       if (allResponse.success && allResponse.data) {
         // Server returns { orders: [...], pagination: {...} }
         const orders = allResponse.data.orders || [];
-        const today = new Date().toISOString().split("T")[0];
+        const today = new Date().toISOString().split('T')[0];
+        console.log('📅 Today\'s date for filtering:', today);
+
         const recentPaid = orders.filter((order: CustomerOrder) => {
-          const orderDate = new Date(order.order_datetime)
-            .toISOString()
-            .split("T")[0];
-
-          return order.payment_status === "paid" && orderDate === today;
+          const orderDate = new Date(order.order_datetime).toISOString().split('T')[0];
+          const isPaid = order.payment_status === 'paid';
+          const isToday = orderDate === today;
+          console.log(`Order ${order.order_number}: payment_status="${order.payment_status}", date=${orderDate}, isPaid=${isPaid}, isToday=${isToday}`);
+          return isPaid && isToday;
         });
-
-        setRecentPayments(recentPaid.slice(0, 10)); // Show last 10
+        console.log('✅ Recent paid orders today:', recentPaid.length);
+        setRecentPayments(recentPaid.slice(0, 10));  // Show last 10
 
         // Calculate verified stats
         const verifiedAmount = recentPaid.reduce(
