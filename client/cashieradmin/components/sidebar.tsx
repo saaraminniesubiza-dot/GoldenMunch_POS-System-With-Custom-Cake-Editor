@@ -23,6 +23,8 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
+  BanknotesIcon,
+  QrCodeIcon,
 } from '@heroicons/react/24/outline';
 
 interface NavItem {
@@ -44,10 +46,12 @@ const cashierNav: NavItem[] = [
 const adminNav: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon, adminOnly: true },
+  { name: 'Transactions', href: '/admin/transactions', icon: BanknotesIcon, adminOnly: true },
   { name: 'Menu Management', href: '/admin/menu', icon: Square3Stack3DIcon, adminOnly: true },
   { name: 'Categories', href: '/admin/categories', icon: TagIcon, adminOnly: true },
   { name: 'Cashiers', href: '/admin/cashiers', icon: UserGroupIcon, adminOnly: true },
   { name: 'Custom Cakes', href: '/admin/custom-cakes', icon: CakeIcon, adminOnly: true },
+  { name: 'Payment QR', href: '/admin/settings/payment-qr', icon: QrCodeIcon, adminOnly: true },
   { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon, adminOnly: true },
 ];
 

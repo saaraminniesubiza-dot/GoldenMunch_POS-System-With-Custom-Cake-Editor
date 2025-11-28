@@ -65,4 +65,30 @@ export class AuthService {
     const user = this.getUser();
     return user?.type === 'cashier';
   }
+
+  static async updateUsername(new_username: string, password: string) {
+    const response = await apiClient.put('/auth/admin/username', {
+      new_username,
+      password,
+    });
+
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to update username');
+    }
+
+    return response;
+  }
+
+  static async updatePassword(current_password: string, new_password: string) {
+    const response = await apiClient.put('/auth/admin/password', {
+      current_password,
+      new_password,
+    });
+
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to update password');
+    }
+
+    return response;
+  }
 }

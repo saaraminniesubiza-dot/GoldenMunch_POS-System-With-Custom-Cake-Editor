@@ -203,3 +203,109 @@ export const diagnosticJWT = async (_req: Request, res: Response) => {
     },
   });
 };
+
+// Update admin username
+export const updateAdminUsername = async (req: any, res: Response) => {
+  try {
+    const { new_username, password } = req.body;
+    const admin_id = req.user?.id;
+
+    if (!new_username || !password) {
+      throw new AppError('New username and current password are required', 400);
+    }
+
+    if (typeof new_username !== 'string' || new_username.trim().length < 3) {
+      throw new AppError('Username must be at least 3 characters long', 400);
+    }
+
+    // Get current admin
+    const admin = getFirstRow<any>(await query(
+      'SELECT * FROM admin WHERE admin_id = ?',
+      [admin_id]
+    ));
+
+    if (!admin) {
+      throw new AppError('Admin not found', 404);
+    }
+
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(password, admin.password_hash);
+    if (!isValidPassword) {
+      throw new AppError('Invalid password', 401);
+    }
+
+    // Check if new username already exists
+    const existingAdmin = getFirstRow<any>(await query(
+      'SELECT admin_id FROM admin WHERE username = ? AND admin_id != ?',
+      [new_username.trim(), admin_id]
+    ));
+
+    if (existingAdmin) {
+      throw new AppError('Username already exists', 400);
+    }
+
+    // Update username
+    await query(
+      'UPDATE admin SET username = ? WHERE admin_id = ?',
+      [new_username.trim(), admin_id]
+    );
+
+    res.json(successResponse('Username updated successfully'));
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    console.error('Update username error:', error);
+    throw new AppError('Failed to update username', 500);
+  }
+};
+
+// Update admin password
+export const updateAdminPassword = async (req: any, res: Response) => {
+  try {
+    const { current_password, new_password } = req.body;
+    const admin_id = req.user?.id;
+
+    if (!current_password || !new_password) {
+      throw new AppError('Current password and new password are required', 400);
+    }
+
+    if (typeof new_password !== 'string' || new_password.length < 6) {
+      throw new AppError('New password must be at least 6 characters long', 400);
+    }
+
+    // Get current admin
+    const admin = getFirstRow<any>(await query(
+      'SELECT * FROM admin WHERE admin_id = ?',
+      [admin_id]
+    ));
+
+    if (!admin) {
+      throw new AppError('Admin not found', 404);
+    }
+
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(current_password, admin.password_hash);
+    if (!isValidPassword) {
+      throw new AppError('Current password is incorrect', 401);
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(new_password, salt);
+
+    // Update password
+    await query(
+      'UPDATE admin SET password_hash = ? WHERE admin_id = ?',
+      [password_hash, admin_id]
+    );
+
+    res.json(successResponse('Password updated successfully'));
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    console.error('Update password error:', error);
+    throw new AppError('Failed to update password', 500);
+  }
+};
