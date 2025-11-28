@@ -10,6 +10,34 @@ This directory contains database migration scripts to fix schema mismatches and 
 **Status**: Ready to apply
 **Purpose**: Fixes the schema mismatch between V2 (code expectations) and V3 (current schema)
 
+### 002_fix_order_item_schema_v3_to_v2_compatibility.sql
+**Priority**: CRITICAL
+**Status**: Ready to apply
+**Purpose**: Fixes the order_item table schema mismatch between V2 (code expectations) and V3 (current schema)
+
+**What it does:**
+- Adds 8 missing columns to `order_item` table
+- Creates foreign keys for custom_cake_design, flavor, and size tables
+- Sets up triggers for automatic data consistency
+- Updates existing records with calculated values
+
+**Columns Added:**
+1. `custom_cake_design_id` - Link to custom cake design (V2 compatibility)
+2. `flavor_id` - Cake flavor selection
+3. `size_id` - Cake size selection
+4. `flavor_cost` - Additional cost for flavor
+5. `size_multiplier` - Price multiplier for size
+6. `design_cost` - Additional cost for custom design
+7. `item_total` - Total for this line item
+8. `special_instructions` - Special instructions for item (V2 compatibility)
+
+---
+
+### 001_fix_customer_order_schema_v3_to_v2_compatibility.sql
+**Priority**: CRITICAL
+**Status**: Ready to apply
+**Purpose**: Fixes the customer_order table schema mismatch between V2 (code expectations) and V3 (current schema)
+
 **What it does:**
 - Adds 15 missing columns to `customer_order` table
 - Renames columns to match code expectations
@@ -82,7 +110,8 @@ This directory contains database migration scripts to fix schema mismatches and 
 
 Always run migrations in numerical order:
 1. `001_fix_customer_order_schema_v3_to_v2_compatibility.sql`
-2. `../add_kiosk_setting_table.sql` (if not already applied)
+2. `002_fix_order_item_schema_v3_to_v2_compatibility.sql` ⭐ **NEW - Required to fix order creation**
+3. `../add_kiosk_setting_table.sql` (if not already applied)
 
 ## Rollback
 
@@ -144,18 +173,22 @@ ALTER TABLE customer_order
 
 ## Impact Assessment
 
-**Before Migration:**
-- ❌ Order creation fails with "Unknown column 'final_amount'"
+**Before Migrations:**
+- ❌ Order creation fails with "Unknown column 'final_amount'" (Migration 001)
+- ❌ Order creation fails with "Unknown column 'custom_cake_design_id'" (Migration 002)
+- ❌ Order item insertion fails for any order type
 - ❌ Payment verification fails
 - ❌ Order lookup by verification code fails
 - ❌ Custom cake payment fails
 - ❌ Transaction history displays incorrectly
 
-**After Migration:**
+**After Migrations:**
 - ✅ All order operations work correctly
+- ✅ Order items can be created with customizations
 - ✅ Payment verification workflow functional
 - ✅ Verification codes generated automatically
 - ✅ Custom cake orders process successfully
+- ✅ Kiosk orders work with cash and cashless payments
 - ✅ Full compatibility with existing codebase
 
 ## Notes
