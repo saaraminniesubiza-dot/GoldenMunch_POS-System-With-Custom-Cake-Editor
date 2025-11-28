@@ -11,6 +11,11 @@
 USE GoldenMunchPOS;
 
 -- ============================================================================
+-- DISABLE SAFE UPDATE MODE (Required for UPDATE statements without KEY columns)
+-- ============================================================================
+SET SQL_SAFE_UPDATES = 0;
+
+-- ============================================================================
 -- STEP 1: Add Missing Critical Columns (Direct SQL with checks)
 -- ============================================================================
 
@@ -309,3 +314,8 @@ SELECT '✅ Updated existing records' as '';
 SELECT '✅ Created 4 triggers' as '';
 SELECT '' as '';
 SELECT '🚀 Database now compatible with existing codebase!' as '';
+
+-- ============================================================================
+-- RE-ENABLE SAFE UPDATE MODE (Restore default safety settings)
+-- ============================================================================
+SET SQL_SAFE_UPDATES = 1;
