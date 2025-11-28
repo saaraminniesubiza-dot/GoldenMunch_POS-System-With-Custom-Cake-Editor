@@ -31,11 +31,15 @@ export default function PaymentQRSettingsPage() {
     try {
       const response = await SettingsService.getAllPaymentQR();
       if (response.success && response.data) {
+        // Get base URL without /api suffix
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const baseUrl = apiUrl.replace('/api', '');
+
         if (response.data.gcash) {
-          setGcashPreview(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${response.data.gcash}`);
+          setGcashPreview(`${baseUrl}${response.data.gcash}`);
         }
         if (response.data.paymaya) {
-          setPaymayaPreview(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${response.data.paymaya}`);
+          setPaymayaPreview(`${baseUrl}${response.data.paymaya}`);
         }
       }
     } catch (err) {
