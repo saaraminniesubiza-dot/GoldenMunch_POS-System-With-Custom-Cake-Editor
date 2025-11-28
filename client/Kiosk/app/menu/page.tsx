@@ -103,11 +103,11 @@ export default function MenuPage() {
             size="lg"
             classNames={{
               wrapper: "w-32 h-32",
-              circle1: "border-b-[#D9B38C]",
-              circle2: "border-b-[#C67B57]"
+              circle1: "border-b-sunny-yellow",
+              circle2: "border-b-deep-orange-yellow"
             }}
           />
-          <p className="text-4xl font-bold text-[#C67B57] mt-8">
+          <p className="text-4xl font-bold text-charcoal-gray mt-8">
             Loading Menu...
           </p>
         </div>
@@ -118,18 +118,18 @@ export default function MenuPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="max-w-2xl bg-[#FFF9F2]/90 backdrop-blur-lg border-2 border-[#D9B38C]">
+        <Card className="max-w-2xl bg-pure-white/20 backdrop-blur-lg border-2 border-sunny-yellow/40">
           <CardBody className="text-center p-12">
             <div className="text-9xl mb-8">⚠️</div>
-            <h1 className="text-5xl font-bold text-[#C67B57] mb-6">
-              Something went wrong
+            <h1 className="text-5xl font-bold text-charcoal-gray mb-6">
+              Oops! Something went wrong
             </h1>
-            <p className="text-2xl text-[#C9B8A5] mb-10">
+            <p className="text-2xl text-charcoal-gray/70 mb-10">
               {error}
             </p>
             <Button
               size="lg"
-              className="bg-gradient-to-r from-[#D9B38C] to-[#C67B57] text-white font-bold text-2xl px-12 py-8 shadow-lg hover:shadow-xl transition-all"
+              className="bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-charcoal-gray font-bold text-2xl px-12 py-8 shadow-lg hover:shadow-xl transition-all"
               onClick={() => window.location.reload()}
             >
               Try Again
@@ -143,16 +143,16 @@ export default function MenuPage() {
   return (
     <>
       <div className="min-h-screen pr-[30vw] max-pr-[576px]">
-        {/* Elegant Header */}
-        <div className="glass-header sticky top-0 z-40 py-8 px-12 mb-8">
+        {/* Vibrant Header */}
+        <div className="sticky top-0 z-40 bg-gradient-to-br from-sunny-yellow/25 via-pure-white/20 to-deep-orange-yellow/25 backdrop-blur-sm border-b-4 border-sunny-yellow py-8 px-12 mb-8 shadow-lg">
           <div className="max-w-[1400px] mx-auto">
             {/* Title */}
             <div className="text-center mb-8">
-              <h1 className="text-7xl font-bold text-[#C67B57] mb-3 tracking-tight">
+              <h1 className="text-7xl font-black bg-gradient-to-br from-sunny-yellow via-deep-orange-yellow to-sunny-yellow bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(251,205,47,0.6)] mb-3 tracking-tight">
                 Golden Munch
               </h1>
-              <p className="text-3xl text-[#C9B8A5] font-light">
-                Fresh. Delicious. Made with Love.
+              <p className="text-3xl text-black font-bold drop-shadow-lg">
+                Fresh • Delicious • Made with Love
               </p>
             </div>
 
@@ -165,8 +165,8 @@ export default function MenuPage() {
                 size="lg"
                 startContent={<span className="text-3xl">🔍</span>}
                 classNames={{
-                  input: "text-2xl py-4",
-                  inputWrapper: "bg-white/90 backdrop-blur-md shadow-lg border-2 border-[#D9B38C]/30 hover:border-[#D9B38C] transition-all h-20"
+                  input: "text-2xl py-4 text-black",
+                  inputWrapper: "bg-gradient-to-r from-pure-white/95 to-sunny-yellow/10 backdrop-blur-md shadow-lg border-2 border-sunny-yellow/60 hover:border-sunny-yellow hover:shadow-xl transition-all h-20"
                 }}
               />
             </div>
@@ -182,10 +182,10 @@ export default function MenuPage() {
                   size="lg"
                   className={`
                     ${selectedCategory === null
-                      ? 'bg-gradient-to-r from-[#D9B38C] to-[#C67B57] text-white shadow-lg scale-105'
-                      : 'bg-white/80 backdrop-blur-sm border-2 border-[#D9B38C]/30 text-[#C67B57] hover:border-[#D9B38C]'
+                      ? 'bg-gradient-to-br from-sunny-yellow to-deep-orange-yellow text-black scale-105 shadow-xl shadow-sunny-yellow/40'
+                      : 'bg-gradient-to-br from-pure-white/80 to-sunny-yellow/10 backdrop-blur-sm border-2 border-sunny-yellow/50 text-black hover:border-sunny-yellow hover:shadow-lg'
                     }
-                    font-semibold text-xl px-10 py-7 rounded-2xl transition-all duration-300
+                    font-bold text-xl px-10 py-7 rounded-2xl transition-all touch-target
                   `}
                   onClick={() => setSelectedCategory(null)}
                 >
@@ -197,10 +197,10 @@ export default function MenuPage() {
                     size="lg"
                     className={`
                       ${selectedCategory === category.category_id
-                        ? 'bg-gradient-to-r from-[#D9B38C] to-[#C67B57] text-white shadow-lg scale-105'
-                        : 'bg-white/80 backdrop-blur-sm border-2 border-[#D9B38C]/30 text-[#C67B57] hover:border-[#D9B38C]'
+                        ? 'bg-gradient-to-br from-sunny-yellow to-deep-orange-yellow text-black scale-105 shadow-xl shadow-sunny-yellow/40'
+                        : 'bg-gradient-to-br from-pure-white/80 to-sunny-yellow/10 backdrop-blur-sm border-2 border-sunny-yellow/50 text-black hover:border-sunny-yellow hover:shadow-lg'
                       }
-                      font-semibold text-xl px-10 py-7 rounded-2xl transition-all duration-300
+                      font-bold text-xl px-10 py-7 rounded-2xl transition-all touch-target
                     `}
                     onClick={() => setSelectedCategory(category.category_id)}
                   >
@@ -213,13 +213,13 @@ export default function MenuPage() {
 
           {/* Menu Items - 4 Per Row */}
           {filteredItems.length === 0 ? (
-            <Card className="bg-white/80 backdrop-blur-lg border-2 border-[#D9B38C]/30">
+            <Card className="bg-gradient-to-br from-pure-white/90 via-sunny-yellow/10 to-deep-orange-yellow/15 backdrop-blur-lg border-2 border-sunny-yellow/60 shadow-xl">
               <CardBody className="text-center py-24">
-                <div className="text-[120px] mb-8">🍽️</div>
-                <h3 className="text-5xl font-bold text-[#C67B57] mb-6">
+                <div className="text-[120px] mb-8 animate-float drop-shadow-xl">🍽️</div>
+                <h3 className="text-5xl font-bold text-black mb-6 drop-shadow-lg">
                   No items found
                 </h3>
-                <p className="text-2xl text-[#C9B8A5] mb-10">
+                <p className="text-2xl text-black/70 mb-10">
                   {searchQuery
                     ? `No results for "${searchQuery}"`
                     : "No items available right now."
@@ -228,7 +228,7 @@ export default function MenuPage() {
                 {(searchQuery || selectedCategory !== null) && (
                   <Button
                     size="lg"
-                    className="bg-gradient-to-r from-[#D9B38C] to-[#C67B57] text-white font-bold text-2xl px-12 py-8"
+                    className="bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-black font-bold text-2xl px-12 py-8 touch-target shadow-xl hover:scale-105 transition-all"
                     onClick={() => {
                       setSearchQuery('');
                       setSelectedCategory(null);
@@ -242,7 +242,7 @@ export default function MenuPage() {
           ) : (
             <>
               <div className="mb-8 text-center">
-                <h2 className="text-4xl font-bold text-[#C67B57]">
+                <h2 className="text-4xl font-bold text-black drop-shadow-lg">
                   {filteredItems.length} Delicious {filteredItems.length === 1 ? 'Item' : 'Items'}
                 </h2>
               </div>

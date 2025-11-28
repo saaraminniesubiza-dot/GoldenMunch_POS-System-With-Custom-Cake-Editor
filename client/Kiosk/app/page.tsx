@@ -135,13 +135,13 @@ export default function HomePage() {
     <>
       <div className="h-[1920px] overflow-y-auto pr-[30vw] max-pr-[576px] flex flex-col">
         {/* Hero Header */}
-        <div className="bg-pure-white/10 backdrop-blur-sm border-b-4 border-sunny-yellow/30 py-10 px-12 mb-6">
+        <div className="bg-gradient-to-br from-sunny-yellow/25 via-pure-white/20 to-deep-orange-yellow/25 backdrop-blur-sm border-b-4 border-sunny-yellow py-10 px-12 mb-6 shadow-lg">
           <div className="max-w-[1400px] mx-auto text-center">
-            <div className="text-9xl mb-6 animate-float">🍰</div>
-            <h1 className="text-8xl font-black bg-gradient-to-br from-sunny-yellow via-deep-orange-yellow to-sunny-yellow bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(251,205,47,0.5)] mb-4">
+            <div className="text-9xl mb-6 animate-float drop-shadow-xl">🍰</div>
+            <h1 className="text-8xl font-black bg-gradient-to-br from-sunny-yellow via-deep-orange-yellow to-sunny-yellow bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(251,205,47,0.6)] mb-4">
               Golden Munch
             </h1>
-            <p className="text-3xl text-charcoal-gray font-semibold drop-shadow-lg">
+            <p className="text-3xl text-black font-bold drop-shadow-lg">
               Fresh • Delicious • Made with Love
             </p>
           </div>
@@ -156,8 +156,8 @@ export default function HomePage() {
                   size="lg"
                   className={`${
                     selectedCategory === null
-                      ? 'bg-gradient-to-br from-sunny-yellow to-deep-orange-yellow text-charcoal-gray scale-105 shadow-lg shadow-sunny-yellow/30'
-                      : 'bg-pure-white/20 backdrop-blur-sm border-2 border-sunny-yellow/30 text-charcoal-gray hover:border-sunny-yellow/60'
+                      ? 'bg-gradient-to-br from-sunny-yellow to-deep-orange-yellow text-black scale-105 shadow-xl shadow-sunny-yellow/40'
+                      : 'bg-gradient-to-br from-pure-white/80 to-sunny-yellow/10 backdrop-blur-sm border-2 border-sunny-yellow/50 text-black hover:border-sunny-yellow hover:shadow-lg'
                   } font-bold text-xl px-10 py-7 rounded-2xl transition-all touch-target`}
                   onClick={() => setSelectedCategory(null)}
                 >
@@ -169,8 +169,8 @@ export default function HomePage() {
                     size="lg"
                     className={`${
                       selectedCategory === category.category_id
-                        ? 'bg-gradient-to-br from-sunny-yellow to-deep-orange-yellow text-charcoal-gray scale-105 shadow-lg shadow-sunny-yellow/30'
-                        : 'bg-pure-white/20 backdrop-blur-sm border-2 border-sunny-yellow/30 text-charcoal-gray hover:border-sunny-yellow/60'
+                        ? 'bg-gradient-to-br from-sunny-yellow to-deep-orange-yellow text-black scale-105 shadow-xl shadow-sunny-yellow/40'
+                        : 'bg-gradient-to-br from-pure-white/80 to-sunny-yellow/10 backdrop-blur-sm border-2 border-sunny-yellow/50 text-black hover:border-sunny-yellow hover:shadow-lg'
                     } font-bold text-xl px-10 py-7 rounded-2xl transition-all touch-target`}
                     onClick={() => setSelectedCategory(category.category_id)}
                   >
@@ -183,19 +183,19 @@ export default function HomePage() {
 
           {/* Menu Items Grid */}
           {filteredItems.length === 0 ? (
-            <Card className="bg-pure-white/15 backdrop-blur-lg border-2 border-sunny-yellow/30">
+            <Card className="bg-gradient-to-br from-pure-white/90 via-sunny-yellow/10 to-deep-orange-yellow/15 backdrop-blur-lg border-2 border-sunny-yellow/60 shadow-xl">
               <CardBody className="text-center py-24">
-                <div className="text-[120px] mb-8 animate-float">🍽️</div>
-                <h3 className="text-5xl font-bold text-charcoal-gray mb-6 drop-shadow-lg">
+                <div className="text-[120px] mb-8 animate-float drop-shadow-xl">🍽️</div>
+                <h3 className="text-5xl font-bold text-black mb-6 drop-shadow-lg">
                   No items found
                 </h3>
-                <p className="text-2xl text-charcoal-gray/70 mb-10">
+                <p className="text-2xl text-black/70 mb-10">
                   No items in this category
                 </p>
                 {selectedCategory !== null && (
                   <Button
                     size="lg"
-                    className="bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-charcoal-gray font-bold px-12 py-8 text-2xl touch-target shadow-lg"
+                    className="bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-black font-bold px-12 py-8 text-2xl touch-target shadow-xl hover:scale-105 transition-all"
                     onClick={() => setSelectedCategory(null)}
                   >
                     Clear Filter
@@ -206,7 +206,7 @@ export default function HomePage() {
           ) : (
             <>
               <div className="text-center mb-6">
-                <h2 className="text-4xl font-bold text-charcoal-gray drop-shadow-lg">
+                <h2 className="text-4xl font-bold text-black drop-shadow-lg">
                   {filteredItems.length} Delicious {filteredItems.length === 1 ? 'Item' : 'Items'}
                 </h2>
               </div>
@@ -227,20 +227,20 @@ export default function HomePage() {
         </div>
 
         {/* Promotional Section - Fixed at Bottom */}
-        <div className="mt-auto bg-gradient-to-r from-sunny-yellow/20 via-deep-orange-yellow/20 to-sunny-yellow/20 backdrop-blur-md border-t-4 border-sunny-yellow/40 py-8 px-12">
+        <div className="mt-auto bg-gradient-to-r from-sunny-yellow/30 via-deep-orange-yellow/25 to-sunny-yellow/30 backdrop-blur-md border-t-4 border-sunny-yellow py-8 px-12 shadow-2xl">
           <div className="max-w-[1400px] mx-auto">
             <div className="flex items-center justify-between gap-8">
               <div className="flex-1">
-                <h3 className="text-4xl font-black text-charcoal-gray mb-2 drop-shadow-lg">
+                <h3 className="text-4xl font-black text-black mb-2 drop-shadow-lg">
                   🎂 Design Your Dream Cake!
                 </h3>
-                <p className="text-xl text-charcoal-gray/80 font-semibold">
+                <p className="text-xl text-black/90 font-bold">
                   Create a custom cake perfectly tailored to your celebration
                 </p>
               </div>
               <Button
                 size="lg"
-                className="bg-gradient-to-br from-sunny-yellow via-deep-orange-yellow to-sunny-yellow text-charcoal-gray font-black text-3xl px-16 py-12 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all touch-target border-4 border-deep-orange-yellow/30 animate-pulse-slow"
+                className="bg-gradient-to-br from-sunny-yellow via-deep-orange-yellow to-sunny-yellow text-black font-black text-3xl px-16 py-12 rounded-3xl shadow-2xl hover:shadow-[0_0_50px_rgba(251,205,47,0.7)] hover:scale-105 transition-all touch-target border-4 border-deep-orange-yellow/50 animate-pulse-slow"
                 onClick={() => window.location.href = '/cake-editor'}
               >
                 🍰 Custom Cake Editor
