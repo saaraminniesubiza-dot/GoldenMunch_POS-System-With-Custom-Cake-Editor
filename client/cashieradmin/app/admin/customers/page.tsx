@@ -273,7 +273,7 @@ export default function AdminCustomersPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-default-500">Total Revenue</p>
-                <p className="text-2xl font-bold">₱{Number(totalRevenue).toFixed(2)}</p>
+                <p className="text-2xl font-bold">₱{Number(totalRevenue || 0).toFixed(2)}</p>
               </div>
               <div className="text-4xl opacity-10">💰</div>
             </div>
@@ -285,7 +285,7 @@ export default function AdminCustomersPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-default-500">Avg. Order Value</p>
-                <p className="text-2xl font-bold">₱{Number(averageOrderValue).toFixed(2)}</p>
+                <p className="text-2xl font-bold">₱{Number(averageOrderValue || 0).toFixed(2)}</p>
               </div>
               <div className="text-4xl opacity-10">📊</div>
             </div>
@@ -369,7 +369,7 @@ export default function AdminCustomersPage() {
                         </Chip>
                       </TableCell>
                       <TableCell>
-                        <p className="font-semibold">₱{Number(customer.totalSpent).toFixed(2)}</p>
+                        <p className="font-semibold">₱{Number(customer.totalSpent || 0).toFixed(2)}</p>
                       </TableCell>
                       <TableCell>
                         <Chip
@@ -534,7 +534,7 @@ export default function AdminCustomersPage() {
                         </div>
                         <div>
                           <p className="text-sm text-default-500">Amount</p>
-                          <p className="font-semibold">₱{Number(order.final_amount).toFixed(2)}</p>
+                          <p className="font-semibold">₱{Number(order.final_amount || 0).toFixed(2)}</p>
                         </div>
                         <div>
                           <p className="text-sm text-default-500">Order Type</p>

@@ -209,9 +209,9 @@ export const getOrderByVerificationCode = async (req: AuthRequest, res: Response
 
   // Get order items
   const items = await query(
-    `SELECT oi.*, mi.name as item_name
+    `SELECT oi.*, oi.subtotal as item_total, mi.name as menu_item_name
      FROM order_item oi
-     JOIN menu_item mi ON oi.menu_item_id = mi.menu_item_id
+     LEFT JOIN menu_item mi ON oi.menu_item_id = mi.menu_item_id
      WHERE oi.order_id = ?`,
     [order.order_id]
   );

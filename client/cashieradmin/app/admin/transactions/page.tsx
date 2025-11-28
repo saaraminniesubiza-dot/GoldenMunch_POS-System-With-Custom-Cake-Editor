@@ -93,7 +93,7 @@ export default function TransactionsPage() {
       new Date(t.order_datetime).toLocaleString(),
       t.payment_method,
       t.payment_status,
-      `₱${Number(t.final_amount).toFixed(2)}`
+      `₱${Number(t.final_amount || 0).toFixed(2)}`
     ]);
 
     const csvContent = [
@@ -304,7 +304,7 @@ export default function TransactionsPage() {
                     </Chip>
                   </TableCell>
                   <TableCell>
-                    <span className="font-semibold">₱{Number(transaction.final_amount).toFixed(2)}</span>
+                    <span className="font-semibold">₱{Number(transaction.final_amount || 0).toFixed(2)}</span>
                   </TableCell>
                 </TableRow>
               ))}
