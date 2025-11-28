@@ -1,40 +1,33 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader } from '@heroui/card';
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
-import { Chip } from '@heroui/chip';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
-import { Select, SelectItem } from '@heroui/select';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/modal';
-import { Spinner } from '@heroui/spinner';
+import { Chip } from '@heroui/chip';
 import { Divider } from '@heroui/divider';
 import { Tabs, Tab } from '@heroui/tabs';
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
+import { Spinner } from '@heroui/spinner';
+import { toast } from '@heroui/toast';
 import { OrderService } from '@/services/order.service';
-import type { CustomerOrder, PaymentMethod, PaymentStatus } from '@/types/api';
+import type { CustomerOrder } from '@/types/api';
 import {
-  MagnifyingGlassIcon,
-  CheckCircleIcon,
-  XCircleIcon,
   ClockIcon,
+  CheckCircleIcon,
   BanknotesIcon,
   CreditCardIcon,
-  DevicePhoneMobileIcon,
-  QrCodeIcon
+  QrCodeIcon,
+  XCircleIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 
-const paymentMethodIcons: Record<PaymentMethod, React.ReactNode> = {
-  cash: <BanknotesIcon className="h-5 w-5" />,
-  cashless: <DevicePhoneMobileIcon className="h-5 w-5" />,
-};
-
-const paymentStatusColors: Record<PaymentStatus, 'default' | 'primary' | 'success' | 'warning' | 'danger'> = {
-  pending: 'warning',
-  partial_paid: 'primary',
-  paid: 'success',
-  failed: 'danger',
-  refunded: 'default',
+const paymentMethodIcons: Record<string, JSX.Element> = {
+  cash: <BanknotesIcon className="h-4 w-4" />,
+  gcash: <QrCodeIcon className="h-4 w-4" />,
+  paymaya: <QrCodeIcon className="h-4 w-4" />,
+  cashless: <CreditCardIcon className="h-4 w-4" />,
 };
 
 export default function PaymentPage() {
@@ -88,7 +81,7 @@ export default function PaymentPage() {
         setPendingOrders(pending);
 
         // Calculate pending stats
-        const pendingAmount = pending.reduce((sum, order) => sum + order.final_amount, 0);
+        const pendingAmount = pending.reduce((sum, order) => sum + Number(order.final_amount || 0), 0);
         setStats(prev => ({
           ...prev,
           pendingCount: pending.length,
@@ -109,7 +102,7 @@ export default function PaymentPage() {
         setRecentPayments(recentPaid.slice(0, 10));  // Show last 10
 
         // Calculate verified stats
-        const verifiedAmount = recentPaid.reduce((sum, order) => sum + order.final_amount, 0);
+        const verifiedAmount = recentPaid.reduce((sum, order) => sum + Number(order.final_amount || 0), 0);
         setStats(prev => ({
           ...prev,
           verifiedToday: recentPaid.length,
@@ -118,6 +111,7 @@ export default function PaymentPage() {
       }
     } catch (error) {
       console.error('Failed to load payment data:', error);
+      toast.error('Failed to load payment data');
     } finally {
       setLoading(false);
     }
@@ -136,7 +130,8 @@ export default function PaymentPage() {
       // Try searching by order number, verification code, or order ID
       const response = await OrderService.getOrders();
       if (response.success && response.data) {
-        const found = response.data.find(
+        const orders = response.data.orders || [];
+        const found = orders.find(
           (order: CustomerOrder) =>
             order.order_number === searchQuery.trim() ||
             order.verification_code === searchQuery.trim() ||
@@ -146,14 +141,17 @@ export default function PaymentPage() {
         if (found) {
           setSelectedOrder(found);
           setReferenceNumber(found.gcash_reference_number || '');
+          setSearchError('');
           onOpen();
         } else {
           setSearchError('Order not found');
+          toast.error('Order not found');
         }
       }
     } catch (error) {
       console.error('Search error:', error);
       setSearchError('Failed to search order');
+      toast.error('Failed to search order');
     } finally {
       setSearchLoading(false);
     }
@@ -195,15 +193,31 @@ export default function PaymentPage() {
       });
 
       if (response.success) {
-        // Success - refresh data and close modal
+        // Success - show toast and refresh
+        const paymentMethod = selectedOrder.payment_method.toUpperCase();
+        const orderNum = selectedOrder.order_number || `#${selectedOrder.order_id}`;
+
+        if (selectedOrder.payment_method === 'cash') {
+          toast.success(`✅ Cash payment verified for ${orderNum}! Change: ₱${calculatedChange.toFixed(2)}`, {
+            duration: 5000,
+          });
+        } else {
+          toast.success(`✅ ${paymentMethod} payment verified for ${orderNum}!`, {
+            duration: 5000,
+          });
+        }
+
         await loadPaymentData();
         handleCloseModal();
       } else {
         setVerifyError(response.error || 'Payment verification failed');
+        toast.error(response.error || 'Payment verification failed');
       }
     } catch (error: any) {
       console.error('Payment verification error:', error);
-      setVerifyError(error.response?.data?.error || 'Failed to verify payment');
+      const errorMsg = error.response?.data?.error || 'Failed to verify payment';
+      setVerifyError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setVerifying(false);
     }
@@ -217,6 +231,7 @@ export default function PaymentPage() {
     setSelectedOrder(null);
     setSearchQuery('');
     setVerifyError('');
+    setSearchError('');
   };
 
   const handleAmountTenderedChange = (value: string) => {
@@ -258,17 +273,20 @@ export default function PaymentPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent">
-          Payment Management
-        </h1>
-        <Button color="primary" onPress={loadPaymentData} isLoading={loading}>
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-golden-orange to-deep-amber bg-clip-text text-transparent">
+            Payment Management
+          </h1>
+          <p className="text-default-500 mt-1">Verify customer payments with cash handling</p>
+        </div>
+        <Button color="primary" onPress={loadPaymentData} isLoading={loading} variant="shadow">
           Refresh
         </Button>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-warning">
+        <Card className="border-l-4 border-l-warning shadow-lg">
           <CardBody className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -283,7 +301,7 @@ export default function PaymentPage() {
           </CardBody>
         </Card>
 
-        <Card className="border-l-4 border-l-success">
+        <Card className="border-l-4 border-l-success shadow-lg">
           <CardBody className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -298,7 +316,7 @@ export default function PaymentPage() {
           </CardBody>
         </Card>
 
-        <Card className="border-l-4 border-l-primary">
+        <Card className="border-l-4 border-l-primary shadow-lg">
           <CardBody className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -315,7 +333,7 @@ export default function PaymentPage() {
           </CardBody>
         </Card>
 
-        <Card className="border-l-4 border-l-secondary">
+        <Card className="border-l-4 border-l-secondary shadow-lg">
           <CardBody className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -334,8 +352,8 @@ export default function PaymentPage() {
       </div>
 
       {/* Quick Search */}
-      <Card>
-        <CardHeader className="p-6 border-b border-default-200">
+      <Card shadow="sm">
+        <CardHeader className="p-6 border-b border-default-200 bg-gradient-to-r from-primary-50 to-secondary-50">
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <QrCodeIcon className="h-6 w-6 text-primary" />
             Quick Payment Verification
@@ -348,9 +366,12 @@ export default function PaymentPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleQuickSearch()}
-              startContent={<MagnifyingGlassIcon className="h-5 w-5 text-default-400" />}
               size="lg"
-              className="flex-1"
+              startContent={<MagnifyingGlassIcon className="h-5 w-5 text-default-400" />}
+              classNames={{
+                input: "text-lg",
+                inputWrapper: "h-14"
+              }}
               isInvalid={!!searchError}
               errorMessage={searchError}
             />
@@ -360,64 +381,81 @@ export default function PaymentPage() {
               onPress={handleQuickSearch}
               isLoading={searchLoading}
               className="px-8"
+              variant="shadow"
             >
-              Search & Verify
+              Search
             </Button>
           </div>
         </CardBody>
       </Card>
 
-      {/* Main Content Tabs */}
-      <Card>
-        <CardBody className="p-0">
-          <Tabs aria-label="Payment tabs" className="w-full">
-            {/* Pending Payments Tab */}
+      {/* Tabs for Pending and Recent */}
+      <Card shadow="sm">
+        <CardBody className="p-6">
+          <Tabs
+            aria-label="Payment tabs"
+            color="primary"
+            variant="underlined"
+            classNames={{
+              tabList: "gap-6",
+              cursor: "w-full bg-primary",
+              tab: "max-w-fit px-0 h-12",
+              tabContent: "group-data-[selected=true]:text-primary"
+            }}
+          >
             <Tab
               key="pending"
               title={
                 <div className="flex items-center gap-2">
-                  <ClockIcon className="h-4 w-4" />
-                  <span>Pending ({stats.pendingCount})</span>
+                  <ClockIcon className="h-5 w-5" />
+                  <span>Pending Payments ({stats.pendingCount})</span>
                 </div>
               }
             >
-              <div className="p-6">
+              <div className="mt-4">
                 {loading ? (
                   <div className="flex justify-center p-8">
                     <Spinner size="lg" color="primary" />
                   </div>
                 ) : pendingOrders.length === 0 ? (
-                  <div className="text-center p-12">
-                    <CheckCircleIcon className="h-16 w-16 mx-auto text-success opacity-50 mb-4" />
-                    <p className="text-lg text-default-500">No pending payments</p>
-                    <p className="text-sm text-default-400 mt-2">All payments have been verified!</p>
+                  <div className="text-center p-12 text-default-400">
+                    <CheckCircleIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg">No pending payments!</p>
+                    <p className="text-sm mt-2">All orders are verified</p>
                   </div>
                 ) : (
-                  <Table aria-label="Pending payments table">
+                  <Table
+                    aria-label="Pending payments table"
+                    classNames={{
+                      th: "bg-default-100",
+                    }}
+                  >
                     <TableHeader>
-                      <TableColumn>ORDER #</TableColumn>
-                      <TableColumn>TIME</TableColumn>
+                      <TableColumn>ORDER</TableColumn>
+                      <TableColumn>CODE</TableColumn>
                       <TableColumn>PAYMENT METHOD</TableColumn>
                       <TableColumn>AMOUNT</TableColumn>
-                      <TableColumn>REFERENCE</TableColumn>
+                      <TableColumn>DATE</TableColumn>
                       <TableColumn>ACTION</TableColumn>
                     </TableHeader>
                     <TableBody>
                       {pendingOrders.map((order) => (
-                        <TableRow key={order.order_id}>
+                        <TableRow key={order.order_id} className="hover:bg-default-50">
                           <TableCell>
-                            <div>
-                              <p className="font-semibold">{order.order_number || `#${order.order_id}`}</p>
-                              <p className="text-xs text-default-400">Code: {order.verification_code || order.order_id.toString().padStart(6, '0')}</p>
-                            </div>
+                            <p className="font-semibold">{order.order_number || `#${order.order_id}`}</p>
                           </TableCell>
-                          <TableCell>{formatDateTime(order.order_datetime)}</TableCell>
+                          <TableCell>
+                            <code className="bg-warning-100 text-warning-700 px-2 py-1 rounded font-semibold">
+                              {order.verification_code}
+                            </code>
+                          </TableCell>
                           <TableCell>
                             <Chip
                               startContent={paymentMethodIcons[order.payment_method]}
+                              color={order.payment_method === 'cash' ? 'success' : 'primary'}
                               variant="flat"
                               size="sm"
-                              className="capitalize"
+                              className="uppercase"
                             >
                               {order.payment_method}
                             </Chip>
@@ -425,16 +463,15 @@ export default function PaymentPage() {
                           <TableCell className="font-semibold text-lg">
                             {formatCurrency(order.final_amount)}
                           </TableCell>
-                          <TableCell>
-                            <code className="text-xs bg-default-100 px-2 py-1 rounded">
-                              {order.gcash_reference_number || '-'}
-                            </code>
+                          <TableCell className="text-sm text-default-500">
+                            {formatDateTime(order.order_datetime)}
                           </TableCell>
                           <TableCell>
                             <Button
                               color="primary"
                               size="sm"
                               onPress={() => handleSelectOrder(order)}
+                              startContent={<CheckCircleIcon className="h-4 w-4" />}
                             >
                               Verify
                             </Button>
@@ -447,32 +484,35 @@ export default function PaymentPage() {
               </div>
             </Tab>
 
-            {/* Recent Payments Tab */}
             <Tab
               key="recent"
               title={
                 <div className="flex items-center gap-2">
-                  <CheckCircleIcon className="h-4 w-4" />
-                  <span>Verified Today ({stats.verifiedToday})</span>
+                  <CheckCircleIcon className="h-5 w-5" />
+                  <span>Recent Payments ({stats.verifiedToday})</span>
                 </div>
               }
             >
-              <div className="p-6">
+              <div className="mt-4">
                 {loading ? (
                   <div className="flex justify-center p-8">
-                    <Spinner size="lg" color="primary" />
+                    <Spinner size="lg" color="success" />
                   </div>
                 ) : recentPayments.length === 0 ? (
-                  <div className="text-center p-12">
-                    <ClockIcon className="h-16 w-16 mx-auto text-default-300 mb-4" />
-                    <p className="text-lg text-default-500">No payments verified today</p>
-                    <p className="text-sm text-default-400 mt-2">Verified payments will appear here</p>
+                  <div className="text-center p-12 text-default-400">
+                    <ClockIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg">No payments verified today</p>
                   </div>
                 ) : (
-                  <Table aria-label="Recent payments table">
+                  <Table
+                    aria-label="Recent payments table"
+                    classNames={{
+                      th: "bg-default-100",
+                    }}
+                  >
                     <TableHeader>
-                      <TableColumn>ORDER #</TableColumn>
-                      <TableColumn>TIME</TableColumn>
+                      <TableColumn>ORDER</TableColumn>
+                      <TableColumn>CODE</TableColumn>
                       <TableColumn>PAYMENT METHOD</TableColumn>
                       <TableColumn>AMOUNT</TableColumn>
                       <TableColumn>REFERENCE</TableColumn>
@@ -482,18 +522,20 @@ export default function PaymentPage() {
                       {recentPayments.map((order) => (
                         <TableRow key={order.order_id}>
                           <TableCell>
-                            <div>
-                              <p className="font-semibold">{order.order_number || `#${order.order_id}`}</p>
-                              <p className="text-xs text-default-400">Code: {order.verification_code || order.order_id.toString().padStart(6, '0')}</p>
-                            </div>
+                            <p className="font-semibold">{order.order_number || `#${order.order_id}`}</p>
                           </TableCell>
-                          <TableCell>{formatDateTime(order.order_datetime)}</TableCell>
+                          <TableCell>
+                            <code className="bg-default-100 px-2 py-1 rounded">
+                              {order.verification_code}
+                            </code>
+                          </TableCell>
                           <TableCell>
                             <Chip
                               startContent={paymentMethodIcons[order.payment_method]}
+                              color={order.payment_method === 'cash' ? 'success' : 'primary'}
                               variant="flat"
                               size="sm"
-                              className="capitalize"
+                              className="uppercase"
                             >
                               {order.payment_method}
                             </Chip>
@@ -523,21 +565,26 @@ export default function PaymentPage() {
       </Card>
 
       {/* Payment Verification Modal */}
-      <Modal isOpen={isOpen} onClose={handleCloseModal} size="lg">
+      <Modal isOpen={isOpen} onClose={handleCloseModal} size="lg" backdrop="blur">
         <ModalContent>
-          <ModalHeader>Verify Payment</ModalHeader>
+          <ModalHeader className="flex flex-col gap-1">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Verify Payment
+            </h3>
+            <p className="text-sm font-normal text-default-500">Process payment and handle cash transactions</p>
+          </ModalHeader>
           <ModalBody>
             {selectedOrder && (
               <div className="space-y-4">
-                <div className="bg-default-100 p-4 rounded-lg">
+                <div className="bg-gradient-to-r from-primary-50 to-secondary-50 p-4 rounded-lg border border-primary-200">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-default-500">Order Number</p>
-                      <p className="text-lg font-bold">{selectedOrder.order_number}</p>
+                      <p className="text-lg font-bold text-primary">{selectedOrder.order_number}</p>
                     </div>
                     <div>
                       <p className="text-sm text-default-500">Verification Code</p>
-                      <code className="text-lg font-bold bg-default-200 px-2 py-1 rounded">
+                      <code className="text-lg font-bold bg-white px-2 py-1 rounded border border-primary-200">
                         {selectedOrder.verification_code}
                       </code>
                     </div>
@@ -561,7 +608,8 @@ export default function PaymentPage() {
                     startContent={paymentMethodIcons[selectedOrder.payment_method]}
                     color="primary"
                     size="lg"
-                    className="capitalize"
+                    className="uppercase"
+                    variant="shadow"
                   >
                     {selectedOrder.payment_method}
                   </Chip>
@@ -638,15 +686,18 @@ export default function PaymentPage() {
 
                     {/* Change Display */}
                     {amountTendered && Number(amountTendered) >= Number(selectedOrder.final_amount || 0) && (
-                      <div className="bg-success-50 p-4 rounded-lg border-2 border-success-200">
+                      <div className="bg-gradient-to-r from-success-50 to-success-100 p-4 rounded-lg border-2 border-success-300 shadow-lg">
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="text-sm text-success-700 font-medium">Change to Return</p>
+                            <p className="text-sm text-success-700 font-medium flex items-center gap-2">
+                              <CheckCircleIcon className="h-5 w-5" />
+                              Change to Return
+                            </p>
                             <p className="text-xs text-success-600 mt-1">
                               {formatCurrency(Number(amountTendered))} - {formatCurrency(Number(selectedOrder.final_amount || 0))}
                             </p>
                           </div>
-                          <p className="text-3xl font-bold text-success-700">
+                          <p className="text-4xl font-bold text-success-700">
                             {formatCurrency(calculatedChange)}
                           </p>
                         </div>
@@ -655,9 +706,10 @@ export default function PaymentPage() {
 
                     {/* Insufficient Amount Warning */}
                     {amountTendered && Number(amountTendered) < Number(selectedOrder.final_amount || 0) && (
-                      <div className="bg-warning-50 p-4 rounded-lg border-2 border-warning-200">
-                        <p className="text-sm text-warning-700 font-medium">
-                          ⚠️ Insufficient amount. Need {formatCurrency(Number(selectedOrder.final_amount || 0) - Number(amountTendered))} more
+                      <div className="bg-gradient-to-r from-warning-50 to-warning-100 p-4 rounded-lg border-2 border-warning-300">
+                        <p className="text-sm text-warning-700 font-medium flex items-center gap-2">
+                          <XCircleIcon className="h-5 w-5" />
+                          Insufficient amount. Need {formatCurrency(Number(selectedOrder.final_amount || 0) - Number(amountTendered))} more
                         </p>
                       </div>
                     )}
@@ -686,6 +738,7 @@ export default function PaymentPage() {
               isLoading={verifying}
               startContent={!verifying && <CheckCircleIcon className="h-5 w-5" />}
               size="lg"
+              variant="shadow"
             >
               {verifying ? 'Verifying...' : 'Verify Payment'}
             </Button>
