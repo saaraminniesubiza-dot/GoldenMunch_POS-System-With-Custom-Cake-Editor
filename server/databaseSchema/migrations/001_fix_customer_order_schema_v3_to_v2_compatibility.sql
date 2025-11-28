@@ -11,103 +11,272 @@
 USE GoldenMunchPOS;
 
 -- ============================================================================
+-- HELPER PROCEDURE: Add column only if it doesn't exist
+-- ============================================================================
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS AddColumnIfNotExists//
+CREATE PROCEDURE AddColumnIfNotExists(
+    IN tableName VARCHAR(128),
+    IN columnName VARCHAR(128),
+    IN columnDefinition TEXT
+)
+BEGIN
+    DECLARE columnExists INT;
+
+    SELECT COUNT(*) INTO columnExists
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = tableName
+      AND COLUMN_NAME = columnName;
+
+    IF columnExists = 0 THEN
+        SET @sql = CONCAT('ALTER TABLE ', tableName, ' ADD COLUMN ', columnName, ' ', columnDefinition);
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+        SELECT CONCAT('✓ Added column: ', columnName) as Status;
+    ELSE
+        SELECT CONCAT('⊘ Column already exists: ', columnName) as Status;
+    END IF;
+END//
+
+DELIMITER ;
+
+-- ============================================================================
 -- STEP 1: Add Missing Critical Columns
 -- ============================================================================
 
-ALTER TABLE customer_order
+SELECT '═══════════════════════════════════════════════════' as '';
+SELECT 'STEP 1: Adding missing columns to customer_order' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
 
-  -- Critical order identification
-  ADD COLUMN IF NOT EXISTS verification_code VARCHAR(6) NOT NULL DEFAULT '000000' COMMENT 'Random 6-digit code for order pickup' AFTER order_number,
-  ADD COLUMN IF NOT EXISTS order_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER customer_id,
+-- Critical order identification
+CALL AddColumnIfNotExists('customer_order', 'verification_code', "VARCHAR(6) NOT NULL DEFAULT '000000' COMMENT 'Random 6-digit code for order pickup' AFTER order_number");
+CALL AddColumnIfNotExists('customer_order', 'order_datetime', "TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER customer_id");
 
-  -- Order classification
-  ADD COLUMN IF NOT EXISTS order_source ENUM('kiosk', 'cashier', 'admin') NOT NULL DEFAULT 'kiosk' AFTER order_type,
-  ADD COLUMN IF NOT EXISTS is_preorder BOOLEAN DEFAULT FALSE AFTER order_source,
+-- Order classification
+CALL AddColumnIfNotExists('customer_order', 'order_source', "ENUM('kiosk', 'cashier', 'admin') NOT NULL DEFAULT 'kiosk' AFTER order_type");
+CALL AddColumnIfNotExists('customer_order', 'is_preorder', "BOOLEAN DEFAULT FALSE AFTER order_source");
 
-  -- Payment amounts (final_amount is the grand total after all calculations)
-  ADD COLUMN IF NOT EXISTS advance_payment_required BOOLEAN DEFAULT FALSE AFTER is_preorder,
-  ADD COLUMN IF NOT EXISTS advance_payment_amount DECIMAL(10,2) DEFAULT 0.00 AFTER advance_payment_required,
-  ADD COLUMN IF NOT EXISTS final_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Grand total = total_amount (same value for compatibility)' AFTER total_amount,
+-- Payment amounts
+CALL AddColumnIfNotExists('customer_order', 'advance_payment_required', "BOOLEAN DEFAULT FALSE AFTER is_preorder");
+CALL AddColumnIfNotExists('customer_order', 'advance_payment_amount', "DECIMAL(10,2) DEFAULT 0.00 AFTER advance_payment_required");
+CALL AddColumnIfNotExists('customer_order', 'final_amount', "DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Grand total = total_amount (same value for compatibility)' AFTER total_amount");
 
-  -- Payment references for e-wallets and cards
-  ADD COLUMN IF NOT EXISTS gcash_reference_number VARCHAR(100) NULL COMMENT 'GCash transaction reference' AFTER payment_method,
-  ADD COLUMN IF NOT EXISTS paymaya_reference_number VARCHAR(100) NULL COMMENT 'PayMaya transaction reference' AFTER gcash_reference_number,
-  ADD COLUMN IF NOT EXISTS card_transaction_ref VARCHAR(100) NULL COMMENT 'Card payment reference' AFTER paymaya_reference_number,
+-- Payment references for e-wallets and cards
+CALL AddColumnIfNotExists('customer_order', 'gcash_reference_number', "VARCHAR(100) NULL COMMENT 'GCash transaction reference' AFTER payment_method");
+CALL AddColumnIfNotExists('customer_order', 'paymaya_reference_number', "VARCHAR(100) NULL COMMENT 'PayMaya transaction reference' AFTER gcash_reference_number");
+CALL AddColumnIfNotExists('customer_order', 'card_transaction_ref', "VARCHAR(100) NULL COMMENT 'Card payment reference' AFTER paymaya_reference_number");
 
-  -- Payment verification workflow
-  ADD COLUMN IF NOT EXISTS payment_verified_at TIMESTAMP NULL AFTER payment_status,
-  ADD COLUMN IF NOT EXISTS payment_verified_by INT NULL COMMENT 'Cashier who verified payment' AFTER payment_verified_at,
+-- Payment verification workflow
+CALL AddColumnIfNotExists('customer_order', 'payment_verified_at', "TIMESTAMP NULL AFTER payment_status");
+CALL AddColumnIfNotExists('customer_order', 'payment_verified_by', "INT NULL COMMENT 'Cashier who verified payment' AFTER payment_verified_at");
 
-  -- Session and printing
-  ADD COLUMN IF NOT EXISTS kiosk_session_id VARCHAR(100) NULL COMMENT 'Kiosk session identifier' AFTER kiosk_id,
-  ADD COLUMN IF NOT EXISTS is_printed BOOLEAN DEFAULT FALSE COMMENT 'Has receipt been printed' AFTER completed_at,
+-- Session and printing
+CALL AddColumnIfNotExists('customer_order', 'kiosk_session_id', "VARCHAR(100) NULL COMMENT 'Kiosk session identifier' AFTER kiosk_id");
+CALL AddColumnIfNotExists('customer_order', 'is_printed', "BOOLEAN DEFAULT FALSE COMMENT 'Has receipt been printed' AFTER completed_at");
 
-  -- Soft delete (for order history without permanent deletion)
-  ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE AFTER is_printed;
+-- Soft delete
+CALL AddColumnIfNotExists('customer_order', 'is_deleted', "BOOLEAN DEFAULT FALSE AFTER is_printed");
 
 -- ============================================================================
 -- STEP 2: Rename Columns to Match Code Expectations
 -- ============================================================================
 
--- The code expects *_datetime suffix, not *_time
-ALTER TABLE customer_order
-  CHANGE COLUMN IF EXISTS scheduled_pickup_time scheduled_pickup_datetime TIMESTAMP NULL,
-  CHANGE COLUMN IF EXISTS actual_pickup_time actual_pickup_datetime TIMESTAMP NULL;
+SELECT '' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+SELECT 'STEP 2: Renaming columns to match code expectations' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+
+-- Check and rename scheduled_pickup_time to scheduled_pickup_datetime
+SET @columnExists = (
+    SELECT COUNT(*)
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'customer_order'
+      AND COLUMN_NAME = 'scheduled_pickup_time'
+);
+
+SET @newColumnExists = (
+    SELECT COUNT(*)
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'customer_order'
+      AND COLUMN_NAME = 'scheduled_pickup_datetime'
+);
+
+-- Only rename if old column exists and new one doesn't
+SET @sql = IF(@columnExists > 0 AND @newColumnExists = 0,
+    'ALTER TABLE customer_order CHANGE COLUMN scheduled_pickup_time scheduled_pickup_datetime TIMESTAMP NULL',
+    'SELECT "⊘ Column scheduled_pickup_datetime already exists or scheduled_pickup_time not found" as Status'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Check and rename actual_pickup_time to actual_pickup_datetime
+SET @columnExists = (
+    SELECT COUNT(*)
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'customer_order'
+      AND COLUMN_NAME = 'actual_pickup_time'
+);
+
+SET @newColumnExists = (
+    SELECT COUNT(*)
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'customer_order'
+      AND COLUMN_NAME = 'actual_pickup_datetime'
+);
+
+SET @sql = IF(@columnExists > 0 AND @newColumnExists = 0,
+    'ALTER TABLE customer_order CHANGE COLUMN actual_pickup_time actual_pickup_datetime TIMESTAMP NULL',
+    'SELECT "⊘ Column actual_pickup_datetime already exists or actual_pickup_time not found" as Status'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- ============================================================================
 -- STEP 3: Add Indexes for Performance
 -- ============================================================================
 
-ALTER TABLE customer_order
-  ADD INDEX IF NOT EXISTS idx_verification_code (verification_code),
-  ADD INDEX IF NOT EXISTS idx_order_datetime (order_datetime),
-  ADD INDEX IF NOT EXISTS idx_gcash_ref (gcash_reference_number),
-  ADD INDEX IF NOT EXISTS idx_paymaya_ref (paymaya_reference_number),
-  ADD INDEX IF NOT EXISTS idx_order_source (order_source),
-  ADD INDEX IF NOT EXISTS idx_preorder (is_preorder),
-  ADD INDEX IF NOT EXISTS idx_kiosk_session (kiosk_session_id),
-  ADD INDEX IF NOT EXISTS idx_is_deleted (is_deleted);
+SELECT '' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+SELECT 'STEP 3: Adding indexes for performance' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+
+-- Helper to add index if not exists
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS AddIndexIfNotExists//
+CREATE PROCEDURE AddIndexIfNotExists(
+    IN tableName VARCHAR(128),
+    IN indexName VARCHAR(128),
+    IN indexDefinition TEXT
+)
+BEGIN
+    DECLARE indexExists INT;
+
+    SELECT COUNT(*) INTO indexExists
+    FROM information_schema.STATISTICS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = tableName
+      AND INDEX_NAME = indexName;
+
+    IF indexExists = 0 THEN
+        SET @sql = CONCAT('ALTER TABLE ', tableName, ' ADD INDEX ', indexName, ' ', indexDefinition);
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+        SELECT CONCAT('✓ Added index: ', indexName) as Status;
+    ELSE
+        SELECT CONCAT('⊘ Index already exists: ', indexName) as Status;
+    END IF;
+END//
+
+DELIMITER ;
+
+CALL AddIndexIfNotExists('customer_order', 'idx_verification_code', '(verification_code)');
+CALL AddIndexIfNotExists('customer_order', 'idx_order_datetime', '(order_datetime)');
+CALL AddIndexIfNotExists('customer_order', 'idx_gcash_ref', '(gcash_reference_number)');
+CALL AddIndexIfNotExists('customer_order', 'idx_paymaya_ref', '(paymaya_reference_number)');
+CALL AddIndexIfNotExists('customer_order', 'idx_order_source', '(order_source)');
+CALL AddIndexIfNotExists('customer_order', 'idx_preorder', '(is_preorder)');
+CALL AddIndexIfNotExists('customer_order', 'idx_kiosk_session', '(kiosk_session_id)');
+CALL AddIndexIfNotExists('customer_order', 'idx_is_deleted', '(is_deleted)');
 
 -- ============================================================================
 -- STEP 4: Add Foreign Keys
 -- ============================================================================
 
--- Add foreign key for payment_verified_by (cashier who verified the payment)
-ALTER TABLE customer_order
-  ADD CONSTRAINT IF NOT EXISTS fk_payment_verified_by
-  FOREIGN KEY (payment_verified_by) REFERENCES cashier(cashier_id) ON DELETE SET NULL;
+SELECT '' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+SELECT 'STEP 4: Adding foreign keys' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+
+-- Check if foreign key exists
+SET @fkExists = (
+    SELECT COUNT(*)
+    FROM information_schema.TABLE_CONSTRAINTS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'customer_order'
+      AND CONSTRAINT_NAME = 'fk_payment_verified_by'
+      AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+);
+
+SET @sql = IF(@fkExists = 0,
+    'ALTER TABLE customer_order ADD CONSTRAINT fk_payment_verified_by FOREIGN KEY (payment_verified_by) REFERENCES cashier(cashier_id) ON DELETE SET NULL',
+    'SELECT "⊘ Foreign key fk_payment_verified_by already exists" as Status'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- ============================================================================
 -- STEP 5: Add Unique Constraints
 -- ============================================================================
 
--- Ensure verification codes are unique within the same day
--- (codes can repeat on different days, which is acceptable)
-ALTER TABLE customer_order
-  ADD UNIQUE KEY IF NOT EXISTS unique_verification_code (verification_code, DATE(order_datetime));
+SELECT '' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+SELECT 'STEP 5: Adding unique constraints' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+
+-- Check if unique constraint exists
+SET @uniqueExists = (
+    SELECT COUNT(*)
+    FROM information_schema.TABLE_CONSTRAINTS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'customer_order'
+      AND CONSTRAINT_NAME = 'unique_verification_code'
+);
+
+-- Note: We're making this a regular index instead of unique to avoid conflicts
+-- Verification codes can be duplicated across different days
+CALL AddIndexIfNotExists('customer_order', 'idx_verification_date', '(verification_code, created_at)');
 
 -- ============================================================================
 -- STEP 6: Update Existing Records
 -- ============================================================================
+
+SELECT '' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+SELECT 'STEP 6: Updating existing records with default values' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
 
 -- Sync final_amount with total_amount for existing records
 UPDATE customer_order
 SET final_amount = total_amount
 WHERE final_amount = 0.00 OR final_amount IS NULL;
 
+SELECT CONCAT('✓ Updated final_amount for ', ROW_COUNT(), ' records') as Status;
+
 -- Generate verification codes for existing orders that don't have them
 UPDATE customer_order
 SET verification_code = LPAD(FLOOR(100000 + RAND() * 900000), 6, '0')
-WHERE verification_code = '000000' OR verification_code IS NULL;
+WHERE verification_code = '000000' OR verification_code IS NULL OR verification_code = '';
+
+SELECT CONCAT('✓ Generated verification codes for ', ROW_COUNT(), ' records') as Status;
 
 -- Set order_datetime from created_at for existing records
 UPDATE customer_order
 SET order_datetime = created_at
 WHERE order_datetime IS NULL;
 
+SELECT CONCAT('✓ Set order_datetime for ', ROW_COUNT(), ' records') as Status;
+
 -- ============================================================================
 -- STEP 7: Add Triggers to Maintain Data Consistency
 -- ============================================================================
+
+SELECT '' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+SELECT 'STEP 7: Creating triggers for automatic data sync' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
 
 DELIMITER //
 
@@ -141,7 +310,7 @@ BEFORE INSERT ON customer_order
 FOR EACH ROW
 BEGIN
     -- Generate random 6-digit code if not provided
-    IF NEW.verification_code = '000000' OR NEW.verification_code IS NULL THEN
+    IF NEW.verification_code = '000000' OR NEW.verification_code IS NULL OR NEW.verification_code = '' THEN
         SET NEW.verification_code = LPAD(FLOOR(100000 + RAND() * 900000), 6, '0');
     END IF;
 END//
@@ -160,14 +329,28 @@ END//
 
 DELIMITER ;
 
+SELECT '✓ Created trigger: trg_sync_final_amount_insert' as Status;
+SELECT '✓ Created trigger: trg_sync_final_amount_update' as Status;
+SELECT '✓ Created trigger: trg_generate_verification_code' as Status;
+SELECT '✓ Created trigger: trg_set_order_datetime' as Status;
+
 -- ============================================================================
--- STEP 8: Verification and Summary
+-- STEP 8: Cleanup Helper Procedures
 -- ============================================================================
 
--- Show the updated table structure
-SHOW CREATE TABLE customer_order;
+DROP PROCEDURE IF EXISTS AddColumnIfNotExists;
+DROP PROCEDURE IF EXISTS AddIndexIfNotExists;
 
--- Count existing orders
+-- ============================================================================
+-- STEP 9: Verification and Summary
+-- ============================================================================
+
+SELECT '' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+SELECT 'STEP 9: Verification and Summary' as '';
+SELECT '═══════════════════════════════════════════════════' as '';
+
+-- Count total orders
 SELECT COUNT(*) as total_orders FROM customer_order;
 
 -- Show sample of updated data
@@ -185,10 +368,28 @@ FROM customer_order
 ORDER BY order_id DESC
 LIMIT 5;
 
+-- Verify all new columns exist
+SELECT
+    COLUMN_NAME,
+    DATA_TYPE,
+    IS_NULLABLE,
+    COLUMN_DEFAULT
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = DATABASE()
+  AND TABLE_NAME = 'customer_order'
+  AND COLUMN_NAME IN (
+    'verification_code', 'order_datetime', 'final_amount',
+    'kiosk_session_id', 'is_preorder', 'gcash_reference_number',
+    'paymaya_reference_number', 'payment_verified_at', 'payment_verified_by',
+    'order_source', 'is_deleted'
+  )
+ORDER BY ORDINAL_POSITION;
+
 -- ============================================================================
 -- COMPLETION MESSAGE
 -- ============================================================================
 
+SELECT '' as '';
 SELECT '╔════════════════════════════════════════════════════════════════════╗' as '';
 SELECT '║                                                                    ║' as '';
 SELECT '║     CUSTOMER_ORDER SCHEMA MIGRATION COMPLETED SUCCESSFULLY        ║' as '';
