@@ -41,9 +41,8 @@ export const submitFeedback = async (req: AuthRequest, res: Response) => {
   // Create feedback
   const result = await query(
     `INSERT INTO customer_feedback
-     (order_id, customer_id, rating, service_rating, food_rating, cleanliness_rating,
-      feedback_text, feedback_type, is_anonymous)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     (order_id, customer_id, overall_rating, service_rating, food_quality_rating, cleanliness_rating, comments)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       order_id,
       customer_id || null,
@@ -52,8 +51,6 @@ export const submitFeedback = async (req: AuthRequest, res: Response) => {
       food_rating || null,
       cleanliness_rating || null,
       feedback_text || null,
-      feedback_type,
-      is_anonymous || false,
     ]
   );
 

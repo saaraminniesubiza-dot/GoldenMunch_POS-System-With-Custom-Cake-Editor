@@ -130,13 +130,13 @@ export const getItemDetails = async (req: AuthRequest, res: Response) => {
   // If customizable, get flavors and sizes
   if (item.can_customize) {
     const flavors = await query(
-      'SELECT * FROM cake_flavors WHERE is_available = TRUE ORDER BY display_order'
+      'SELECT * FROM cake_flavors WHERE is_available = TRUE ORDER BY flavor_category ASC, flavor_name ASC'
     );
     const sizes = await query(
-      'SELECT * FROM cake_sizes WHERE is_available = TRUE ORDER BY display_order'
+      'SELECT * FROM cake_sizes WHERE is_available = TRUE ORDER BY diameter_cm ASC'
     );
     const themes = await query(
-      'SELECT * FROM custom_cake_theme WHERE is_available = TRUE ORDER BY display_order'
+      'SELECT * FROM custom_cake_theme WHERE is_available = TRUE ORDER BY theme_name ASC'
     );
 
     item.flavors = flavors;
@@ -164,11 +164,9 @@ export const getActivePromotions = async (_req: AuthRequest, res: Response) => {
   const sql = `
     SELECT * FROM promotion_rules
     WHERE is_active = TRUE
-      AND display_on_kiosk = TRUE
-      AND CURDATE() BETWEEN start_date AND end_date
-      AND CURTIME() BETWEEN start_time AND end_time
-      AND (total_usage_limit IS NULL OR current_usage_count < total_usage_limit)
-    ORDER BY discount_percentage DESC, discount_amount DESC
+      AND CURDATE() BETWEEN DATE(start_date) AND DATE(end_date)
+      AND (usage_limit IS NULL OR usage_limit > 0)
+    ORDER BY discount_value DESC, created_at DESC
   `;
 
   const promotions = await query(sql);

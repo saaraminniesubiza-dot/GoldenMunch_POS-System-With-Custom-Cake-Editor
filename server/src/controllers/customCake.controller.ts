@@ -263,10 +263,10 @@ export const getDesignOptions = async (req: AuthRequest, res: Response) => {
   // Fetch flavors, sizes, and themes in parallel
   const [flavors, sizes, themes] = await Promise.all([
     query<any[]>(
-      `SELECT flavor_id, flavor_name, description, image_url, base_price_per_tier, is_premium, is_available
+      `SELECT flavor_id, flavor_name, description, image_url, base_price_per_tier, flavor_category, is_available
        FROM cake_flavors
        WHERE is_available = TRUE
-       ORDER BY is_premium ASC, flavor_name ASC`
+       ORDER BY flavor_category ASC, flavor_name ASC`
     ),
     query<any[]>(
       `SELECT size_id, size_name, diameter_cm, servings, base_price_multiplier, is_available
@@ -275,7 +275,7 @@ export const getDesignOptions = async (req: AuthRequest, res: Response) => {
        ORDER BY diameter_cm ASC`
     ),
     query<any[]>(
-      `SELECT theme_id, theme_name, description, theme_image_url, base_additional_cost, is_available
+      `SELECT theme_id, theme_name, description, sample_image_url as theme_image_url, base_additional_cost, is_available
        FROM custom_cake_theme
        WHERE is_available = TRUE
        ORDER BY theme_name ASC`
@@ -478,17 +478,13 @@ export const uploadImages = async (req: AuthRequest, res: Response) => {
   const imageInsertPromises = images.map((img: any) =>
     query(
       `INSERT INTO custom_cake_request_images
-       (request_id, image_url, image_type, view_angle, file_size, mime_type, width, height)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       (request_id, image_url, image_type, view_angle)
+       VALUES (?, ?, ?, ?)`,
       [
         request_id,
         img.url,
         img.type || '3d_render',
         img.view_angle || 'front',
-        img.file_size || null,
-        img.mime_type || 'image/png',
-        img.width || null,
-        img.height || null,
       ]
     )
   );
@@ -547,8 +543,8 @@ export const submitForReview = async (req: AuthRequest, res: Response) => {
     // Create notification for admin
     await conn.query(
       `INSERT INTO custom_cake_notifications
-       (request_id, notification_type, recipient_email, subject, message, status)
-       VALUES (?, 'submitted', ?, ?, ?, 'pending')`,
+       (request_id, notification_type, recipient_email, subject, message_body, status)
+       VALUES (?, 'submission_received', ?, ?, ?, 'pending')`,
       [
         request_id,
         process.env.ADMIN_EMAIL || 'admin@goldenmunch.com',
@@ -668,7 +664,7 @@ export const approveRequest = async (req: AuthRequest, res: Response) => {
       // Create notification
       await conn.query(
         `INSERT INTO custom_cake_notifications
-         (request_id, notification_type, recipient_email, subject, message, status)
+         (request_id, notification_type, recipient_email, subject, message_body, status)
          VALUES (?, 'approved', ?, ?, ?, 'pending')`,
         [
           requestId,
@@ -725,7 +721,7 @@ export const rejectRequest = async (req: AuthRequest, res: Response) => {
       // Create notification
       await conn.query(
         `INSERT INTO custom_cake_notifications
-         (request_id, notification_type, recipient_email, subject, message, status)
+         (request_id, notification_type, recipient_email, subject, message_body, status)
          VALUES (?, 'rejected', ?, ?, ?, 'pending')`,
         [
           requestId,
@@ -879,8 +875,8 @@ export const processPayment = async (req: AuthRequest, res: Response) => {
     if (request.customer_email) {
       await conn.query(
         `INSERT INTO custom_cake_notifications
-         (request_id, notification_type, recipient_email, subject, message, status)
-         VALUES (?, 'completed', ?, ?, ?, 'pending')`,
+         (request_id, notification_type, recipient_email, subject, message_body, status)
+         VALUES (?, 'ready_for_pickup', ?, ?, ?, 'pending')`,
         [
           requestId,
           request.customer_email,

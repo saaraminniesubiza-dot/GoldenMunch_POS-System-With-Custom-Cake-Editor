@@ -4,7 +4,7 @@ import type { CakeFlavor, CakeSize, CustomCakeTheme } from '@/types/api';
 export class CakeService {
   // Flavors
   static async getFlavors() {
-    return apiClient.get<CakeFlavor[]>('/admin/cake-flavors');
+    return apiClient.get<CakeFlavor[]>('/admin/cake/flavors');
   }
 
   static async createFlavor(data: {
@@ -14,7 +14,7 @@ export class CakeService {
     display_order?: number;
     is_available?: boolean;
   }) {
-    return apiClient.post<CakeFlavor>('/admin/cake-flavors', data);
+    return apiClient.post<CakeFlavor>('/admin/cake/flavors', data);
   }
 
   static async updateFlavor(id: number, data: Partial<{
@@ -24,12 +24,12 @@ export class CakeService {
     display_order?: number;
     is_available?: boolean;
   }>) {
-    return apiClient.put<CakeFlavor>(`/admin/cake-flavors/${id}`, data);
+    return apiClient.put<CakeFlavor>(`/admin/cake/flavors/${id}`, data);
   }
 
   // Sizes
   static async getSizes() {
-    return apiClient.get<CakeSize[]>('/admin/cake-sizes');
+    return apiClient.get<CakeSize[]>('/admin/cake/sizes');
   }
 
   static async createSize(data: {
@@ -40,7 +40,7 @@ export class CakeService {
     display_order?: number;
     is_available?: boolean;
   }) {
-    return apiClient.post<CakeSize>('/admin/cake-sizes', data);
+    return apiClient.post<CakeSize>('/admin/cake/sizes', data);
   }
 
   static async updateSize(id: number, data: Partial<{
@@ -51,12 +51,12 @@ export class CakeService {
     display_order?: number;
     is_available?: boolean;
   }>) {
-    return apiClient.put<CakeSize>(`/admin/cake-sizes/${id}`, data);
+    return apiClient.put<CakeSize>(`/admin/cake/sizes/${id}`, data);
   }
 
   // Themes
   static async getThemes() {
-    return apiClient.get<CustomCakeTheme[]>('/admin/cake-themes');
+    return apiClient.get<CustomCakeTheme[]>('/admin/cake/themes');
   }
 
   static async createTheme(data: {
@@ -75,9 +75,9 @@ export class CakeService {
         }
       });
       formData.append('image', imageFile);
-      return apiClient.postFormData<CustomCakeTheme>('/admin/cake-themes', formData);
+      return apiClient.postFormData<CustomCakeTheme>('/admin/cake/themes', formData);
     }
-    return apiClient.post<CustomCakeTheme>('/admin/cake-themes', data);
+    return apiClient.post<CustomCakeTheme>('/admin/cake/themes', data);
   }
 
   static async updateTheme(id: number, data: Partial<{
@@ -96,8 +96,8 @@ export class CakeService {
         }
       });
       formData.append('image', imageFile);
-      return apiClient.postFormData<CustomCakeTheme>(`/admin/cake-themes/${id}`, formData);
+      return apiClient.postFormData<CustomCakeTheme>(`/admin/cake/themes/${id}`, formData);
     }
-    return apiClient.put<CustomCakeTheme>(`/admin/cake-themes/${id}`, data);
+    return apiClient.put<CustomCakeTheme>(`/admin/cake/themes/${id}`, data);
   }
 }

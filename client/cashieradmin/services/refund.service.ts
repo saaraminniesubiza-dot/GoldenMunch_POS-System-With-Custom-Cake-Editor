@@ -25,7 +25,7 @@ export class RefundService {
   }
 
   static async rejectRefund(id: number, reason: string) {
-    return apiClient.post(`/admin/refund/${id}/reject`, { rejected_reason: reason });
+    return apiClient.post(`/admin/refund/${id}/reject`, { notes: reason });
   }
 
   static async completeRefund(id: number, data: {

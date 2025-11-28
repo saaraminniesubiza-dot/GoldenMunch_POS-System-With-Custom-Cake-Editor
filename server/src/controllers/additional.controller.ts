@@ -112,7 +112,7 @@ export const updateCustomer = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const updates = req.body;
 
-  const allowedColumns = ['first_name', 'last_name', 'phone', 'email', 'date_of_birth', 'is_active'];
+  const allowedColumns = ['name', 'phone', 'email', 'address', 'notes', 'is_active'];
 
   const { setClause, values } = buildSafeUpdateQuery(updates, allowedColumns);
   await query(`UPDATE customer SET ${setClause} WHERE customer_id = ?`, [...values, id]);
@@ -235,13 +235,12 @@ export const deleteCashier = async (req: AuthRequest, res: Response) => {
 // ==== TAX RULES MANAGEMENT ====
 
 export const createTaxRule = async (req: AuthRequest, res: Response) => {
-  const { tax_name, tax_type, tax_rate, fixed_amount, is_inclusive } = req.body;
-  const admin_id = req.user?.id;
+  const { tax_name, tax_type, tax_rate, is_inclusive, applicable_to, start_date, end_date } = req.body;
 
   const result = await query(
-    `INSERT INTO tax_rules (tax_name, tax_type, tax_rate, fixed_amount, is_inclusive, created_by)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [tax_name, tax_type, tax_rate || 0, fixed_amount || 0, is_inclusive || false, admin_id]
+    `INSERT INTO tax_rules (tax_name, tax_type, tax_rate, is_inclusive, applicable_to, start_date, end_date)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [tax_name, tax_type, tax_rate || 0, is_inclusive || false, applicable_to || 'all', start_date || null, end_date || null]
   );
 
   res.status(201).json(successResponse('Tax rule created', { id: getInsertId(result) }));
@@ -269,7 +268,7 @@ export const updateTaxRule = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const updates = req.body;
 
-  const allowedColumns = ['tax_name', 'tax_type', 'tax_rate', 'fixed_amount', 'is_inclusive', 'is_active'];
+  const allowedColumns = ['tax_name', 'tax_type', 'tax_rate', 'is_inclusive', 'applicable_to', 'is_active', 'start_date', 'end_date'];
 
   const { setClause, values } = buildSafeUpdateQuery(updates, allowedColumns);
   await query(`UPDATE tax_rules SET ${setClause} WHERE tax_id = ?`, [...values, id]);

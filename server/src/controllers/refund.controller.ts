@@ -33,17 +33,12 @@ export const createRefundRequest = async (req: AuthRequest, res: Response) => {
   // Create refund request
   const result = await query(
     `INSERT INTO refund_request
-     (order_id, order_item_id, refund_type, refund_amount, refund_reason,
-      reason_details, refund_method, requested_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+     (order_id, refund_amount, refund_reason, requested_by)
+     VALUES (?, ?, ?, ?)`,
     [
       order_id,
-      order_item_id || null,
-      refund_type,
       refund_amount,
-      refund_reason,
-      reason_details || null,
-      refund_method,
+      refund_reason || 'Customer request',
       cashier_id,
     ]
   );
@@ -55,7 +50,7 @@ export const createRefundRequest = async (req: AuthRequest, res: Response) => {
 
 // Get refund requests
 export const getRefundRequests = async (req: AuthRequest, res: Response) => {
-  const { refund_status, date_from, date_to, page = '1', limit = '20' } = req.query;
+  const { status, date_from, date_to, page = '1', limit = '20' } = req.query;
 
   // Parse and validate pagination parameters
   const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
@@ -77,9 +72,9 @@ export const getRefundRequests = async (req: AuthRequest, res: Response) => {
 
   const params: any[] = [];
 
-  if (refund_status) {
-    sql += ' AND rr.refund_status = ?';
-    params.push(refund_status);
+  if (status) {
+    sql += ' AND rr.status = ?';
+    params.push(status);
   }
 
   if (date_from) {
@@ -143,7 +138,7 @@ export const approveRefund = async (req: AuthRequest, res: Response) => {
 
   await query(
     `UPDATE refund_request
-     SET refund_status = 'approved',
+     SET status = 'approved',
          approved_by = ?,
          reference_number = ?,
          notes = ?,
@@ -163,7 +158,7 @@ export const rejectRefund = async (req: AuthRequest, res: Response) => {
 
   await query(
     `UPDATE refund_request
-     SET refund_status = 'rejected',
+     SET status = 'rejected',
          approved_by = ?,
          notes = ?,
          processed_at = NOW()
@@ -189,14 +184,14 @@ export const completeRefund = async (req: AuthRequest, res: Response) => {
     throw new AppError('Refund request not found', 404);
   }
 
-  if (refund.refund_status !== 'approved') {
+  if (refund.status !== 'approved') {
     throw new AppError('Refund must be approved before completion', 400);
   }
 
   // Update refund status
   await query(
     `UPDATE refund_request
-     SET refund_status = 'completed',
+     SET status = 'completed',
          reference_number = ?,
          processed_at = NOW()
      WHERE refund_id = ?`,

@@ -39,82 +39,57 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
       let itemPrice = menuItemData.current_price || 0;
       let flavorCost = 0;
       let sizeMultiplier = 1;
-      let designCost = 0;
-      let designId = null;
+      let customCakeRequestId = null;
 
-      // Handle custom cake design
-      if (item.custom_cake_design) {
-        // Insert custom cake design
-        const [designResult] = await conn.query(
-          `INSERT INTO custom_cake_design
-           (theme_id, frosting_color, frosting_type, decoration_details,
-            cake_text, special_instructions, design_complexity, additional_cost)
-           VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
-          [
-            item.custom_cake_design.theme_id || null,
-            item.custom_cake_design.frosting_color || null,
-            item.custom_cake_design.frosting_type,
-            item.custom_cake_design.decoration_details || null,
-            item.custom_cake_design.cake_text || null,
-            item.custom_cake_design.special_instructions || null,
-            item.custom_cake_design.design_complexity,
-          ]
-        );
-
-        designId = (designResult as any).insertId;
-
-        // Get theme cost if applicable
-        if (item.custom_cake_design.theme_id) {
-          const [themeRows] = await conn.query(
-            'SELECT base_additional_cost FROM custom_cake_theme WHERE theme_id = ?',
-            [item.custom_cake_design.theme_id]
-          );
-          if (Array.isArray(themeRows) && themeRows.length > 0) {
-            const theme = themeRows[0] as any;
-            designCost += theme.base_additional_cost || 0;
-          }
-        }
-      }
-
-      // Get flavor cost
+      // Get flavor cost (for custom cakes)
       if (item.flavor_id) {
         const [flavorRows] = await conn.query(
-          'SELECT additional_cost FROM cake_flavors WHERE flavor_id = ?',
+          'SELECT base_price_per_tier FROM cake_flavors WHERE flavor_id = ?',
           [item.flavor_id]
         );
         if (Array.isArray(flavorRows) && flavorRows.length > 0) {
           const flavor = flavorRows[0] as any;
-          flavorCost = flavor.additional_cost || 0;
+          flavorCost = flavor.base_price_per_tier || 0;
         }
       }
 
-      // Get size multiplier
+      // Get size multiplier (for custom cakes)
       if (item.size_id) {
         const [sizeRows] = await conn.query(
-          'SELECT size_multiplier FROM cake_sizes WHERE size_id = ?',
+          'SELECT base_price_multiplier FROM cake_sizes WHERE size_id = ?',
           [item.size_id]
         );
         if (Array.isArray(sizeRows) && sizeRows.length > 0) {
           const size = sizeRows[0] as any;
-          sizeMultiplier = size.size_multiplier || 1;
+          sizeMultiplier = size.base_price_multiplier || 1;
         }
       }
 
-      const itemTotal = (itemPrice + flavorCost + designCost) * sizeMultiplier * item.quantity;
+      const itemTotal = (itemPrice + flavorCost) * sizeMultiplier * item.quantity;
+
+      // Prepare customization notes (for special instructions, cake design details, etc.)
+      let customizationNotes = null;
+      if (item.custom_cake_design) {
+        customizationNotes = JSON.stringify({
+          theme_id: item.custom_cake_design.theme_id,
+          frosting_color: item.custom_cake_design.frosting_color,
+          frosting_type: item.custom_cake_design.frosting_type,
+          decoration_details: item.custom_cake_design.decoration_details,
+          cake_text: item.custom_cake_design.cake_text,
+          design_complexity: item.custom_cake_design.design_complexity,
+        });
+      }
 
       orderItems.push({
         menu_item_id: item.menu_item_id,
+        custom_cake_request_id: customCakeRequestId,
         item_name: menuItemData.name,
-        custom_cake_design_id: designId,
-        flavor_id: item.flavor_id || null,
-        size_id: item.size_id || null,
+        item_description: menuItemData.description,
         quantity: item.quantity,
         unit_price: itemPrice,
-        flavor_cost: flavorCost,
-        size_multiplier: sizeMultiplier,
-        design_cost: designCost,
-        item_total: itemTotal,
-        special_instructions: item.special_instructions || null,
+        subtotal: itemTotal,
+        customization_notes: customizationNotes,
+        special_requests: item.special_instructions || null,
       });
 
       subtotal += itemTotal;
@@ -170,24 +145,20 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     for (const orderItem of orderItems) {
       await conn.query(
         `INSERT INTO order_item
-         (order_id, menu_item_id, item_name, custom_cake_design_id, flavor_id, size_id,
-          quantity, unit_price, flavor_cost, size_multiplier, design_cost,
-          item_total, special_instructions)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (order_id, menu_item_id, custom_cake_request_id, item_name, item_description,
+          quantity, unit_price, subtotal, customization_notes, special_requests)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           orderId,
           orderItem.menu_item_id,
+          orderItem.custom_cake_request_id,
           orderItem.item_name,
-          orderItem.custom_cake_design_id,
-          orderItem.flavor_id,
-          orderItem.size_id,
+          orderItem.item_description,
           orderItem.quantity,
           orderItem.unit_price,
-          orderItem.flavor_cost,
-          orderItem.size_multiplier,
-          orderItem.design_cost,
-          orderItem.item_total,
-          orderItem.special_instructions,
+          orderItem.subtotal,
+          orderItem.customization_notes,
+          orderItem.special_requests,
         ]
       );
     }
@@ -275,8 +246,8 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
 
     await conn.query(
       `INSERT INTO payment_transaction
-       (order_id, payment_method, amount, reference_number, payment_status, verified_by, verified_at)
-       VALUES (?, ?, ?, ?, 'verified', ?, NOW())`,
+       (order_id, transaction_type, payment_method, amount, reference_number, status, processed_by, completed_at)
+       VALUES (?, 'payment', ?, ?, ?, 'completed', ?, NOW())`,
       [order_id, payment_method, orderData.total_amount, reference_number || null, cashier_id]
     );
   });

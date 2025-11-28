@@ -39,7 +39,7 @@ export const createWasteEntry = async (req: AuthRequest, res: Response) => {
     // Create waste entry
     const [wasteResult] = await conn.query(
       `INSERT INTO waste_tracking
-       (menu_item_id, quantity_wasted, waste_reason, waste_cost, reason_details, reported_by, waste_date)
+       (menu_item_id, quantity, waste_reason, estimated_value, notes, recorded_by, waste_date)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         menu_item_id,
