@@ -100,6 +100,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
         }
       }
 
+      const subtotal = itemPrice * item.quantity;
       const itemTotal = (itemPrice + flavorCost + designCost) * sizeMultiplier * item.quantity;
 
       orderItems.push({
@@ -110,6 +111,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
         size_id: item.size_id || null,
         quantity: item.quantity,
         unit_price: itemPrice,
+        subtotal: subtotal,
         flavor_cost: flavorCost,
         size_multiplier: sizeMultiplier,
         design_cost: designCost,
@@ -171,9 +173,9 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
       await conn.query(
         `INSERT INTO order_item
          (order_id, menu_item_id, item_name, custom_cake_design_id, flavor_id, size_id,
-          quantity, unit_price, flavor_cost, size_multiplier, design_cost,
+          quantity, unit_price, subtotal, flavor_cost, size_multiplier, design_cost,
           item_total, special_instructions)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           orderId,
           orderItem.menu_item_id,
@@ -183,6 +185,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
           orderItem.size_id,
           orderItem.quantity,
           orderItem.unit_price,
+          orderItem.subtotal,
           orderItem.flavor_cost,
           orderItem.size_multiplier,
           orderItem.design_cost,
