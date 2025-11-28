@@ -33,4 +33,8 @@ export class SettingsService {
   static async getPaymentQR(paymentMethod: 'gcash' | 'paymaya') {
     return apiClient.get(`/kiosk/payment-qr/${paymentMethod}`);
   }
+
+  static async getAllPaymentQR() {
+    return apiClient.get<{ gcash: string | null; paymaya: string | null }>('/admin/payment-qr');
+  }
 }
