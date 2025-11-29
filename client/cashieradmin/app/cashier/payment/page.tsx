@@ -26,7 +26,7 @@ import {
   TableCell,
 } from "@heroui/table";
 import { Spinner } from "@heroui/spinner";
-import { Toast } from "@heroui/toast";
+import { addToast } from "@heroui/toast";
 import {
   ClockIcon,
   CheckCircleIcon,
@@ -157,7 +157,11 @@ export default function PaymentPage() {
       }
     } catch (error) {
       console.error("Failed to load payment data:", error);
-      Toast.error("Failed to load payment data");
+      addToast({
+        title: "Error",
+        description: "Failed to load payment data",
+        status: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -193,13 +197,21 @@ export default function PaymentPage() {
           onOpen();
         } else {
           setSearchError("Order not found");
-          Toast.error("Order not found");
+          addToast({
+            title: "Error",
+            description: "Order is not found",
+          });
         }
       }
     } catch (error) {
       console.error("Search error:", error);
       setSearchError("Failed to search order");
-      Toast.error("Failed to search order");
+      addToast({
+        title: "Error",
+        description: "Failed to search order",
+        color: "danger",
+        timeout: 5000,
+      });
     } finally {
       setSearchLoading(false);
     }
@@ -257,26 +269,31 @@ export default function PaymentPage() {
           selectedOrder.order_number || `#${selectedOrder.order_id}`;
 
         if (selectedOrder.payment_method === "cash") {
-          Toast.success(
-            `✅ Cash payment verified for ${orderNum}! Change: ₱${calculatedChange.toFixed(2)}`,
-            {
-              duration: 5000,
-            },
-          );
+          addToast({
+            title: "Success",
+            description: `✅ Cash payment verified for ${orderNum}! Change: ₱${calculatedChange.toFixed(2)}`,
+            color: "success",
+            timeout: 5000,
+          });
         } else {
-          Toast.success(
-            `✅ ${paymentMethod} payment verified for ${orderNum}!`,
-            {
-              duration: 5000,
-            },
-          );
+          addToast({
+            title: "Success",
+            description: `✅ ${paymentMethod} payment verified for ${orderNum}!`,
+            color: "success",
+            timeout: 5000,
+          });
         }
 
         await loadPaymentData();
         handleCloseModal();
       } else {
         setVerifyError(response.error || "Payment verification failed");
-        Toast.error(response.error || "Payment verification failed");
+        addToast({
+          title: "Error",
+          description: response.error || "Payment verification failed",
+          color: "danger",
+          timeout: 5000,
+        });
       }
     } catch (error: any) {
       console.error("Payment verification error:", error);
@@ -284,7 +301,12 @@ export default function PaymentPage() {
         error.response?.data?.error || "Failed to verify payment";
 
       setVerifyError(errorMsg);
-      Toast.error(errorMsg);
+      addToast({
+        title: "Error",
+        description: errorMsg,
+        color: "danger",
+        timeout: 5000,
+      });
     } finally {
       setVerifying(false);
     }

@@ -38,9 +38,7 @@ interface NavItem {
 const cashierNav: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Orders', href: '/cashier/orders', icon: ShoppingCartIcon },
-  { name: 'Payment Verification', href: '/cashier/payment', icon: CreditCardIcon },
-  { name: 'Waste Logging', href: '/cashier/waste', icon: TrashIcon },
-  { name: 'Refund Requests', href: '/cashier/refunds', icon: ReceiptRefundIcon },
+  { name: 'Payment Verification', href: '/cashier/payment', icon: CreditCardIcon }
 ];
 
 const adminNav: NavItem[] = [
