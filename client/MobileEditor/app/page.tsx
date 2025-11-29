@@ -388,8 +388,8 @@ function CakeEditorContent() {
     );
   }
 
-  // No session token - show landing page
-  if (!sessionToken) {
+  // No session token - show landing page (unless in debug mode)
+  if (!sessionToken && !(debugMode && process.env.NODE_ENV !== 'production')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-pink-50 p-4">
         <Card className="max-w-md">
