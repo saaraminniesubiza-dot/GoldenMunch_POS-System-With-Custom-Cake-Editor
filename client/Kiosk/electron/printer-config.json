@@ -3,7 +3,12 @@
   "usb": {
     "vid": "0x0416",
     "pid": "0x5011",
-    "comment": "Common IDs - Check your printer's USB VID/PID using 'lsusb' (Linux/Mac) or Device Manager (Windows)"
+    "comment": "USB IDs for POS-9200L / XPrinter-type thermal printers"
+  },
+  "settings": {
+    "width": 48,
+    "encoding": "GB18030",
+    "comment": "48 chars = 80mm paper (POS-9200L supports 110mm labels but prints ESC/POS at 48 chars)"
   },
   "network": {
     "address": "192.168.1.100",
@@ -14,11 +19,6 @@
     "path": "/dev/ttyUSB0",
     "baudRate": 9600,
     "comment": "Serial port path - /dev/ttyUSB0 (Linux), COM3 (Windows)"
-  },
-  "settings": {
-    "width": 48,
-    "encoding": "GB18030",
-    "comment": "Width: 48 chars for 80mm paper, 32 for 58mm paper"
   },
   "commonPrinters": {
     "epson": {
