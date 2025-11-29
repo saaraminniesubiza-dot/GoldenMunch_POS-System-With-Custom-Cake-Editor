@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
@@ -386,8 +386,8 @@ export default function TransactionsPage() {
                     const itemsCount = transaction.items?.length || 0;
 
                     return (
-                      <>
-                        <tr key={transaction.order_id} className="hover:bg-default-50">
+                      <React.Fragment key={transaction.order_id}>
+                        <tr className="hover:bg-default-50">
                           <td className="px-4 py-4">
                             <div className="space-y-1">
                               <p className="font-semibold text-sm">
@@ -470,8 +470,8 @@ export default function TransactionsPage() {
                               <div className="space-y-2">
                                 <p className="text-sm font-semibold text-default-700 mb-3">Order Items:</p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                  {transaction.items.map((item, idx) => (
-                                    <div key={idx} className="flex justify-between items-center bg-white p-3 rounded border border-default-200">
+                                  {transaction.items.map((item) => (
+                                    <div key={item.order_item_id} className="flex justify-between items-center bg-white p-3 rounded border border-default-200">
                                       <div className="flex-1">
                                         <p className="font-medium text-sm">{item.item_name || 'Item'}</p>
                                         <p className="text-xs text-default-500">
@@ -488,7 +488,7 @@ export default function TransactionsPage() {
                             </td>
                           </tr>
                         )}
-                      </>
+                      </React.Fragment>
                     );
                   })
                 )}
@@ -538,8 +538,8 @@ export default function TransactionsPage() {
                 <div>
                   <p className="text-sm font-semibold text-default-700 mb-3">Items Purchased:</p>
                   <div className="space-y-2">
-                    {selectedTransaction.items?.map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-start p-3 bg-default-50 rounded">
+                    {selectedTransaction.items?.map((item) => (
+                      <div key={item.order_item_id} className="flex justify-between items-start p-3 bg-default-50 rounded">
                         <div className="flex-1">
                           <p className="font-medium">{item.item_name || 'Item'}</p>
                           <p className="text-sm text-default-500">

@@ -162,6 +162,11 @@ export default function PaymentPage() {
         description: "Failed to load payment data",
         status: "error",
       });
+      console.error('Failed to load payment data:', error);
+      addToast({
+        title: 'Failed to load payment data',
+        icon: <XCircleIcon className="h-5 w-5 text-danger" />
+      });
     } finally {
       setLoading(false);
     }
@@ -201,6 +206,11 @@ export default function PaymentPage() {
             title: "Error",
             description: "Order is not found",
           });
+          setSearchError('Order not found');
+          addToast({
+            title: 'Order not found',
+            icon: <XCircleIcon className="h-5 w-5 text-danger" />
+          });
         }
       }
     } catch (error) {
@@ -211,6 +221,12 @@ export default function PaymentPage() {
         description: "Failed to search order",
         color: "danger",
         timeout: 5000,
+      });
+      console.error('Search error:', error);
+      setSearchError('Failed to search order');
+      addToast({
+        title: 'Failed to search order',
+        icon: <XCircleIcon className="h-5 w-5 text-danger" />
       });
     } finally {
       setSearchLoading(false);
@@ -274,12 +290,23 @@ export default function PaymentPage() {
             description: `✅ Cash payment verified for ${orderNum}! Change: ₱${calculatedChange.toFixed(2)}`,
             color: "success",
             timeout: 5000,
+        if (selectedOrder.payment_method === 'cash') {
+          addToast({
+            title: 'Cash Payment Verified',
+            description: `Payment verified for ${orderNum}! Change: ₱${calculatedChange.toFixed(2)}`,
+            icon: <CheckCircleIcon className="h-5 w-5 text-success" />,
+            timeout: 5000,
           });
         } else {
           addToast({
             title: "Success",
             description: `✅ ${paymentMethod} payment verified for ${orderNum}!`,
             color: "success",
+            timeout: 5000,
+          addToast({
+            title: 'Payment Verified',
+            description: `${paymentMethod.toUpperCase()} payment verified for ${orderNum}!`,
+            icon: <CheckCircleIcon className="h-5 w-5 text-success" />,
             timeout: 5000,
           });
         }
@@ -294,6 +321,12 @@ export default function PaymentPage() {
           color: "danger",
           timeout: 5000,
         });
+        setVerifyError(response.error || 'Payment verification failed');
+        addToast({
+          title: 'Payment verification failed',
+          description: response.error,
+          icon: <XCircleIcon className="h-5 w-5 text-danger" />
+        });
       }
     } catch (error: any) {
       console.error("Payment verification error:", error);
@@ -306,6 +339,11 @@ export default function PaymentPage() {
         description: errorMsg,
         color: "danger",
         timeout: 5000,
+      });
+      addToast({
+        title: 'Failed to verify payment',
+        description: errorMsg,
+        icon: <XCircleIcon className="h-5 w-5 text-danger" />
       });
     } finally {
       setVerifying(false);
