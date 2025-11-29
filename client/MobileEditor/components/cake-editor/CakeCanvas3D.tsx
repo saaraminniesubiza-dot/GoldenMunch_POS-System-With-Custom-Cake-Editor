@@ -8,6 +8,7 @@ import type { CakeDesign } from '@/app/page';
 
 interface CakeCanvas3DProps {
   design: CakeDesign;
+  options?: any;
 }
 
 // Component to expose screenshot functionality
@@ -22,7 +23,7 @@ function ScreenshotHelper({ onCapture }: { onCapture: (capture: () => string) =>
   return null;
 }
 
-const CakeCanvas3D = forwardRef<any, CakeCanvas3DProps>(({ design }, ref) => {
+const CakeCanvas3D = forwardRef<any, CakeCanvas3DProps>(({ design, options }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const captureRef = useRef<() => string>();
 
@@ -65,7 +66,7 @@ const CakeCanvas3D = forwardRef<any, CakeCanvas3DProps>(({ design }, ref) => {
 
         {/* Cake Model */}
         <Suspense fallback={null}>
-          <CakeModel design={design} />
+          <CakeModel design={design} options={options} />
         </Suspense>
 
         {/* Ground Shadow */}

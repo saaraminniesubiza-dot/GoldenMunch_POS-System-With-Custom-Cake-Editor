@@ -479,7 +479,7 @@ function CakeEditorContent() {
               <CardBody className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Live Preview</h3>
                 <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden">
-                  <CakeCanvas3D ref={canvasRef} design={design} />
+                  <CakeCanvas3D ref={canvasRef} design={design} options={options} />
                 </div>
                 <div className="mt-4 p-3 bg-amber-50 rounded-lg">
                   <p className="text-sm font-medium text-amber-900">Estimated Price</p>
