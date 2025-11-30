@@ -31,10 +31,10 @@ npm install
 ```
 
 This installs:
-- `escpos` - ESC/POS printer library
-- `escpos-usb` - USB adapter for escpos
-- `escpos-network` - Network adapter for escpos
-- `escpos-serialport` - Serial port adapter for escpos
+- `escpos` - ESC/POS printer library (v3.0.0-alpha.6)
+- `escpos-usb` - USB adapter for escpos (v3.0.0-alpha.4)
+- `escpos-network` - Network adapter for escpos (v3.0.0-alpha.5)
+- `escpos-serialport` - Serial port adapter for escpos (v3.0.0-alpha.4)
 - `serialport` - For serial/USB communication
 
 **Important**: If you get errors about missing adapter packages, run:
