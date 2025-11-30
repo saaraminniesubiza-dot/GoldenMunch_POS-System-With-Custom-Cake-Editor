@@ -1,9 +1,10 @@
 {
+  "_comment": "IMPORTANT: For LABEL-9X00 or other printers, run: PowerShell .\\electron\\find-label-printer.ps1",
   "printerType": "usb",
   "usb": {
     "vid": "0x0416",
     "pid": "0x5011",
-    "comment": "USB IDs for POS-9200L / XPrinter-type thermal printers"
+    "comment": "UPDATE THESE VALUES! Run find-label-printer.ps1 to detect your LABEL-9X00 printer VID/PID"
   },
   "settings": {
     "width": 48,
@@ -16,9 +17,9 @@
     "comment": "Use printer's IP address on your network"
   },
   "serial": {
-    "path": "/dev/ttyUSB0",
+    "path": "COM3",
     "baudRate": 9600,
-    "comment": "Serial port path - /dev/ttyUSB0 (Linux), COM3 (Windows)"
+    "comment": "Serial port path - COM3, COM4, etc. (Windows) or /dev/ttyUSB0 (Linux)"
   },
   "commonPrinters": {
     "epson": {
@@ -36,6 +37,19 @@
     "bixolon": {
       "usb": { "vid": "0x1504", "pid": "0x0006" },
       "description": "Bixolon SRP-350, SRP-275 series"
-    }
+    },
+    "tsc_label": {
+      "usb": { "vid": "0x1203", "pid": "0x0001" },
+      "description": "TSC Label Printers (TTP-244, TTP-345)"
+    },
+    "godex_label": {
+      "usb": { "vid": "0x0519", "pid": "0x0020" },
+      "description": "Godex Label Printers (G500, EZ-1100)"
+    },
+    "zebra_label": {
+      "usb": { "vid": "0x0a5f", "pid": "0x0001" },
+      "description": "Zebra Label Printers (ZD220, GK420)"
+    },
+    "note": "Run find-label-printer.ps1 to detect your specific LABEL-9X00 printer"
   }
 }
