@@ -52,7 +52,7 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ selectedItem, onClos
     (selectedItem?.is_infinite_stock || (selectedItem?.stock_quantity ?? 0) > 0);
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 w-[30vw] max-w-[576px] bg-gradient-to-b from-pure-white/90 via-sunny-yellow/5 to-deep-orange-yellow/10 backdrop-blur-md border-l-4 border-sunny-yellow shadow-[-10px_0_40px_rgba(251,205,47,0.4)] z-30 flex flex-col">
+    <div className="fixed right-0 top-0 bottom-0 w-[35vw] max-w-[500px] bg-gradient-to-b from-pure-white/90 via-sunny-yellow/5 to-deep-orange-yellow/10 backdrop-blur-md border-l-4 border-sunny-yellow shadow-[-10px_0_40px_rgba(251,205,47,0.4)] z-30 flex flex-col">
       {/* Item Detail Section (Top 60%) */}
       <div className={`flex-1 overflow-y-auto transition-all duration-500 ${selectedItem ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         {selectedItem && (
@@ -73,12 +73,12 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ selectedItem, onClos
                     <div className="text-9xl">🍰</div>
                   )}
 
-                  {/* Close Button */}
+                  {/* Close Button - Larger for touch */}
                   <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 w-12 h-12 bg-sunny-yellow rounded-full flex items-center justify-center text-black hover:bg-deep-orange-yellow hover:text-white transition-all shadow-lg hover:scale-110"
+                    className="absolute top-6 right-6 w-16 h-16 bg-sunny-yellow rounded-full flex items-center justify-center text-black hover:bg-deep-orange-yellow hover:text-white transition-all shadow-xl hover:scale-110 touch-target"
                   >
-                    <span className="text-2xl font-bold">×</span>
+                    <span className="text-3xl font-bold">×</span>
                   </button>
 
                   {/* Badges */}
@@ -99,69 +99,69 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ selectedItem, onClos
                 {/* Item Details - White Background with Dark Text */}
                 <div className="p-6 flex-1 flex flex-col justify-between bg-gradient-to-b from-pure-white/95 to-sunny-yellow/5 backdrop-blur-sm">
                   <div>
-                    {/* Name */}
-                    <h2 className="text-3xl font-black text-black mb-3 drop-shadow-sm">
+                    {/* Name - Larger for portrait */}
+                    <h2 className="text-4xl font-black text-black mb-4">
                       {selectedItem.name}
                     </h2>
 
-                    {/* Description - Darker text for readability */}
-                    <p className="text-lg text-black/80 mb-4 leading-relaxed">
+                    {/* Description - All black text */}
+                    <p className="text-xl text-black mb-5 leading-relaxed">
                       {selectedItem.description || 'Delicious treat made fresh daily with the finest ingredients.'}
                     </p>
 
-                    {/* Category & Type */}
-                    <div className="flex gap-3 mb-4">
-                      <Chip size="lg" className="bg-sunny-yellow text-black font-bold text-base px-4 shadow-md">
+                    {/* Category & Type - Larger */}
+                    <div className="flex gap-4 mb-5">
+                      <Chip size="lg" className="bg-sunny-yellow text-black font-bold text-lg px-5 py-2 shadow-md">
                         {selectedItem.item_type}
                       </Chip>
                       {selectedItem.categories && selectedItem.categories.length > 0 && (
-                        <Chip size="lg" className="bg-deep-orange-yellow text-white font-bold text-base px-4 shadow-md">
+                        <Chip size="lg" className="bg-deep-orange-yellow text-black font-bold text-lg px-5 py-2 shadow-md">
                           {selectedItem.categories[0].name}
                         </Chip>
                       )}
                     </div>
 
-                    {/* Price */}
-                    <div className="mb-4">
-                      <span className="text-5xl font-black text-black drop-shadow-sm">
+                    {/* Price - Larger and always black */}
+                    <div className="mb-5">
+                      <span className="text-6xl font-black text-black">
                         ${(Number(selectedItem.current_price) || 0).toFixed(2)}
                       </span>
                     </div>
 
-                    {/* Stock Info */}
+                    {/* Stock Info - All black text */}
                     {!selectedItem.is_infinite_stock && (
-                      <p className="text-base text-charcoal-gray/80 mb-4">
+                      <p className="text-lg text-black mb-5">
                         {isAvailable ? (
                           <span>📦 {selectedItem.stock_quantity} available</span>
                         ) : (
-                          <span className="text-red-600">❌ Out of stock</span>
+                          <span className="text-black font-bold">❌ Out of stock</span>
                         )}
                       </p>
                     )}
                   </div>
 
-                  {/* Quantity Selector & Add Button */}
+                  {/* Quantity Selector & Add Button - Larger for touch */}
                   {isAvailable && (
-                    <div className="space-y-4">
-                      {/* Quantity Selector */}
-                      <div className="flex items-center gap-4">
-                        <span className="text-lg font-semibold text-charcoal-gray">Quantity:</span>
-                        <div className="flex items-center gap-3">
+                    <div className="space-y-5">
+                      {/* Quantity Selector - Larger buttons */}
+                      <div className="flex items-center gap-5">
+                        <span className="text-2xl font-semibold text-black">Quantity:</span>
+                        <div className="flex items-center gap-4">
                           <Button
                             size="lg"
                             isIconOnly
-                            className="bg-sunny-yellow/30 text-charcoal-gray font-bold text-2xl hover:bg-sunny-yellow hover:text-charcoal-gray transition-all w-14 h-14"
+                            className="bg-sunny-yellow/30 text-black font-bold text-3xl hover:bg-sunny-yellow hover:text-black transition-all w-20 h-20 touch-target-lg"
                             onClick={() => handleQuantityChange(-1)}
                           >
                             −
                           </Button>
-                          <span className="text-3xl font-bold text-charcoal-gray min-w-[60px] text-center">
+                          <span className="text-4xl font-bold text-black min-w-[80px] text-center">
                             {quantity}
                           </span>
                           <Button
                             size="lg"
                             isIconOnly
-                            className="bg-sunny-yellow/30 text-charcoal-gray font-bold text-2xl hover:bg-sunny-yellow hover:text-charcoal-gray transition-all w-14 h-14"
+                            className="bg-sunny-yellow/30 text-black font-bold text-3xl hover:bg-sunny-yellow hover:text-black transition-all w-20 h-20 touch-target-lg"
                             onClick={() => handleQuantityChange(1)}
                           >
                             +
@@ -169,10 +169,10 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ selectedItem, onClos
                         </div>
                       </div>
 
-                      {/* Add to Cart Button */}
+                      {/* Add to Cart Button - Larger */}
                       <Button
                         size="lg"
-                        className="w-full bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-charcoal-gray font-bold text-2xl py-8 shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+                        className="w-full bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-black font-bold text-3xl py-10 shadow-xl hover:shadow-2xl hover:scale-105 transition-all touch-target-lg"
                         onClick={handleAddToCart}
                       >
                         🛒 Add to Cart
@@ -184,7 +184,7 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ selectedItem, onClos
                     <Button
                       disabled
                       size="lg"
-                      className="w-full bg-gray-300 text-gray-500 font-semibold text-2xl py-8"
+                      className="w-full bg-gray-300 text-black font-semibold text-3xl py-10 touch-target-lg"
                     >
                       Unavailable
                     </Button>
@@ -196,20 +196,20 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ selectedItem, onClos
         )}
       </div>
 
-      {/* Cart Section (Bottom 40%) - Always Present */}
-      <div className={`border-t-4 border-sunny-yellow bg-gradient-to-b from-sunny-yellow/10 to-deep-orange-yellow/15 backdrop-blur-md transition-all duration-500 ${isCartHidden ? 'h-16' : 'h-[40vh]'}`}>
-        {/* Toggle Button */}
+      {/* Cart Section (Bottom 40%) - Always Present, portrait optimized */}
+      <div className={`border-t-4 border-sunny-yellow bg-gradient-to-b from-sunny-yellow/10 to-deep-orange-yellow/15 backdrop-blur-md transition-all duration-500 ${isCartHidden ? 'h-20' : 'h-[40vh]'}`}>
+        {/* Toggle Button - Larger for touch */}
         <button
           onClick={() => setIsCartHidden(!isCartHidden)}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-sunny-yellow/30 transition-all"
+          className="w-full px-8 py-5 flex items-center justify-between hover:bg-sunny-yellow/30 transition-all touch-target-lg"
         >
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">🛒</span>
-            <span className="text-xl font-bold text-black">
+          <div className="flex items-center gap-4">
+            <span className="text-4xl">🛒</span>
+            <span className="text-2xl font-bold text-black">
               Your Cart {itemCount > 0 && `(${itemCount})`}
             </span>
           </div>
-          <span className="text-2xl text-black">
+          <span className="text-3xl text-black">
             {isCartHidden ? '▲' : '▼'}
           </span>
         </button>
@@ -274,13 +274,13 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ selectedItem, onClos
                     </span>
                   </div>
 
-                  {/* Buttons */}
-                  <div className="space-y-3">
+                  {/* Buttons - Larger for portrait touch */}
+                  <div className="space-y-4">
                     <Button
                       as={Link}
                       href="/cart"
                       size="lg"
-                      className="w-full bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-black font-bold text-xl py-6 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                      className="w-full bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-black font-bold text-2xl py-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all touch-target-lg"
                     >
                       View Cart & Checkout →
                     </Button>
@@ -289,11 +289,11 @@ export const KioskSidebar: React.FC<KioskSidebarProps> = ({ selectedItem, onClos
                       as={Link}
                       href="/custom-cake"
                       size="lg"
-                      className="w-full bg-gradient-to-r from-deep-orange-yellow via-sunny-yellow to-deep-orange-yellow text-charcoal-gray font-bold text-xl py-6 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                      className="w-full bg-gradient-to-r from-deep-orange-yellow via-sunny-yellow to-deep-orange-yellow text-black font-bold text-2xl py-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all touch-target-lg"
                     >
                       <div className="flex items-center justify-between w-full">
                         <span>🎂 Custom Cake</span>
-                        <span className="text-sm bg-charcoal-gray/20 px-3 py-1 rounded-lg">📱 Scan QR</span>
+                        <span className="text-sm bg-black/20 px-3 py-1 rounded-lg text-black">📱 Scan QR</span>
                       </div>
                     </Button>
                   </div>

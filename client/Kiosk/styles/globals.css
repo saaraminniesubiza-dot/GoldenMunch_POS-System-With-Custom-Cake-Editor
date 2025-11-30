@@ -647,16 +647,50 @@ img {
     box-shadow: 0 8px 24px rgba(217, 179, 140, 0.4);
   }
 
-  /* Touch Optimized - Large touch targets for 24" touchscreen */
+  /* Touch Optimized - Large touch targets for 21" portrait touchscreen */
   .touch-target {
-    min-height: 80px;
-    min-width: 80px;
+    min-height: 88px;
+    min-width: 88px;
+    touch-action: manipulation;
+  }
+
+  /* Extra large touch targets for primary actions */
+  .touch-target-lg {
+    min-height: 100px;
+    min-width: 100px;
+    touch-action: manipulation;
   }
 
   /* Touch Feedback - Visual feedback for touch interactions */
   .touch-feedback:active {
     transform: scale(0.97);
     transition: transform 0.1s ease-out;
+  }
+
+  /* Portrait 21-inch optimized text sizes */
+  .text-portrait-sm {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .text-portrait-base {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .text-portrait-lg {
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+
+  .text-portrait-xl {
+    font-size: 2.5rem;
+    line-height: 3rem;
+  }
+
+  .text-portrait-2xl {
+    font-size: 3rem;
+    line-height: 3.5rem;
   }
 
   /* Gentle Float Animation - For background elements */

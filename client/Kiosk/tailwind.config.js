@@ -38,6 +38,10 @@ const config = {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-20px)' },
         }
+      },
+      // Portrait 21-inch monitor optimizations
+      spacing: {
+        'touch': '16px', // Minimum touch target spacing
       }
     },
   },

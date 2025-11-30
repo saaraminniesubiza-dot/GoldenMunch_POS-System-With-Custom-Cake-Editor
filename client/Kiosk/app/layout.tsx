@@ -8,6 +8,7 @@ import { Providers } from "./providers";
 
 import { fontSans } from "@/config/fonts";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
+import { BackToMenuButton } from "@/components/BackToMenuButton";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -49,6 +50,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <>
       <AnimatedBackground />
+      <BackToMenuButton />
       <div className="relative min-h-screen">
         {/* Main Content Area */}
         <main className="w-full overflow-y-auto">

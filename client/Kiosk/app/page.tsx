@@ -133,32 +133,32 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="h-[1920px] overflow-y-auto pr-[30vw] max-pr-[576px] flex flex-col">
-        {/* Hero Header */}
-        <div className="bg-gradient-to-br from-sunny-yellow/25 via-pure-white/20 to-deep-orange-yellow/25 backdrop-blur-sm border-b-4 border-sunny-yellow py-10 px-12 mb-6 shadow-lg">
-          <div className="max-w-[1400px] mx-auto text-center">
-            <div className="text-9xl mb-6 animate-float drop-shadow-xl">🍰</div>
-            <h1 className="text-8xl font-black bg-gradient-to-br from-sunny-yellow via-deep-orange-yellow to-sunny-yellow bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(251,205,47,0.6)] mb-4">
+      <div className="min-h-screen overflow-y-auto pr-[35vw] max-pr-[500px] flex flex-col pt-20">
+        {/* Hero Header - Optimized for portrait */}
+        <div className="bg-gradient-to-br from-sunny-yellow/25 via-pure-white/20 to-deep-orange-yellow/25 backdrop-blur-sm border-b-4 border-sunny-yellow py-8 px-8 mb-8 shadow-lg">
+          <div className="max-w-full mx-auto text-center">
+            <div className="text-8xl mb-4 animate-float drop-shadow-xl">🍰</div>
+            <h1 className="text-7xl font-black text-black drop-shadow-lg mb-3">
               Golden Munch
             </h1>
-            <p className="text-3xl text-black font-bold drop-shadow-lg">
+            <p className="text-2xl text-black font-bold drop-shadow-sm">
               Fresh • Delicious • Made with Love
             </p>
           </div>
         </div>
 
-        <div className="max-w-[1400px] mx-auto px-12">
-          {/* Categories */}
+        <div className="max-w-full mx-auto px-8">
+          {/* Categories - Touch optimized */}
           {categories.length > 0 && (
-            <div className="mb-6">
-              <div className="flex gap-4 justify-center flex-wrap">
+            <div className="mb-8">
+              <div className="flex gap-5 justify-center flex-wrap">
                 <Button
                   size="lg"
                   className={`${
                     selectedCategory === null
                       ? 'bg-gradient-to-br from-sunny-yellow to-deep-orange-yellow text-black scale-105 shadow-xl shadow-sunny-yellow/40'
                       : 'bg-gradient-to-br from-pure-white/80 to-sunny-yellow/10 backdrop-blur-sm border-2 border-sunny-yellow/50 text-black hover:border-sunny-yellow hover:shadow-lg'
-                  } font-bold text-xl px-10 py-7 rounded-2xl transition-all touch-target`}
+                  } font-bold text-2xl px-12 py-8 rounded-2xl transition-all touch-target-lg`}
                   onClick={() => setSelectedCategory(null)}
                 >
                   All Items
@@ -171,7 +171,7 @@ export default function HomePage() {
                       selectedCategory === category.category_id
                         ? 'bg-gradient-to-br from-sunny-yellow to-deep-orange-yellow text-black scale-105 shadow-xl shadow-sunny-yellow/40'
                         : 'bg-gradient-to-br from-pure-white/80 to-sunny-yellow/10 backdrop-blur-sm border-2 border-sunny-yellow/50 text-black hover:border-sunny-yellow hover:shadow-lg'
-                    } font-bold text-xl px-10 py-7 rounded-2xl transition-all touch-target`}
+                    } font-bold text-2xl px-12 py-8 rounded-2xl transition-all touch-target-lg`}
                     onClick={() => setSelectedCategory(category.category_id)}
                   >
                     {category.name}
@@ -205,14 +205,14 @@ export default function HomePage() {
             </Card>
           ) : (
             <>
-              <div className="text-center mb-6">
-                <h2 className="text-4xl font-bold text-black drop-shadow-lg">
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-bold text-black drop-shadow-sm">
                   {filteredItems.length} Delicious {filteredItems.length === 1 ? 'Item' : 'Items'}
                 </h2>
               </div>
 
-              {/* 4 Column Grid - Flexible height for scrolling */}
-              <div className="grid grid-cols-4 gap-8 pb-6 flex-1">
+              {/* 2 Column Grid - Portrait 21-inch optimized */}
+              <div className="grid grid-cols-2 gap-8 pb-8 flex-1">
                 {filteredItems.map((item) => (
                   <MenuCard
                     key={item.menu_item_id}
@@ -226,21 +226,21 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Promotional Section - Fixed at Bottom */}
-        <div className="mt-auto bg-gradient-to-r from-sunny-yellow/30 via-deep-orange-yellow/25 to-sunny-yellow/30 backdrop-blur-md border-t-4 border-sunny-yellow py-8 px-12 shadow-2xl">
-          <div className="max-w-[1400px] mx-auto">
-            <div className="flex items-center justify-between gap-8">
-              <div className="flex-1">
-                <h3 className="text-4xl font-black text-black mb-2 drop-shadow-lg">
+        {/* Promotional Section - Portrait optimized */}
+        <div className="mt-auto bg-gradient-to-r from-sunny-yellow/30 via-deep-orange-yellow/25 to-sunny-yellow/30 backdrop-blur-md border-t-4 border-sunny-yellow py-10 px-8 shadow-2xl">
+          <div className="max-w-full mx-auto">
+            <div className="flex flex-col items-center gap-6 text-center">
+              <div>
+                <h3 className="text-5xl font-black text-black mb-3 drop-shadow-sm">
                   🎂 Design Your Dream Cake!
                 </h3>
-                <p className="text-xl text-black/90 font-bold">
+                <p className="text-2xl text-black font-bold">
                   Create a custom cake perfectly tailored to your celebration
                 </p>
               </div>
               <Button
                 size="lg"
-                className="bg-gradient-to-br from-sunny-yellow via-deep-orange-yellow to-sunny-yellow text-black font-black text-3xl px-16 py-12 rounded-3xl shadow-2xl hover:shadow-[0_0_50px_rgba(251,205,47,0.7)] hover:scale-105 transition-all touch-target border-4 border-deep-orange-yellow/50 animate-pulse-slow"
+                className="bg-gradient-to-br from-sunny-yellow via-deep-orange-yellow to-sunny-yellow text-black font-black text-3xl px-20 py-10 rounded-3xl shadow-2xl hover:shadow-[0_0_50px_rgba(251,205,47,0.7)] hover:scale-105 transition-all touch-target-lg border-4 border-deep-orange-yellow/50 animate-pulse-slow min-w-full"
                 onClick={() => window.location.href = '/cake-editor'}
               >
                 🍰 Custom Cake Editor
