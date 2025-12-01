@@ -43,7 +43,6 @@ export default function CartPage() {
   const [specialInstructions, setSpecialInstructions] = useState("");
   const [orderType, setOrderType] = useState<OrderType>('takeout');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
-  const [referenceNumber, setReferenceNumber] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [completedOrder, setCompletedOrder] = useState<CustomerOrder | null>(null);
@@ -53,7 +52,6 @@ export default function CartPage() {
   const { isOpen: isQROpen, onOpen: onQROpen, onClose: onQRClose } = useDisclosure();
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [loadingQR, setLoadingQR] = useState(false);
-  const [showReferenceInput, setShowReferenceInput] = useState(false);
 
   // Track failed image URLs to show emoji fallback
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
@@ -66,11 +64,8 @@ export default function CartPage() {
   useEffect(() => {
     if (paymentMethod === 'gcash' || paymentMethod === 'paymaya') {
       fetchQRCode();
-      setShowReferenceInput(false);
     } else {
       setQrCodeUrl(null);
-      setShowReferenceInput(false);
-      setReferenceNumber(''); // Clear reference number for cash payments
     }
   }, [paymentMethod]);
 
@@ -96,11 +91,6 @@ export default function CartPage() {
     }
   };
 
-  const handlePaymentComplete = () => {
-    onQRClose();
-    setShowReferenceInput(true);
-  };
-
   const getItemEmoji = (itemType: string): string => {
     const emojiMap: Record<string, string> = {
       cake: '🍰',
@@ -120,20 +110,11 @@ export default function CartPage() {
     setIsProcessing(true);
     setError(null);
 
-    // Validate reference number for GCash and PayMaya payments
-    if ((paymentMethod === 'gcash' || paymentMethod === 'paymaya') && !referenceNumber.trim()) {
-      const methodName = paymentMethod === 'gcash' ? 'GCash' : 'PayMaya';
-      setError(`Please enter your ${methodName} reference number`);
-      setIsProcessing(false);
-      return;
-    }
-
     try {
       const orderData: CreateOrderRequest = {
         order_type: orderType,
         order_source: 'kiosk',
         payment_method: paymentMethod,
-        payment_reference_number: referenceNumber.trim() || undefined,
         special_instructions: specialInstructions || undefined,
         items: getOrderItems(),
       };
@@ -468,55 +449,16 @@ export default function CartPage() {
                   </SelectItem>
                 </Select>
 
-                {/* Show QR code and reference number input for GCash and PayMaya payments */}
+                {/* Show QR code for GCash and PayMaya payments */}
                 {(paymentMethod === 'gcash' || paymentMethod === 'paymaya') && (
-                  <div className="space-y-4">
-                    {/* Show QR Code Button */}
-                    {!showReferenceInput && (
-                      <Button
-                        size="lg"
-                        className="w-full bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-black font-bold shadow-lg hover:scale-105 transition-all"
-                        onPress={handleShowQRCode}
-                        isLoading={loadingQR}
-                      >
-                        {loadingQR ? 'Loading QR Code...' : '📱 Show Payment QR Code'}
-                      </Button>
-                    )}
-
-                    {/* Reference Number Input - shows after payment */}
-                    {showReferenceInput && (
-                      <div className="space-y-3">
-                        <div className="bg-sunny-yellow/20 p-4 rounded-lg border-2 border-sunny-yellow/60 shadow-md">
-                          <p className="text-sm text-black font-semibold">
-                            ✅ Payment Complete? Enter your reference number below:
-                          </p>
-                        </div>
-                        <Input
-                          label="Reference Number *"
-                          placeholder="Enter your payment reference number"
-                          value={referenceNumber}
-                          onChange={(e) => setReferenceNumber(e.target.value)}
-                          size="lg"
-                          variant="bordered"
-                          required
-                          classNames={{
-                            input: "text-black",
-                            label: "text-black font-semibold",
-                            inputWrapper: "border-2 border-sunny-yellow/60 hover:border-sunny-yellow bg-pure-white/50 shadow-sm"
-                          }}
-                          description="Enter the reference number from your payment confirmation"
-                        />
-                        <Button
-                          size="sm"
-                          variant="flat"
-                          className="w-full bg-sunny-yellow/20 text-black hover:bg-sunny-yellow/30 font-semibold"
-                          onPress={() => setShowReferenceInput(false)}
-                        >
-                          View QR Code Again
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                  <Button
+                    size="lg"
+                    className="w-full bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-black font-bold shadow-lg hover:scale-105 transition-all"
+                    onPress={handleShowQRCode}
+                    isLoading={loadingQR}
+                  >
+                    {loadingQR ? 'Loading QR Code...' : '📱 Show Payment QR Code'}
+                  </Button>
                 )}
 
                 <Input
@@ -711,14 +653,13 @@ export default function CartPage() {
                     <li>Scan the QR code shown above</li>
                     <li>Verify the amount: ₱{getTotal().toFixed(2)}</li>
                     <li>Complete the payment in your app</li>
-                    <li>Save the reference number from your receipt</li>
-                    <li>Click "I've Paid" below to continue</li>
+                    <li>Show your payment confirmation to the cashier</li>
                   </ol>
                 </div>
 
-                <div className="bg-red-500/20 p-3 rounded-lg border-2 border-red-500/60 shadow-md">
+                <div className="bg-yellow-500/20 p-3 rounded-lg border-2 border-yellow-500/60 shadow-md">
                   <p className="text-sm text-black text-center">
-                    ⚠️ <strong>Important:</strong> Make sure to complete the payment and get your reference number before clicking "I've Paid"
+                    ℹ️ <strong>Note:</strong> Please complete your payment and show the confirmation to the cashier when picking up your order.
                   </p>
                 </div>
               </div>
@@ -733,19 +674,12 @@ export default function CartPage() {
           </ModalBody>
           <ModalFooter>
             <Button
-              variant="light"
-              className="text-black hover:text-black font-semibold"
-              onPress={onQRClose}
-            >
-              Cancel
-            </Button>
-            <Button
               size="lg"
               className="bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-black font-bold shadow-lg hover:scale-105 transition-all"
-              onPress={handlePaymentComplete}
+              onPress={onQRClose}
               isDisabled={!qrCodeUrl}
             >
-              ✅ I've Paid - Enter Reference Number
+              Done
             </Button>
           </ModalFooter>
         </ModalContent>

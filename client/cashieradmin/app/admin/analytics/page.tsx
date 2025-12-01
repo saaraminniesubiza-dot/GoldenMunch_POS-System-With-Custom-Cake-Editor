@@ -37,7 +37,24 @@ export default function AnalyticsPage() {
       ]);
 
       if (salesRes.success) {
-        setSalesData(salesRes.data);
+        // Server returns array of daily stats, aggregate them
+        const dailyStats = Array.isArray(salesRes.data) ? salesRes.data : [salesRes.data];
+
+        const aggregated = dailyStats.reduce((acc, day: any) => ({
+          total_orders: acc.total_orders + (Number(day.total_orders) || 0),
+          unique_customers: acc.unique_customers + (Number(day.unique_customers) || 0),
+          total_revenue: acc.total_revenue + (Number(day.total_revenue) || 0),
+        }), { total_orders: 0, unique_customers: 0, total_revenue: 0 });
+
+        // Calculate average order value
+        const avg_order_value = aggregated.total_orders > 0
+          ? aggregated.total_revenue / aggregated.total_orders
+          : 0;
+
+        setSalesData({
+          ...aggregated,
+          avg_order_value,
+        });
       }
 
       if (trendingRes.success) {
@@ -141,7 +158,7 @@ export default function AnalyticsPage() {
                 <div>
                   <p className="text-sm text-default-500">Avg Order Value</p>
                   <p className="text-2xl font-bold">
-                    ₱{parseFloat(salesData.average_order_value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                    ₱{parseFloat(salesData.avg_order_value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
               </div>
