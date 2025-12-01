@@ -472,6 +472,7 @@ export interface KioskSetting {
 export interface SalesAnalytics {
   totalRevenue: number;
   totalOrders: number;
+  uniqueCustomers: number;
   averageOrderValue: number;
   topSellingItems: Array<{
     menu_item_id: number;

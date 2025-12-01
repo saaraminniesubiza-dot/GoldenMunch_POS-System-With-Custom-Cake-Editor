@@ -240,6 +240,7 @@ export const getSalesAnalytics = async (req: AuthRequest, res: Response) => {
     SELECT
       DATE(created_at) as date,
       COUNT(*) as total_orders,
+      COUNT(DISTINCT customer_id) as unique_customers,
       SUM(total_amount) as total_revenue,
       AVG(total_amount) as avg_order_value,
       SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) as paid_orders,

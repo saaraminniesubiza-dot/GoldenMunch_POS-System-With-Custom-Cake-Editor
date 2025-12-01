@@ -49,12 +49,20 @@ export default function DashboardPage() {
       const ordersResponse = await OrderService.getOrders();
 
       if (analyticsResponse.success && analyticsResponse.data) {
-        const data = analyticsResponse.data;
+        // Server returns array of daily stats, aggregate them
+        const dailyStats = Array.isArray(analyticsResponse.data) ? analyticsResponse.data : [analyticsResponse.data];
+
+        const aggregated = dailyStats.reduce((acc, day: any) => ({
+          totalOrders: acc.totalOrders + (Number(day.total_orders) || 0),
+          totalRevenue: acc.totalRevenue + (Number(day.total_revenue) || 0),
+          uniqueCustomers: acc.uniqueCustomers + (Number(day.unique_customers) || 0),
+        }), { totalOrders: 0, totalRevenue: 0, uniqueCustomers: 0 });
+
         setStats({
-          todayOrders: data.totalOrders || 0,
-          todayRevenue: data.totalRevenue || 0,
-          totalCustomers: 0, // unique_customers not available in SalesAnalytics
-          avgOrderValue: data.averageOrderValue || 0,
+          todayOrders: aggregated.totalOrders,
+          todayRevenue: aggregated.totalRevenue,
+          totalCustomers: aggregated.uniqueCustomers,
+          avgOrderValue: aggregated.totalOrders > 0 ? aggregated.totalRevenue / aggregated.totalOrders : 0,
         });
       }
 
