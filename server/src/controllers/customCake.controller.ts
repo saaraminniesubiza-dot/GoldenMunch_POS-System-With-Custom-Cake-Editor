@@ -7,6 +7,7 @@ import { getFirstRow, getInsertId } from '../utils/typeGuards';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
 import mysql from 'mysql2/promise';
+import logger from '../utils/logger';
 
 // ============================================================================
 // TYPES
