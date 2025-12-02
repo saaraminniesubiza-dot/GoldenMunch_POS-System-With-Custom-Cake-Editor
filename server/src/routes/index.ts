@@ -592,6 +592,7 @@ router.put('/admin/kiosk-settings/:key', authenticateAdmin, asyncHandler(additio
 // Payment QR Codes (Admin only)
 router.post('/admin/payment-qr/upload', authenticateAdmin, uploadPaymentQR.single('qr_code'), asyncHandler(paymentQRController.uploadPaymentQR));
 router.get('/admin/payment-qr', authenticateAdmin, asyncHandler(paymentQRController.getAllPaymentQR));
+router.delete('/admin/payment-qr/:paymentMethod', authenticateAdmin, asyncHandler(paymentQRController.deletePaymentQR));
 
 // Refund Management (Admin Only)
 router.get('/admin/refund', authenticateAdmin, asyncHandler(refundController.getRefundRequests));

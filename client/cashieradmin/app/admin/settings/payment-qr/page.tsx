@@ -116,7 +116,41 @@ export default function PaymentQRSettingsPage() {
       setPaymayaQR(null);
       setPaymayaPreview(null);
     }
-    loadExistingQRs(); // Reload to show saved QR if any
+    // Don't reload - user wants to clear and upload a new one
+  };
+
+  const handleDeleteQR = async (method: PaymentMethod) => {
+    if (!confirm(`Are you sure you want to delete the ${method.toUpperCase()} QR code? This cannot be undone.`)) {
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await SettingsService.deletePaymentQR(method);
+
+      setSuccess(`${method.toUpperCase()} QR code deleted successfully!`);
+
+      // Clear both preview and file
+      if (method === 'gcash') {
+        setGcashQR(null);
+        setGcashPreview(null);
+      } else {
+        setPaymayaQR(null);
+        setPaymayaPreview(null);
+      }
+
+      setTimeout(() => {
+        setSuccess(null);
+      }, 2000);
+    } catch (err: any) {
+      console.error('Delete error:', err);
+      setError(err.response?.data?.error || err.message || 'Failed to delete QR code');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const renderQRUpload = (method: PaymentMethod) => {
@@ -141,27 +175,50 @@ export default function PaymentQRSettingsPage() {
         <CardBody className="space-y-4">
           {/* Preview */}
           {preview ? (
-            <div className="relative">
-              <div className="aspect-square bg-default-100 rounded-lg overflow-hidden flex items-center justify-center max-w-md mx-auto">
-                <Image
-                  src={preview}
-                  alt={`${method.toUpperCase()} Payment QR Preview`}
-                  width={400}
-                  height={400}
-                  className="object-contain"
-                  unoptimized
-                />
+            <div className="space-y-4">
+              <div className="relative">
+                <div className="aspect-square bg-default-100 rounded-lg overflow-hidden flex items-center justify-center max-w-md mx-auto">
+                  <Image
+                    src={preview}
+                    alt={`${method.toUpperCase()} Payment QR Preview`}
+                    width={400}
+                    height={400}
+                    className="object-contain"
+                    unoptimized
+                  />
+                </div>
+                {qrFile && (
+                  <Button
+                    size="sm"
+                    color="danger"
+                    variant="flat"
+                    className="absolute top-2 right-2"
+                    onPress={() => clearPreview(method)}
+                  >
+                    Remove
+                  </Button>
+                )}
               </div>
-              {qrFile && (
-                <Button
-                  size="sm"
-                  color="danger"
-                  variant="flat"
-                  className="absolute top-2 right-2"
-                  onPress={() => clearPreview(method)}
-                >
-                  Remove
-                </Button>
+
+              {/* Replace QR option - show file input when there's an existing QR */}
+              {!qrFile && preview && (
+                <div className="border-2 border-dashed border-primary-300 rounded-lg p-6 text-center bg-primary-50">
+                  <p className="text-sm text-default-700 font-semibold mb-3">
+                    Replace with a new QR code
+                  </p>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileSelect(file, method);
+                    }}
+                    className="max-w-xs mx-auto"
+                    classNames={{
+                      input: "cursor-pointer"
+                    }}
+                  />
+                </div>
               )}
             </div>
           ) : (
@@ -194,29 +251,45 @@ export default function PaymentQRSettingsPage() {
 
           <Divider />
 
-          {/* Upload Button */}
-          <div className="flex justify-end gap-2">
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center gap-2">
+            {/* Delete button - only show if there's a saved QR (preview but no new file selected) */}
             {preview && !qrFile && (
               <Button
                 color="danger"
-                variant="flat"
+                variant="bordered"
                 size="lg"
-                onPress={() => clearPreview(method)}
+                onPress={() => handleDeleteQR(method)}
+                isLoading={uploading}
+                startContent={<XCircleIcon className="h-5 w-5" />}
               >
-                Clear
+                Delete QR Code
               </Button>
             )}
-            <Button
-              color="primary"
-              size="lg"
-              onPress={() => handleUpload(method)}
-              isLoading={uploading}
-              isDisabled={!qrFile}
-              startContent={<QrCodeIcon className="h-5 w-5" />}
-              className="font-semibold"
-            >
-              {uploading ? 'Uploading...' : `Upload ${method.toUpperCase()} QR Code`}
-            </Button>
+
+            {/* Upload button - only show if there's a new file selected */}
+            {qrFile && (
+              <div className="flex gap-2 ml-auto">
+                <Button
+                  color="default"
+                  variant="flat"
+                  size="lg"
+                  onPress={() => clearPreview(method)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="primary"
+                  size="lg"
+                  onPress={() => handleUpload(method)}
+                  isLoading={uploading}
+                  startContent={<QrCodeIcon className="h-5 w-5" />}
+                  className="font-semibold"
+                >
+                  {uploading ? 'Uploading...' : `Upload ${method.toUpperCase()} QR Code`}
+                </Button>
+              </div>
+            )}
           </div>
         </CardBody>
       </Card>
