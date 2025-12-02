@@ -154,7 +154,8 @@ export default function CashierOrdersPage() {
 
   const needsPaymentVerification = (order: CustomerOrder) => {
     return order.payment_status === 'pending' &&
-           (order.payment_method === 'gcash' || order.payment_method === 'paymaya' || order.payment_method === 'card');
+           (order.payment_method === 'gcash' || order.payment_method === 'paymaya' ||
+            order.payment_method === 'credit_card' || order.payment_method === 'debit_card');
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -564,7 +565,7 @@ export default function CashierOrdersPage() {
                   />
                 )}
 
-                {selectedOrder.payment_method === 'card' && (
+                {(selectedOrder.payment_method === 'credit_card' || selectedOrder.payment_method === 'debit_card') && (
                   <div className="bg-warning-50 p-3 rounded">
                     <p className="text-sm text-warning-700">
                       Verify that the card payment was successfully processed through your POS terminal.

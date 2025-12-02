@@ -95,7 +95,7 @@ export default function PaymentPage() {
 
       if (pendingResponse.success && pendingResponse.data) {
         // Server returns { orders: [...], pagination: {...} }
-        const orders = pendingResponse.data.orders || [];
+        const orders = (pendingResponse.data as any).orders || [];
         console.log('📦 Total orders received:', orders.length);
         console.log('📋 Orders data:', orders);
 
@@ -129,7 +129,7 @@ export default function PaymentPage() {
 
       if (allResponse.success && allResponse.data) {
         // Server returns { orders: [...], pagination: {...} }
-        const orders = allResponse.data.orders || [];
+        const orders = (allResponse.data as any).orders || [];
         const today = new Date().toISOString().split('T')[0];
         console.log('📅 Today\'s date for filtering:', today);
 

@@ -480,7 +480,7 @@ export default function AdminMenuPage() {
   const confirmBulkDelete = async () => {
     try {
       setError(null);
-      const promises = Array.from(selectedItems).map(id =>
+      const promises = (Array.from(selectedItems) as number[]).map(id =>
         MenuService.deleteMenuItem(id)
       );
       await Promise.all(promises);
@@ -501,7 +501,7 @@ export default function AdminMenuPage() {
 
     try {
       setError(null);
-      const promises = Array.from(selectedItems).map(id =>
+      const promises = (Array.from(selectedItems) as number[]).map(id =>
         MenuService.updateMenuItem(id, { status: status as any })
       );
       await Promise.all(promises);
