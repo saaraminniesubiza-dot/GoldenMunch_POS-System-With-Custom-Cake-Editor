@@ -119,3 +119,49 @@ export const getAllPaymentQR = async (req: AuthRequest, res: Response) => {
     })
   );
 };
+
+// Delete Payment QR Code (Admin only)
+export const deletePaymentQR = async (req: AuthRequest, res: Response) => {
+  const { paymentMethod } = req.params;
+
+  if (!paymentMethod || !['gcash', 'paymaya'].includes(paymentMethod)) {
+    throw new AppError('Invalid payment method. Must be gcash or paymaya', 400);
+  }
+
+  const settingKey = `${paymentMethod}_qr_code_url`;
+
+  // Get existing setting to delete the file
+  const existingSetting = getFirstRow<any>(
+    await query(
+      'SELECT setting_value FROM system_settings WHERE setting_key = ?',
+      [settingKey]
+    )
+  );
+
+  if (!existingSetting || !existingSetting.setting_value) {
+    throw new AppError(`${paymentMethod.toUpperCase()} QR code not found`, 404);
+  }
+
+  // Delete the file from filesystem
+  const filePath = path.join(__dirname, '../../', existingSetting.setting_value);
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch (err) {
+      console.error('Failed to delete QR code file:', err);
+      // Continue anyway to remove from database
+    }
+  }
+
+  // Delete the database record
+  await query(
+    'DELETE FROM system_settings WHERE setting_key = ?',
+    [settingKey]
+  );
+
+  res.json(
+    successResponse(`${paymentMethod.toUpperCase()} QR code deleted successfully`, {
+      payment_method: paymentMethod
+    })
+  );
+};

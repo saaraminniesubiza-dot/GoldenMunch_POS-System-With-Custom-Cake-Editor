@@ -37,4 +37,8 @@ export class SettingsService {
   static async getAllPaymentQR() {
     return apiClient.get<{ gcash: string | null; paymaya: string | null }>('/admin/payment-qr');
   }
+
+  static async deletePaymentQR(paymentMethod: 'gcash' | 'paymaya') {
+    return apiClient.delete(`/admin/payment-qr/${paymentMethod}`);
+  }
 }
