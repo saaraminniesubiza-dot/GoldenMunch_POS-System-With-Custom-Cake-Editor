@@ -179,13 +179,13 @@ export default function TransactionsPage() {
   const getTotalCashCollected = () => {
     return filteredTransactions
       .filter(t => t.payment_method === 'cash')
-      .reduce((sum, t) => sum + Number(t.amount_paid || t.final_amount || 0), 0);
+      .reduce((sum, t) => sum + Number((t as any).amount_paid || t.final_amount || 0), 0);
   };
 
   const getTotalChangeGiven = () => {
     return filteredTransactions
       .filter(t => t.payment_method === 'cash')
-      .reduce((sum, t) => sum + Number(t.change_amount || 0), 0);
+      .reduce((sum, t) => sum + Number((t as any).change_amount || 0), 0);
   };
 
   const formatCurrency = (amount: number | string) => {
@@ -438,9 +438,9 @@ export default function TransactionsPage() {
                               >
                                 {transaction.payment_method}
                               </Chip>
-                              {transaction.payment_method === 'cash' && transaction.change_amount && Number(transaction.change_amount) > 0 && (
+                              {transaction.payment_method === 'cash' && (transaction as any).change_amount && Number((transaction as any).change_amount) > 0 && (
                                 <p className="text-xs text-default-500">
-                                  Change: {formatCurrency(transaction.change_amount)}
+                                  Change: {formatCurrency((transaction as any).change_amount)}
                                 </p>
                               )}
                             </div>
@@ -448,9 +448,9 @@ export default function TransactionsPage() {
                           <td className="px-4 py-4 text-right">
                             <div className="space-y-1">
                               <p className="font-bold text-lg">{formatCurrency(transaction.final_amount)}</p>
-                              {transaction.payment_method === 'cash' && transaction.amount_paid && Number(transaction.amount_paid) > Number(transaction.final_amount || 0) && (
+                              {transaction.payment_method === 'cash' && (transaction as any).amount_paid && Number((transaction as any).amount_paid) > Number(transaction.final_amount || 0) && (
                                 <p className="text-xs text-default-500">
-                                  Paid: {formatCurrency(transaction.amount_paid)}
+                                  Paid: {formatCurrency((transaction as any).amount_paid)}
                                 </p>
                               )}
                             </div>
@@ -478,7 +478,7 @@ export default function TransactionsPage() {
                                   {transaction.items.map((item) => (
                                     <div key={item.order_item_id} className="flex justify-between items-center bg-white p-3 rounded border border-default-200">
                                       <div className="flex-1">
-                                        <p className="font-medium text-sm">{item.item_name || 'Item'}</p>
+                                        <p className="font-medium text-sm">{(item as any).item_name || 'Item'}</p>
                                         <p className="text-xs text-default-500">
                                           {formatCurrency(item.unit_price)} × {item.quantity}
                                         </p>
@@ -546,7 +546,7 @@ export default function TransactionsPage() {
                     {selectedTransaction.items?.map((item) => (
                       <div key={item.order_item_id} className="flex justify-between items-start p-3 bg-default-50 rounded">
                         <div className="flex-1">
-                          <p className="font-medium">{item.item_name || 'Item'}</p>
+                          <p className="font-medium">{(item as any).item_name || 'Item'}</p>
                           <p className="text-sm text-default-500">
                             {formatCurrency(item.unit_price)} × {item.quantity}
                           </p>
@@ -593,11 +593,11 @@ export default function TransactionsPage() {
                           <p className="font-semibold text-sm text-success-700">Cash Payment Details</p>
                           <div className="flex justify-between">
                             <span className="text-sm">Amount Received:</span>
-                            <span className="font-semibold">{formatCurrency(selectedTransaction.amount_paid || selectedTransaction.final_amount)}</span>
+                            <span className="font-semibold">{formatCurrency((selectedTransaction as any).amount_paid || selectedTransaction.final_amount)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm">Change Given:</span>
-                            <span className="font-semibold">{formatCurrency(selectedTransaction.change_amount)}</span>
+                            <span className="font-semibold">{formatCurrency((selectedTransaction as any).change_amount)}</span>
                           </div>
                         </div>
                       </>
@@ -637,10 +637,10 @@ export default function TransactionsPage() {
                       {selectedTransaction.payment_status}
                     </Chip>
                   </div>
-                  {selectedTransaction.cashier && (
+                  {(selectedTransaction as any).cashier && (
                     <div>
                       <p className="text-sm text-default-500">Processed By</p>
-                      <p className="font-semibold">{selectedTransaction.cashier.name || 'Cashier'}</p>
+                      <p className="font-semibold">{(selectedTransaction as any).cashier.name || 'Cashier'}</p>
                     </div>
                   )}
                   <div>
