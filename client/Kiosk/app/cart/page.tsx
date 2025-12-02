@@ -52,6 +52,7 @@ export default function CartPage() {
   const { isOpen: isQROpen, onOpen: onQROpen, onClose: onQRClose } = useDisclosure();
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [loadingQR, setLoadingQR] = useState(false);
+  const [referenceNumber, setReferenceNumber] = useState("");
 
   // Track failed image URLs to show emoji fallback
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
@@ -66,6 +67,7 @@ export default function CartPage() {
       fetchQRCode();
     } else {
       setQrCodeUrl(null);
+      setReferenceNumber(""); // Clear reference number when switching away from digital payments
     }
   }, [paymentMethod]);
 
@@ -111,6 +113,13 @@ export default function CartPage() {
     setError(null);
 
     try {
+      // Validate reference number for GCash and PayMaya
+      if ((paymentMethod === 'gcash' || paymentMethod === 'paymaya') && !referenceNumber.trim()) {
+        setError(`Please enter your ${paymentMethod.toUpperCase()} reference number`);
+        setIsProcessing(false);
+        return;
+      }
+
       const orderData: CreateOrderRequest = {
         order_type: orderType,
         order_source: 'kiosk',
@@ -118,6 +127,13 @@ export default function CartPage() {
         special_instructions: specialInstructions || undefined,
         items: getOrderItems(),
       };
+
+      // Add reference number based on payment method
+      if (paymentMethod === 'gcash' && referenceNumber.trim()) {
+        orderData.gcash_reference_number = referenceNumber.trim();
+      } else if (paymentMethod === 'paymaya' && referenceNumber.trim()) {
+        orderData.paymaya_reference_number = referenceNumber.trim();
+      }
 
       const order = await OrderService.createOrder(orderData);
       setCompletedOrder(order);
@@ -166,6 +182,7 @@ export default function CartPage() {
     setSpecialInstructions("");
     setOrderType('takeout');
     setPaymentMethod('cash');
+    setReferenceNumber("");
     setCompletedOrder(null);
     onOpenChange();
     router.push('/');
@@ -653,13 +670,40 @@ export default function CartPage() {
                     <li>Scan the QR code shown above</li>
                     <li>Verify the amount: ₱{getTotal().toFixed(2)}</li>
                     <li>Complete the payment in your app</li>
-                    <li>Show your payment confirmation to the cashier</li>
+                    <li><strong>Copy the reference number from your payment confirmation</strong></li>
+                    <li>Enter the reference number below</li>
                   </ol>
+                </div>
+
+                {/* Reference Number Input */}
+                <div className="bg-gradient-to-br from-pure-white/95 to-sunny-yellow/20 p-6 rounded-xl border-2 border-sunny-yellow/60 shadow-lg">
+                  <Input
+                    label={`${paymentMethod === 'gcash' ? 'GCash' : 'PayMaya'} Reference Number`}
+                    placeholder="Enter your reference number"
+                    value={referenceNumber}
+                    onChange={(e) => setReferenceNumber(e.target.value)}
+                    size="lg"
+                    variant="bordered"
+                    isRequired
+                    classNames={{
+                      input: "text-black font-semibold text-lg",
+                      label: "text-black font-bold text-base",
+                      inputWrapper: "border-3 border-sunny-yellow/80 hover:border-sunny-yellow bg-pure-white shadow-md h-14"
+                    }}
+                    startContent={
+                      <div className="pointer-events-none flex items-center">
+                        <span className="text-2xl mr-2">📱</span>
+                      </div>
+                    }
+                  />
+                  <p className="text-xs text-black mt-2 font-medium">
+                    ⚠️ This reference number is required to complete your order
+                  </p>
                 </div>
 
                 <div className="bg-yellow-500/20 p-3 rounded-lg border-2 border-yellow-500/60 shadow-md">
                   <p className="text-sm text-black text-center">
-                    ℹ️ <strong>Note:</strong> Please complete your payment and show the confirmation to the cashier when picking up your order.
+                    ℹ️ <strong>Note:</strong> Please complete your payment and enter the reference number above. The cashier will verify this reference number when you pick up your order.
                   </p>
                 </div>
               </div>
@@ -677,9 +721,9 @@ export default function CartPage() {
               size="lg"
               className="bg-gradient-to-r from-sunny-yellow to-deep-orange-yellow text-black font-bold shadow-lg hover:scale-105 transition-all"
               onPress={onQRClose}
-              isDisabled={!qrCodeUrl}
+              isDisabled={!qrCodeUrl || !referenceNumber.trim()}
             >
-              Done
+              ✓ I've Entered My Reference Number
             </Button>
           </ModalFooter>
         </ModalContent>

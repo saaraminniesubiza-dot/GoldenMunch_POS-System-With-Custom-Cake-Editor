@@ -119,8 +119,8 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
       `INSERT INTO customer_order
        (order_number, verification_code, customer_id, order_type, payment_method, payment_status, order_status,
         subtotal, total_amount, discount_amount, tax_amount, final_amount,
-        special_instructions, kiosk_session_id, is_preorder, gcash_reference_number)
-       VALUES (?, ?, ?, ?, ?, 'unpaid', 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        special_instructions, kiosk_session_id, is_preorder, gcash_reference_number, paymaya_reference_number)
+       VALUES (?, ?, ?, ?, ?, 'unpaid', 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         orderNumber,
         verificationCode,
@@ -135,7 +135,8 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
         orderData.special_instructions || null,
         orderData.kiosk_session_id || generateSessionId(),
         orderData.order_type === 'custom_order',
-        orderData.payment_reference_number || null,
+        orderData.gcash_reference_number || null,
+        orderData.paymaya_reference_number || null,
       ]
     );
 

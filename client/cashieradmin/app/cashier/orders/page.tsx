@@ -332,11 +332,19 @@ export default function CashierOrdersPage() {
                           {selectedOrder.payment_status}
                         </Chip>
                       </div>
-                      {(selectedOrder.gcash_reference_number || selectedOrder.paymaya_reference_number) && (
+                      {selectedOrder.gcash_reference_number && (
                         <div>
-                          <p className="text-sm text-default-500">Reference Number</p>
-                          <code className="text-sm bg-default-100 px-2 py-1 rounded">
-                            {selectedOrder.gcash_reference_number || selectedOrder.paymaya_reference_number}
+                          <p className="text-sm text-default-500">GCash Reference Number</p>
+                          <code className="text-sm font-semibold bg-primary-50 border border-primary-200 px-3 py-1 rounded">
+                            {selectedOrder.gcash_reference_number}
+                          </code>
+                        </div>
+                      )}
+                      {selectedOrder.paymaya_reference_number && (
+                        <div>
+                          <p className="text-sm text-default-500">PayMaya Reference Number</p>
+                          <code className="text-sm font-semibold bg-success-50 border border-success-200 px-3 py-1 rounded">
+                            {selectedOrder.paymaya_reference_number}
                           </code>
                         </div>
                       )}
