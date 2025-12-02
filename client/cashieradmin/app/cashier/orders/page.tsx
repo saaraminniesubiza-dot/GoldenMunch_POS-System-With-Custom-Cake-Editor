@@ -349,7 +349,7 @@ export default function CashierOrdersPage() {
                       {selectedOrder.items?.map((item, idx) => (
                         <div key={idx} className="flex justify-between p-3 bg-default-50 rounded mb-2">
                           <div>
-                            <span className="font-medium">{item.item_name || item.menu_item?.name || 'Item'}</span>
+                            <span className="font-medium">{(item as any).item_name || item.menu_item?.name || 'Item'}</span>
                             <span className="text-sm text-default-500 ml-2">x{item.quantity}</span>
                           </div>
                           <span className="font-semibold">₱{Number(item.item_total || 0).toFixed(2)}</span>
