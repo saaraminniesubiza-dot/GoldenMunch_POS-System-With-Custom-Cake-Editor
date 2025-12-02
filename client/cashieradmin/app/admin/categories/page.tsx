@@ -171,12 +171,12 @@ export default function CategoriesPage() {
       setError(null);
 
       // Find items to unassign (were in original but not in new selection)
-      const itemsToUnassign = Array.from(originallyAssignedItems).filter(
+      const itemsToUnassign = (Array.from(originallyAssignedItems) as number[]).filter(
         id => !selectedMenuItems.has(id)
       );
 
       // Find items to assign (are in new selection but not in original)
-      const itemsToAssign = Array.from(selectedMenuItems).filter(
+      const itemsToAssign = (Array.from(selectedMenuItems) as number[]).filter(
         id => !originallyAssignedItems.has(id)
       );
 

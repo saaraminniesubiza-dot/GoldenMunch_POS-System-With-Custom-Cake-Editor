@@ -37,11 +37,20 @@ export enum OrderStatus {
 
 export enum PaymentMethod {
   CASH = 'cash',
-  CASHLESS = 'cashless'
+  CASHLESS = 'cashless',
+  CREDIT_CARD = 'credit_card',
+  DEBIT_CARD = 'debit_card',
+  GCASH = 'gcash',
+  PAYMAYA = 'paymaya',
+  BANK_TRANSFER = 'bank_transfer',
+  LOYALTY_POINTS = 'loyalty_points',
+  OTHER = 'other'
 }
 
 export enum PaymentStatus {
+  UNPAID = 'unpaid',
   PENDING = 'pending',
+  PARTIAL = 'partial',
   PARTIAL_PAID = 'partial_paid',
   PAID = 'paid',
   FAILED = 'failed',
