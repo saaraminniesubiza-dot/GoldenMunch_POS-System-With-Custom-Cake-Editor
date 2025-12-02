@@ -102,9 +102,10 @@ export default function CashierOrdersPage() {
   const handleUpdateStatus = async (newStatus: OrderStatus) => {
     if (!selectedOrder) return;
 
-    // Validation: Cannot start order (confirm) if payment is not verified
-    if (newStatus === 'confirmed' && selectedOrder.payment_status !== 'paid') {
-      setStatusUpdateError('⚠️ Payment must be verified before starting this order. Please verify the payment first.');
+    // Validation: Payment must be verified for any status change beyond pending
+    if (selectedOrder.payment_status !== 'paid' &&
+        (newStatus === 'confirmed' || newStatus === 'preparing' || newStatus === 'ready' || newStatus === 'completed')) {
+      setStatusUpdateError('⚠️ Payment must be verified before processing this order. Please verify the payment first.');
       return;
     }
 

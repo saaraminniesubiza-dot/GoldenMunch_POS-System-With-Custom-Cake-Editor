@@ -65,6 +65,10 @@ export default function PaymentPage() {
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState("");
 
+  // Reject payment/order
+  const [rejectConfirmOpen, setRejectConfirmOpen] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+
   // Cash payment handling
   const [amountTendered, setAmountTendered] = useState("");
   const [calculatedChange, setCalculatedChange] = useState(0);
@@ -340,6 +344,50 @@ export default function PaymentPage() {
     }
   };
 
+  const handleRejectPayment = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      setRejecting(true);
+
+      // Update order status to cancelled or pending based on business logic
+      // We'll set it to 'cancelled' to indicate rejected payment
+      const response = await OrderService.updateOrderStatus(selectedOrder.order_id, {
+        order_status: 'cancelled'
+      });
+
+      if (response.success) {
+        addToast({
+          title: "Payment Rejected",
+          description: `Order ${selectedOrder.order_number || `#${selectedOrder.order_id}`} has been cancelled due to wrong reference number.`,
+          color: "warning",
+          timeout: 5000,
+        });
+
+        await loadPaymentData();
+        setRejectConfirmOpen(false);
+        handleCloseModal();
+      } else {
+        addToast({
+          title: "Error",
+          description: response.error || "Failed to reject payment",
+          color: "danger",
+          timeout: 5000,
+        });
+      }
+    } catch (error: any) {
+      console.error("Failed to reject payment:", error);
+      addToast({
+        title: "Error",
+        description: "Failed to reject payment",
+        color: "danger",
+        timeout: 5000,
+      });
+    } finally {
+      setRejecting(false);
+    }
+  };
+
   const handleCloseModal = () => {
     onClose();
     setReferenceNumber("");
@@ -349,6 +397,7 @@ export default function PaymentPage() {
     setSearchQuery("");
     setVerifyError("");
     setSearchError("");
+    setRejectConfirmOpen(false);
   };
 
   const handleAmountTenderedChange = (value: string) => {
@@ -789,6 +838,24 @@ export default function PaymentPage() {
                   </Chip>
                 </div>
 
+                {/* Display customer's inputted reference number */}
+                {(selectedOrder.payment_method === "gcash" || selectedOrder.payment_method === "paymaya" || selectedOrder.payment_method === "cashless") &&
+                 (selectedOrder.gcash_reference_number || selectedOrder.paymaya_reference_number) && (
+                  <div className="bg-primary-50 border-2 border-primary-200 p-4 rounded-lg">
+                    <p className="text-sm text-default-500 mb-2 font-medium">
+                      Customer Provided Reference Number
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-lg font-bold bg-white px-3 py-2 rounded border-2 border-primary-300 flex-1">
+                        {selectedOrder.gcash_reference_number || selectedOrder.paymaya_reference_number}
+                      </code>
+                    </div>
+                    <p className="text-xs text-default-400 mt-2">
+                      This is the reference number the customer entered at the kiosk
+                    </p>
+                  </div>
+                )}
+
                 {selectedOrder.payment_method === "cashless" && (
                   <Input
                     isRequired
@@ -921,21 +988,97 @@ export default function PaymentPage() {
               </div>
             )}
           </ModalBody>
+          <ModalFooter className="flex justify-between">
+            <div>
+              <Button
+                color="danger"
+                variant="flat"
+                startContent={<XCircleIcon className="h-5 w-5" />}
+                onPress={() => setRejectConfirmOpen(true)}
+              >
+                Reject Payment
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="light" onPress={handleCloseModal}>
+                Cancel
+              </Button>
+              <Button
+                color="success"
+                isLoading={verifying}
+                size="lg"
+                startContent={
+                  !verifying && <CheckCircleIcon className="h-5 w-5" />
+                }
+                variant="shadow"
+                onPress={handleVerifyPayment}
+              >
+                {verifying ? "Verifying..." : "Verify Payment"}
+              </Button>
+            </div>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Reject Payment Confirmation Modal */}
+      <Modal
+        backdrop="blur"
+        isOpen={rejectConfirmOpen}
+        size="md"
+        onClose={() => setRejectConfirmOpen(false)}
+      >
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">
+            <h3 className="text-xl font-bold text-danger">Confirm Rejection</h3>
+          </ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <div className="bg-warning-50 border-2 border-warning-200 p-4 rounded-lg flex items-start gap-3">
+                <XCircleIcon className="h-6 w-6 text-warning-600 flex-shrink-0 mt-1" />
+                <div>
+                  <p className="font-semibold text-warning-900 mb-2">
+                    Are you sure you want to reject this payment?
+                  </p>
+                  <p className="text-sm text-warning-700">
+                    This action will cancel the order due to an incorrect or invalid reference number.
+                  </p>
+                </div>
+              </div>
+
+              {selectedOrder && (
+                <div className="bg-default-100 p-3 rounded-lg">
+                  <p className="text-sm text-default-500 mb-1">Order to Cancel</p>
+                  <p className="font-bold text-lg">
+                    {selectedOrder.order_number || `#${selectedOrder.order_id}`}
+                  </p>
+                  <p className="text-sm text-default-600 mt-2">
+                    Amount: {formatCurrency(selectedOrder.final_amount)}
+                  </p>
+                </div>
+              )}
+
+              <div className="bg-danger-50 border border-danger-200 p-3 rounded-lg">
+                <p className="text-sm text-danger-700 font-medium">
+                  ⚠️ Before rejecting, please confirm with the customer that the reference number is incorrect.
+                </p>
+              </div>
+            </div>
+          </ModalBody>
           <ModalFooter>
-            <Button variant="light" onPress={handleCloseModal}>
-              Cancel
+            <Button
+              variant="light"
+              onPress={() => setRejectConfirmOpen(false)}
+            >
+              No, Go Back
             </Button>
             <Button
-              color="success"
-              isLoading={verifying}
-              size="lg"
-              startContent={
-                !verifying && <CheckCircleIcon className="h-5 w-5" />
-              }
+              color="danger"
+              isLoading={rejecting}
+              startContent={!rejecting && <XCircleIcon className="h-5 w-5" />}
               variant="shadow"
-              onPress={handleVerifyPayment}
+              onPress={handleRejectPayment}
             >
-              {verifying ? "Verifying..." : "Verify Payment"}
+              {rejecting ? "Rejecting..." : "Yes, Reject & Cancel Order"}
             </Button>
           </ModalFooter>
         </ModalContent>
