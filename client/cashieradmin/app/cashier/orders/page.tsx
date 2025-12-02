@@ -40,6 +40,7 @@ export default function CashierOrdersPage() {
   const [referenceNumber, setReferenceNumber] = useState('');
   const [verifyingPayment, setVerifyingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState('');
+  const [statusUpdateError, setStatusUpdateError] = useState('');
 
   useEffect(() => {
     loadOrders();
@@ -86,6 +87,7 @@ export default function CashierOrdersPage() {
 
   const handleViewOrder = async (order: CustomerOrder) => {
     try {
+      setStatusUpdateError(''); // Clear any previous errors
       const response = await OrderService.getOrderById(order.order_id);
       if (response.success && response.data) {
         setSelectedOrder(response.data);
@@ -100,8 +102,21 @@ export default function CashierOrdersPage() {
   const handleUpdateStatus = async (newStatus: OrderStatus) => {
     if (!selectedOrder) return;
 
+    // Validation: Cannot start order (confirm) if payment is not verified
+    if (newStatus === 'confirmed' && selectedOrder.payment_status !== 'paid') {
+      setStatusUpdateError('⚠️ Payment must be verified before starting this order. Please verify the payment first.');
+      return;
+    }
+
+    // Validation: Cannot complete order unless it's ready
+    if (newStatus === 'completed' && selectedOrder.order_status !== 'ready') {
+      setStatusUpdateError('⚠️ Order must be ready before it can be completed. Please mark it as ready first.');
+      return;
+    }
+
     try {
       setUpdating(true);
+      setStatusUpdateError('');
       const response = await OrderService.updateOrderStatus(selectedOrder.order_id, {
         order_status: newStatus,
       });
@@ -112,6 +127,7 @@ export default function CashierOrdersPage() {
       }
     } catch (error) {
       console.error('Failed to update order status:', error);
+      setStatusUpdateError('Failed to update order status. Please try again.');
     } finally {
       setUpdating(false);
     }
@@ -138,9 +154,15 @@ export default function CashierOrdersPage() {
 
       if (response.success) {
         onPaymentModalClose();
-        onClose();
-        loadOrders();
         setReferenceNumber('');
+        // Reload the order details to show updated payment status
+        if (selectedOrder) {
+          const updatedOrderResponse = await OrderService.getOrderById(selectedOrder.order_id);
+          if (updatedOrderResponse.success && updatedOrderResponse.data) {
+            setSelectedOrder(updatedOrderResponse.data);
+          }
+        }
+        loadOrders();
       } else {
         setPaymentError(response.error || 'Payment verification failed');
       }
@@ -297,6 +319,32 @@ export default function CashierOrdersPage() {
           <ModalHeader>Order Details - {selectedOrder?.order_number}</ModalHeader>
           <ModalBody>
             {selectedOrder && (
+              <>
+                {/* Status Update Error Message */}
+                {statusUpdateError && (
+                  <div className="mb-4 bg-danger-50 border-2 border-danger-200 p-4 rounded-lg flex items-start gap-3">
+                    <XCircleIcon className="h-6 w-6 text-danger-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-danger-700 mb-1">Cannot Update Order Status</p>
+                      <p className="text-sm text-danger-600">{statusUpdateError}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Payment Status Alert for Unpaid Orders */}
+                {selectedOrder.payment_status !== 'paid' && (
+                  <div className="mb-4 bg-warning-50 border-2 border-warning-300 p-4 rounded-lg flex items-start gap-3">
+                    <ClockIcon className="h-6 w-6 text-warning-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-warning-800 mb-1">Payment Verification Required</p>
+                      <p className="text-sm text-warning-700">
+                        This order must be paid/verified before you can start preparing it.
+                        Click "Verify Payment" below to confirm payment.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
               <Tabs aria-label="Order details tabs">
                 <Tab key="details" title="Details">
                   <div className="space-y-4 pt-4">
@@ -472,6 +520,7 @@ export default function CashierOrdersPage() {
                   </div>
                 </Tab>
               </Tabs>
+              </>
             )}
           </ModalBody>
           <ModalFooter>
