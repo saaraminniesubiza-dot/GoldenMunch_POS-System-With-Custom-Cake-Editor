@@ -119,8 +119,8 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
       `INSERT INTO customer_order
        (order_number, verification_code, customer_id, order_type, payment_method, payment_status, order_status,
         subtotal, total_amount, discount_amount, tax_amount, final_amount,
-        special_instructions, kiosk_session_id, is_preorder, gcash_reference_number)
-       VALUES (?, ?, ?, ?, ?, 'unpaid', 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        special_instructions, kiosk_session_id, is_preorder, gcash_reference_number, paymaya_reference_number)
+       VALUES (?, ?, ?, ?, ?, 'unpaid', 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         orderNumber,
         verificationCode,
@@ -135,7 +135,8 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
         orderData.special_instructions || null,
         orderData.kiosk_session_id || generateSessionId(),
         orderData.order_type === 'custom_order',
-        orderData.payment_reference_number || null,
+        orderData.gcash_reference_number || null,
+        orderData.paymaya_reference_number || null,
       ]
     );
 
@@ -314,15 +315,27 @@ export const getOrderDetails = async (req: AuthRequest, res: Response) => {
 // Update order status
 export const updateOrderStatus = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { order_status, notes } = req.body;
   const cashier_id = req.user?.id;
 
+  if (!order_status) {
+    throw new AppError('Order status is required', 400);
+  }
+
+  // Update order status
   await query(
-    'UPDATE customer_order SET order_status = ?, cashier_id = ? WHERE order_id = ?',
-    [status, cashier_id, id]
+    'UPDATE customer_order SET order_status = ?, cashier_id = ?, updated_at = NOW() WHERE order_id = ?',
+    [order_status, cashier_id, id]
   );
 
-  res.json(successResponse('Order status updated'));
+  // Add timeline entry
+  await query(
+    `INSERT INTO order_timeline (order_id, status, changed_by, notes, timestamp)
+     VALUES (?, ?, ?, ?, NOW())`,
+    [id, order_status, cashier_id, notes || null]
+  );
+
+  res.json(successResponse('Order status updated', { order_status }));
 };
 
 // Get orders list with filters

@@ -648,6 +648,8 @@ export interface CreateOrderRequest {
   scheduled_pickup_datetime?: string;
   payment_method: PaymentMethod;
   payment_reference_number?: string;
+  gcash_reference_number?: string;
+  paymaya_reference_number?: string;
   special_instructions?: string;
   kiosk_session_id?: string;
   items: OrderItemRequest[];
