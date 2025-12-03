@@ -1,6 +1,7 @@
 "use client";
 
 import type { CustomerOrder } from "@/types/api";
+import { OrderStatus } from "@/types/api";
 
 import { useState, useEffect } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
@@ -353,7 +354,7 @@ export default function PaymentPage() {
       // Update order status to cancelled or pending based on business logic
       // We'll set it to 'cancelled' to indicate rejected payment
       const response = await OrderService.updateOrderStatus(selectedOrder.order_id, {
-        order_status: 'cancelled'
+        order_status: OrderStatus.CANCELLED
       });
 
       if (response.success) {
