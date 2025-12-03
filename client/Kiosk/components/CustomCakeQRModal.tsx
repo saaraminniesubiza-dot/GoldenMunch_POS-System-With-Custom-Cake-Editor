@@ -41,7 +41,7 @@ export const CustomCakeQRModal: React.FC<CustomCakeQRModalProps> = ({
       }
       if (session) {
         // Cancel the session if it wasn't completed
-        CustomCakeService.cancelSession(session.sessionId).catch(console.error);
+        CustomCakeService.cancelSession(session.sessionToken).catch(console.error);
       }
       setSession(null);
       setIsLoading(true);
@@ -72,11 +72,11 @@ export const CustomCakeQRModal: React.FC<CustomCakeQRModalProps> = ({
       setIsLoading(true);
       setError(null);
 
-      const sessionData = await CustomCakeService.createSession(kioskSessionId, menuItemId);
+      const sessionData = await CustomCakeService.generateQRSession(kioskSessionId);
       setSession(sessionData);
 
       // Start polling for completion
-      startPolling(sessionData.sessionId);
+      startPolling(sessionData.sessionToken);
     } catch (err) {
       console.error('Failed to create session:', err);
       setError('Failed to create customization session. Please try again.');
@@ -118,7 +118,7 @@ export const CustomCakeQRModal: React.FC<CustomCakeQRModalProps> = ({
 
   const handleCancel = () => {
     if (session && pollingInterval) {
-      CustomCakeService.cancelSession(session.sessionId).catch(console.error);
+      CustomCakeService.cancelSession(session.sessionToken).catch(console.error);
       clearInterval(pollingInterval);
       setPollingInterval(null);
     }
@@ -185,7 +185,7 @@ export const CustomCakeQRModal: React.FC<CustomCakeQRModalProps> = ({
                 <CardBody className="p-6">
                   <div className="relative w-80 h-80 bg-white flex items-center justify-center">
                     <Image
-                      src={session.qrCodeDataUrl}
+                      src={session.qrCodeUrl}
                       alt="Custom Cake QR Code"
                       width={320}
                       height={320}

@@ -5,7 +5,7 @@ import type { ApiResponse } from '@/types/api';
  * Custom Cake Session Interface (New Comprehensive API)
  */
 export interface CustomCakeSessionResponse {
-  sessionId: string;
+  sessionToken: string;
   qrCodeUrl: string;
   editorUrl: string;
   expiresIn: number;
