@@ -54,7 +54,21 @@ transports.push(
   new winston.transports.Console({
     format: winston.format.combine(
       winston.format.colorize(),
-      winston.format.simple()
+      winston.format.printf(({ level, message, timestamp, ...metadata }) => {
+        let msg = `${level}: ${message}`;
+
+        // If there's additional metadata, stringify it
+        const metaKeys = Object.keys(metadata).filter(key => key !== 'service');
+        if (metaKeys.length > 0) {
+          const metaData = metaKeys.reduce((acc, key) => {
+            acc[key] = metadata[key];
+            return acc;
+          }, {} as any);
+          msg += ` ${JSON.stringify(metaData, null, 2)}`;
+        }
+
+        return msg;
+      })
     ),
   })
 );
