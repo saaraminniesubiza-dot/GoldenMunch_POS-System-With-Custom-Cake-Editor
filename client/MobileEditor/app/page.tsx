@@ -17,6 +17,7 @@ import StepFrosting from '@/components/cake-editor/steps/StepFrosting';
 import StepDecorations from '@/components/cake-editor/steps/StepDecorations';
 import StepText from '@/components/cake-editor/steps/StepText';
 import StepReview from '@/components/cake-editor/steps/StepReview';
+import ContactConfirmationModal from '@/components/ContactConfirmationModal';
 import { CustomCakeService } from '@/services/customCake.service';
 
 // Dynamic import for 3D canvas to prevent SSR issues
@@ -93,6 +94,7 @@ function CakeEditorContent() {
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [requestId, setRequestId] = useState<number | null>(null);
+  const [showContactModal, setShowContactModal] = useState(false);
 
   // Design Options from API
   const [options, setOptions] = useState<any>(null);
@@ -307,6 +309,11 @@ function CakeEditorContent() {
   };
 
   const handleSubmit = async () => {
+    // Show contact confirmation modal before submitting
+    setShowContactModal(true);
+  };
+
+  const handleConfirmAndSubmit = async () => {
     try {
       setSubmitting(true);
 
@@ -321,69 +328,65 @@ function CakeEditorContent() {
         alert(`🔧 DEBUG MODE - Design Preview:\n\nCustomer: ${design.customer_name}\nEmail: ${design.customer_email}\nPhone: ${design.customer_phone}\nLayers: ${design.num_layers}\nFrosting: ${design.frosting_type}\nColor: ${design.frosting_color}\n\n(This is a debug preview - no actual submission occurred)`);
 
         setSubmitting(false);
+        setShowContactModal(false);
         return;
       }
 
-      // Step 1: Save final draft to get request_id
-      if (!requestId) {
-        await saveDraft();
-      }
-
-      // Step 2: Capture 3D screenshots
+      // Capture 3D screenshots
       const screenshots = await captureScreenshots();
 
-      // Step 3: Upload images (if we have them)
-      if (screenshots.length > 0 && requestId) {
-        try {
-          const imageUploads = screenshots.map((dataUrl, index) => ({
-            url: dataUrl,
-            type: '3d_render',
-            view_angle: ['front', 'side', 'top', '3d_perspective'][index] || 'front',
-          }));
+      // Prepare image uploads
+      const imageUploads = screenshots.map((dataUrl, index) => ({
+        url: dataUrl,
+        type: '3d_render',
+        view_angle: ['front', 'side', 'top', '3d_perspective'][index] || 'front',
+      }));
 
-          await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/custom-cake/upload-images`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              request_id: requestId,
-              images: imageUploads,
-            }),
-          });
-        } catch (error) {
-          console.error('Failed to upload images:', error);
-          // Continue even if image upload fails
-        }
-      }
-
-      // Step 4: Submit for review
-      const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/custom-cake/submit`, {
+      // Submit with contact confirmation using the new enhanced endpoint
+      const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/custom-cake/submit-with-confirmation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          request_id: requestId,
+          session_token: sessionToken,
+          contact_confirmation: {
+            customer_name: design.customer_name,
+            customer_email: design.customer_email,
+            customer_phone: design.customer_phone,
+            confirmed: true,
+            terms_accepted: true,
+          },
+          design_data: {
+            ...design,
+            // Include 3D images if captured
+            ...(imageUploads.length > 0 ? { images: imageUploads } : {}),
+          },
         }),
       });
 
       if (!submitResponse.ok) {
-        throw new Error('Failed to submit request');
+        const errorData = await submitResponse.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || 'Failed to submit request');
       }
 
       const result = await submitResponse.json();
 
-      // Success! Show confirmation
-      alert(`✅ Success! Your custom cake request has been submitted!\n\nRequest ID: ${requestId}\n\nWe'll review your design and contact you at ${design.customer_email} within 24 hours with pricing and availability.`);
+      if (result.success && result.data) {
+        const { tracking_code } = result.data;
 
-      // Optionally redirect to a success page
-      // window.location.href = '/custom-cake/success';
+        // Close modal
+        setShowContactModal(false);
+
+        // Redirect to tracking page
+        window.location.href = `/track/${tracking_code}`;
+      } else {
+        throw new Error('Invalid response from server');
+      }
 
     } catch (error: any) {
       console.error('Failed to submit:', error);
       alert(`❌ Failed to submit request: ${error.message || 'Unknown error'}\n\nPlease try again or contact staff for assistance.`);
-    } finally {
       setSubmitting(false);
     }
   };
@@ -592,6 +595,22 @@ function CakeEditorContent() {
           </motion.div>
         </div>
       </div>
+
+      {/* Contact Confirmation Modal */}
+      <ContactConfirmationModal
+        isOpen={showContactModal}
+        contactInfo={{
+          customer_name: design.customer_name,
+          customer_email: design.customer_email,
+          customer_phone: design.customer_phone,
+        }}
+        onConfirm={handleConfirmAndSubmit}
+        onCancel={() => setShowContactModal(false)}
+        onEdit={() => {
+          setShowContactModal(false);
+          setCurrentStep(0); // Go back to customer info step
+        }}
+      />
     </div>
   );
 }
