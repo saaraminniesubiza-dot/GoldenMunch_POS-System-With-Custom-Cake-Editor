@@ -5,7 +5,39 @@ const isDev = process.env.NODE_ENV !== 'production';
 const ThermalPrinterService = require('./printer');
 
 let mainWindow;
+let splashWindow;
 let printerService = null;
+
+function createSplashScreen() {
+  console.log('Creating splash screen...');
+
+  splashWindow = new BrowserWindow({
+    width: 400,
+    height: 500,
+    center: true,
+    transparent: false,
+    frame: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: false,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+
+  splashWindow.loadFile(path.join(__dirname, 'splash.html'));
+
+  console.log('Splash screen displayed');
+}
+
+function closeSplashScreen() {
+  if (splashWindow && !splashWindow.isDestroyed()) {
+    console.log('Closing splash screen...');
+    splashWindow.close();
+    splashWindow = null;
+  }
+}
 
 function createWindow() {
   console.log('=== KIOSK INITIALIZATION ===');
@@ -24,6 +56,7 @@ function createWindow() {
     kiosk: !isDev, // Kiosk mode in production (prevents user from exiting)
     frame: isDev, // Show frame only in development
     autoHideMenuBar: true,
+    show: false, // Don't show until ready
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -53,6 +86,13 @@ function createWindow() {
   mainWindow.webContents.on('did-finish-load', () => {
     console.log('=== PAGE LOADED SUCCESSFULLY ===');
     console.log('Timestamp:', new Date().toISOString());
+
+    // Close splash screen and show main window
+    setTimeout(() => {
+      closeSplashScreen();
+      mainWindow.show();
+      console.log('Main window displayed');
+    }, 1000); // Brief delay for smooth transition
   });
 
   // Prevent navigation away from app
@@ -89,17 +129,26 @@ function createWindow() {
 
 // This method will be called when Electron has finished initialization
 app.whenReady().then(() => {
-  createWindow();
+  // Show splash screen first
+  createSplashScreen();
+
+  // Create main window after a brief delay
+  setTimeout(() => {
+    createWindow();
+  }, 1500);
 
   // Initialize printer after a short delay
   setTimeout(() => {
     initializePrinter();
-  }, 2000);
+  }, 3000);
 
   app.on('activate', () => {
     // On macOS, re-create window when dock icon is clicked
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      createSplashScreen();
+      setTimeout(() => {
+        createWindow();
+      }, 1500);
     }
   });
 });

@@ -131,22 +131,101 @@ Add these to the end of the line (on the same line):
 logo.nologo quiet splash vt.global_cursor_default=0
 ```
 
+## Loading Screen
+
+When the kiosk starts, you will see a beautiful loading screen with the GoldenMunch logo and a spinner. This indicates the app is starting up. The loading screen will automatically close once the app is fully loaded.
+
+If you see the loading screen but the app never loads, check the logs (see Troubleshooting section below).
+
 ## Troubleshooting
 
+### 🔧 Quick Diagnostic Tool
+
+**FIRST: Run the diagnostic script to check your setup!**
+
+```bash
+bash ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/check-kiosk-setup.sh
+```
+
+This will check:
+- Repository location
+- Node.js and npm installation
+- Kiosk dependencies
+- Startup script configuration
+- LXDE autostart settings
+- systemd service status
+- Display rotation
+- X server status
+- Recent error logs
+- Running processes
+
+### 📋 Check the Startup Log
+
+The startup script now creates a detailed log file:
+
+```bash
+cat ~/kiosk-startup.log
+```
+
+This log shows:
+- When the app started
+- X server status
+- Environment variables
+- Directory changes
+- Node/npm versions
+- Any errors that occurred
+
 ### App doesn't start on boot
-1. Check if the script is executable:
+
+1. **Run the diagnostic tool (see above)**
+
+2. Check if the script is executable:
    ```bash
    ls -l ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk.sh
    ```
 
-2. Test the script manually:
+3. Test the script manually:
    ```bash
    bash ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk.sh
    ```
 
-3. Check for errors in the autostart log (for LXDE method):
+4. Check the startup log:
+   ```bash
+   tail -50 ~/kiosk-startup.log
+   ```
+
+5. Check for errors in the autostart log (for LXDE method):
    ```bash
    cat ~/.xsession-errors
+   ```
+
+6. Verify dependencies are installed:
+   ```bash
+   cd ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/client/Kiosk
+   ls -la node_modules
+   ```
+
+### Loading screen appears but app never loads
+
+1. Check if the Next.js dev server is starting:
+   ```bash
+   tail -50 ~/kiosk-startup.log | grep "localhost:3002"
+   ```
+
+2. Try accessing the app manually:
+   ```bash
+   curl http://localhost:3002
+   ```
+
+3. Check for port conflicts:
+   ```bash
+   sudo netstat -tulpn | grep 3002
+   ```
+
+4. Check npm and node paths:
+   ```bash
+   which node
+   which npm
    ```
 
 ### Display not rotating
