@@ -1,0 +1,13 @@
+@lxpanel --profile LXDE-pi
+@pcmanfm --desktop --profile LXDE-pi
+
+# Disable screen blanking and power management
+@xset s off
+@xset -dpms
+@xset s noblank
+
+# Hide mouse cursor after inactivity (optional)
+@unclutter -idle 0.5 -root
+
+# Start GoldenMunch Kiosk
+@bash /home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk.sh
