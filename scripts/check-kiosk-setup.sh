@@ -11,15 +11,15 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Detect repository location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # Check 1: Repository location
 echo "1. Checking repository location..."
-if [ -d "/home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor" ]; then
-    echo -e "${GREEN}✓${NC} Repository found at /home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor"
-else
-    echo -e "${RED}✗${NC} Repository NOT found at /home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor"
-    echo "   Current location might be different. Repository is at:"
-    pwd
-fi
+echo -e "${GREEN}✓${NC} Repository found at: $REPO_ROOT"
+echo "   Current user: $USER"
+echo "   Home directory: $HOME"
 echo ""
 
 # Check 2: Node.js and npm
@@ -41,22 +41,25 @@ echo ""
 
 # Check 3: Kiosk dependencies
 echo "3. Checking Kiosk dependencies..."
-if [ -d "/home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor/client/Kiosk/node_modules" ]; then
+KIOSK_DIR="$REPO_ROOT/client/Kiosk"
+if [ -d "$KIOSK_DIR/node_modules" ]; then
     echo -e "${GREEN}✓${NC} node_modules exists in Kiosk directory"
 else
-    echo -e "${RED}✗${NC} node_modules NOT found. Run: cd ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/client/Kiosk && npm install"
+    echo -e "${RED}✗${NC} node_modules NOT found"
+    echo "   Run: cd $KIOSK_DIR && npm install"
 fi
 echo ""
 
 # Check 4: Startup script
 echo "4. Checking startup script..."
-if [ -f "/home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk.sh" ]; then
+START_SCRIPT="$REPO_ROOT/scripts/start-kiosk.sh"
+if [ -f "$START_SCRIPT" ]; then
     echo -e "${GREEN}✓${NC} start-kiosk.sh exists"
-    if [ -x "/home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk.sh" ]; then
+    if [ -x "$START_SCRIPT" ]; then
         echo -e "${GREEN}✓${NC} start-kiosk.sh is executable"
     else
         echo -e "${RED}✗${NC} start-kiosk.sh is NOT executable"
-        echo "   Run: chmod +x ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk.sh"
+        echo "   Run: chmod +x $START_SCRIPT"
     fi
 else
     echo -e "${RED}✗${NC} start-kiosk.sh NOT found"
@@ -154,5 +157,7 @@ echo "Diagnostic complete!"
 echo "========================================"
 echo ""
 echo "To test the kiosk manually, run:"
-echo "  bash ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk.sh"
+echo "  bash $START_SCRIPT"
+echo ""
+echo "Repository location: $REPO_ROOT"
 echo ""

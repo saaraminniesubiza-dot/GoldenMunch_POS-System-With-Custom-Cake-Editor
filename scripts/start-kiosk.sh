@@ -36,9 +36,15 @@ xset -dpms
 xset s noblank
 echo "✓ Screen blanking disabled"
 
-# Change to the Kiosk directory
-KIOSK_DIR="/home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor/client/Kiosk"
-echo "Changing to directory: $KIOSK_DIR"
+# Detect script location and navigate to Kiosk directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+KIOSK_DIR="$REPO_ROOT/client/Kiosk"
+
+echo "Script location: $SCRIPT_DIR"
+echo "Repository root: $REPO_ROOT"
+echo "Kiosk directory: $KIOSK_DIR"
+
 if [ ! -d "$KIOSK_DIR" ]; then
     echo "ERROR: Directory not found: $KIOSK_DIR"
     exit 1

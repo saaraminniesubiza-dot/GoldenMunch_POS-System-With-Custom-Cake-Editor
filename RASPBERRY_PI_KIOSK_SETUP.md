@@ -5,9 +5,11 @@ This guide will help you set up your Raspberry Pi to automatically start the Gol
 ## Prerequisites
 
 1. Raspberry Pi with Raspberry Pi OS installed
-2. The repository cloned to `/home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor`
+2. The repository cloned to your home directory (works with any username)
 3. Node.js and npm installed
 4. All dependencies installed (`cd client/Kiosk && npm install`)
+
+**Note:** The setup scripts automatically detect your repository location - you don't need to use the `pi` username!
 
 ## Step 1: Set Display to Portrait Mode
 
@@ -40,23 +42,25 @@ Save and exit (Ctrl+X, then Y, then Enter).
 
 This is the most reliable method for GUI applications.
 
-1. Copy the autostart file:
+**Easy Setup - Just run this one command:**
+
 ```bash
-mkdir -p ~/.config/lxsession/LXDE-pi
-cp ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/lxde-autostart ~/.config/lxsession/LXDE-pi/autostart
+cd ~/GoldenMunch_POS-System-With-Custom-Cake-Editor
+bash scripts/setup-autostart.sh
 ```
 
-2. Make the startup script executable:
-```bash
-chmod +x ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk.sh
-```
+This script will:
+- Make all scripts executable
+- Create the LXDE autostart directory
+- Generate autostart configuration with the correct paths for your system
+- Show you the configuration it created
 
-3. (Optional) Install unclutter to hide the mouse cursor:
+**Optional:** Install unclutter to hide the mouse cursor:
 ```bash
 sudo apt-get install unclutter
 ```
 
-4. Reboot:
+**Then reboot:**
 ```bash
 sudo reboot
 ```
@@ -65,23 +69,20 @@ sudo reboot
 
 Use this if you prefer systemd management.
 
-1. Copy the service file:
+**Easy Setup - Just run this one command:**
+
 ```bash
-sudo cp ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/kiosk.service /etc/systemd/system/
+cd ~/GoldenMunch_POS-System-With-Custom-Cake-Editor
+bash scripts/setup-systemd.sh
 ```
 
-2. Make the startup script executable:
-```bash
-chmod +x ~/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk.sh
-```
+This script will:
+- Make all scripts executable
+- Generate systemd service file with the correct paths for your system
+- Install and enable the service
+- Show you how to manage the service
 
-3. Enable and start the service:
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable kiosk.service
-```
-
-4. Reboot:
+**Then reboot:**
 ```bash
 sudo reboot
 ```
