@@ -19,9 +19,11 @@ interface Quote {
   author?: string;
 }
 
+// Page types for the rotating screens
+type PageType = 'welcome' | 'featured' | 'quote1' | 'quote2' | 'custom-cake';
+
 // Emoji mapping based on item types
 const getEmojiForItemType = (itemType: ItemType, itemName: string): string => {
-  // Check item name for specific keywords
   const nameLower = itemName.toLowerCase();
 
   if (nameLower.includes('chocolate')) return '🍫';
@@ -33,35 +35,25 @@ const getEmojiForItemType = (itemType: ItemType, itemName: string): string => {
   if (nameLower.includes('cheese')) return '🧀';
   if (nameLower.includes('custom')) return '🎨';
 
-  // Fallback to item type
   switch (itemType) {
-    case ItemType.CAKE:
-      return '🎂';
-    case ItemType.PASTRY:
-      return '🥐';
-    case ItemType.BEVERAGE:
-      return '☕';
-    case ItemType.SNACK:
-      return '🍪';
-    case ItemType.DESSERT:
-      return '🍰';
-    case ItemType.BREAD:
-      return '🍞';
-    default:
-      return '🧁';
+    case ItemType.CAKE: return '🎂';
+    case ItemType.PASTRY: return '🥐';
+    case ItemType.BEVERAGE: return '☕';
+    case ItemType.SNACK: return '🍪';
+    case ItemType.DESSERT: return '🍰';
+    case ItemType.BREAD: return '🍞';
+    default: return '🧁';
   }
 };
 
 export default function IdlePage() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentQuote, setCurrentQuote] = useState(0);
-  const [currentCTA, setCurrentCTA] = useState(0);
+  const [currentPage, setCurrentPage] = useState<PageType>('welcome');
+  const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
   const [floatingElements, setFloatingElements] = useState<Array<{ id: number; x: number; y: number; emoji: string }>>([]);
   const [featuredItems, setFeaturedItems] = useState<FeaturedItem[]>([]);
   const [isLoadingItems, setIsLoadingItems] = useState(true);
-  const [itemsError, setItemsError] = useState<string | null>(null);
 
-  // Promotional quotes that rotate
+  // Promotional quotes
   const quotes: Quote[] = [
     { text: "Life is short, eat dessert first!", author: "Jacques Torres" },
     { text: "Every cake has a story to tell", author: "Golden Munch" },
@@ -71,19 +63,6 @@ export default function IdlePage() {
     { text: "Creating memories, one cake at a time", author: "Golden Munch" }
   ];
 
-  // Call-to-action messages with variations
-  const ctaMessages: string[] = [
-    "Click Anywhere to Order NOW!",
-    "Tap to Start Your Sweet Journey!",
-    "Touch Screen to Order Your Favorites!",
-    "Ready to Order? Click Here!",
-    "Your Perfect Cake Awaits - Click Now!",
-    "Start Ordering Delicious Treats!",
-    "Click to Design Your Custom Cake!",
-    "Tap Anywhere to Begin Ordering!"
-  ];
-
-  // Floating bakery emojis
   const bakeryEmojis = ['🍰', '🧁', '🎂', '🍪', '🥐', '🍩', '🥧', '✨', '⭐', '💫'];
 
   // Fetch featured items from API
@@ -91,22 +70,13 @@ export default function IdlePage() {
     const fetchFeaturedItems = async () => {
       try {
         setIsLoadingItems(true);
-        setItemsError(null);
-
         console.log('🎯 [Idle] Fetching featured menu items...');
 
-        // Fetch featured items from API
         const items = await MenuService.getMenuItems({ is_featured: true });
 
-        console.log('✅ [Idle] Featured items fetched:', {
-          count: items.length,
-          items: items.map(i => ({ id: i.menu_item_id, name: i.name, price: i.current_price }))
-        });
-
-        // Transform API data to FeaturedItem format
         const transformedItems: FeaturedItem[] = items
-          .filter(item => item.status === 'available') // Only show available items
-          .slice(0, 6) // Limit to 6 items maximum
+          .filter(item => item.status === 'available')
+          .slice(0, 6)
           .map(item => ({
             id: item.menu_item_id,
             name: item.name,
@@ -115,9 +85,7 @@ export default function IdlePage() {
             price: item.current_price ? `₱${item.current_price.toFixed(2)}` : 'Price varies'
           }));
 
-        // If no featured items, fallback to showing custom cake option
         if (transformedItems.length === 0) {
-          console.warn('⚠️  [Idle] No featured items found, showing custom cake option');
           setFeaturedItems([
             {
               id: 0,
@@ -131,12 +99,9 @@ export default function IdlePage() {
           setFeaturedItems(transformedItems);
         }
 
-        console.log('✅ [Idle] Featured items ready for display:', transformedItems.length);
+        console.log('✅ [Idle] Featured items ready:', transformedItems.length);
       } catch (error) {
         console.error('❌ [Idle] Error fetching featured items:', error);
-        setItemsError('Unable to load featured items');
-
-        // Fallback to custom cake option on error
         setFeaturedItems([
           {
             id: 0,
@@ -154,7 +119,7 @@ export default function IdlePage() {
     fetchFeaturedItems();
   }, []);
 
-  // Generate floating elements on mount
+  // Generate floating elements
   useEffect(() => {
     const elements = Array.from({ length: 15 }, (_, i) => ({
       id: i,
@@ -165,36 +130,43 @@ export default function IdlePage() {
     setFloatingElements(elements);
   }, []);
 
-  // Auto-rotate slides every 5 seconds
+  // Page rotation logic - 30-40 seconds per page
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % featuredItems.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [featuredItems.length]);
+    const getRandomDelay = () => 30000 + Math.random() * 10000; // 30-40 seconds
 
-  // Auto-rotate quotes every 7 seconds
+    const timer = setTimeout(() => {
+      setCurrentPage(prev => {
+        // Page sequence: welcome -> featured -> quote1 -> quote2 -> custom-cake -> welcome
+        switch (prev) {
+          case 'welcome': return 'featured';
+          case 'featured': return 'quote1';
+          case 'quote1': return 'quote2';
+          case 'quote2': return 'custom-cake';
+          case 'custom-cake': return 'welcome';
+          default: return 'welcome';
+        }
+      });
+    }, getRandomDelay());
+
+    return () => clearTimeout(timer);
+  }, [currentPage]);
+
+  // Rotate featured items if on featured page
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentQuote((prev) => (prev + 1) % quotes.length);
-    }, 7000);
-    return () => clearInterval(timer);
-  }, [quotes.length]);
+    if (currentPage === 'featured' && featuredItems.length > 1) {
+      const timer = setInterval(() => {
+        setCurrentFeaturedIndex(prev => (prev + 1) % featuredItems.length);
+      }, 5000); // Change featured item every 5 seconds
 
-  // Auto-rotate CTA messages every 3 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentCTA((prev) => (prev + 1) % ctaMessages.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [ctaMessages.length]);
+      return () => clearInterval(timer);
+    }
+  }, [currentPage, featuredItems.length]);
 
-  // Handle touch to return to menu
+  // Handle interaction
   const handleInteraction = useCallback(() => {
     window.location.href = '/';
   }, []);
 
-  // Handle keyboard
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.key === ' ' || event.key === 'Enter' || event.key === 'Escape') {
@@ -204,6 +176,13 @@ export default function IdlePage() {
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [handleInteraction]);
+
+  // Get random quote for quote pages
+  const getRandomQuote = (pageNum: number): Quote => {
+    const seed = pageNum === 1 ? 0 : 3;
+    const index = (seed + Math.floor(Date.now() / 40000)) % quotes.length;
+    return quotes[index];
+  };
 
   return (
     <div
@@ -263,261 +242,231 @@ export default function IdlePage() {
         ))}
       </div>
 
-      {/* Main content container */}
-      <div className="relative z-10 h-full flex flex-col items-center justify-center p-8">
-
-        {/* Header with logo and tagline */}
-        <motion.div
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1 }}
-          className="text-center mb-12"
-        >
-          <motion.div
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="text-9xl mb-4"
-          >
-            🍰
-          </motion.div>
-          <h1 className="text-7xl font-bold text-[#FAF7F2] mb-4 drop-shadow-2xl">
-            Golden Munch
-          </h1>
-          <p className="text-3xl text-[#EAD7B7] font-light tracking-wide">
-            Where Every Bite is Pure Bliss
-          </p>
-        </motion.div>
-
-        {/* Featured Items Carousel */}
-        <div className="w-full max-w-6xl mb-12">
-          {isLoadingItems ? (
-            // Loading state
+      {/* Page Content */}
+      <div className="relative z-10 h-full flex items-center justify-center p-8">
+        <AnimatePresence mode="wait">
+          {/* PAGE 1: Welcome Screen */}
+          {currentPage === 'welcome' && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="bg-gradient-to-br from-[#FAF7F2]/20 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-12 shadow-[0_0_60px_rgba(234,215,183,0.3)] border-2 border-[#EAD7B7]/30"
+              key="welcome"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 1 }}
+              className="text-center"
             >
-              <div className="flex items-center justify-center gap-6">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                >
-                  <Sparkles className="w-16 h-16 text-[#D97706]" />
-                </motion.div>
-                <p className="text-4xl text-[#FAF7F2] font-light">Loading our featured specials...</p>
-              </div>
-            </motion.div>
-          ) : itemsError ? (
-            // Error state
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="bg-gradient-to-br from-[#FAF7F2]/20 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-12 shadow-[0_0_60px_rgba(234,215,183,0.3)] border-2 border-[#EAD7B7]/30"
-            >
-              <div className="flex items-center justify-center gap-6">
-                <AlertCircle className="w-16 h-16 text-[#D97706]" />
-                <div>
-                  <p className="text-3xl text-[#FAF7F2] font-semibold mb-2">Oops! Something went wrong</p>
-                  <p className="text-xl text-[#EAD7B7]">{itemsError}</p>
-                </div>
-              </div>
-            </motion.div>
-          ) : featuredItems.length > 0 ? (
-            // Featured items carousel
-            <AnimatePresence mode="wait">
               <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, scale: 0.8, rotateY: 90 }}
-                animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                exit={{ opacity: 0, scale: 0.8, rotateY: -90 }}
-                transition={{ duration: 0.8 }}
-                className="relative"
+                animate={{ rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="text-[250px] mb-8"
               >
-                <div className="bg-gradient-to-br from-[#FAF7F2]/20 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-12 shadow-[0_0_60px_rgba(234,215,183,0.3)] border-2 border-[#EAD7B7]/30">
-                  <div className="flex items-center justify-center gap-16">
-                    {/* Item emoji/image */}
-                    <motion.div
-                      animate={{
-                        scale: [1, 1.1, 1],
-                        rotate: [0, 5, -5, 0]
-                      }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                      className="drop-shadow-2xl"
-                    >
-                      {featuredItems[currentSlide].image.startsWith('http') ? (
-                        <img
-                          src={featuredItems[currentSlide].image}
-                          alt={featuredItems[currentSlide].name}
-                          className="w-[200px] h-[200px] object-cover rounded-2xl"
-                        />
-                      ) : (
-                        <div className="text-[200px]">
-                          {featuredItems[currentSlide].image}
-                        </div>
-                      )}
-                    </motion.div>
+                🍰
+              </motion.div>
+              <h1 className="text-9xl font-bold text-[#FAF7F2] mb-6 drop-shadow-2xl">
+                Golden Munch
+              </h1>
+              <p className="text-5xl text-[#EAD7B7] font-light tracking-wide mb-12">
+                Where Every Bite is Pure Bliss
+              </p>
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="text-4xl text-[#FAF7F2]/80"
+              >
+                Touch screen to start ordering
+              </motion.div>
+            </motion.div>
+          )}
 
-                    {/* Item details */}
-                    <div className="flex-1 text-left">
+          {/* PAGE 2: Featured Items */}
+          {currentPage === 'featured' && !isLoadingItems && featuredItems.length > 0 && (
+            <motion.div
+              key="featured"
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 1 }}
+              className="w-full max-w-7xl"
+            >
+              <div className="bg-gradient-to-br from-[#FAF7F2]/20 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-16 shadow-[0_0_80px_rgba(234,215,183,0.4)] border-2 border-[#EAD7B7]/30">
+                <div className="flex items-center justify-center gap-20">
+                  {/* Item image */}
+                  <motion.div
+                    key={currentFeaturedIndex}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="drop-shadow-2xl"
+                  >
+                    {featuredItems[currentFeaturedIndex].image.startsWith('http') ? (
+                      <img
+                        src={featuredItems[currentFeaturedIndex].image}
+                        alt={featuredItems[currentFeaturedIndex].name}
+                        className="w-[300px] h-[300px] object-cover rounded-3xl"
+                      />
+                    ) : (
                       <motion.div
-                        initial={{ x: 50, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 0.3 }}
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                        className="text-[300px]"
                       >
-                        <div className="flex items-center gap-3 mb-4">
-                          <Star className="w-8 h-8 text-[#D97706] fill-[#D97706]" />
-                          <span className="text-[#EAD7B7] text-2xl font-semibold tracking-wider uppercase">
-                            Featured Special
-                          </span>
-                        </div>
-                        <h2 className="text-6xl font-bold text-[#FAF7F2] mb-6 drop-shadow-lg">
-                          {featuredItems[currentSlide].name}
-                        </h2>
-                        <p className="text-3xl text-[#EAD7B7] mb-8 leading-relaxed">
-                          {featuredItems[currentSlide].description}
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="bg-gradient-to-r from-[#D97706] to-[#7B4B28] text-[#FAF7F2] text-4xl font-bold px-8 py-4 rounded-2xl shadow-2xl">
-                            {featuredItems[currentSlide].price}
-                          </div>
-                          <motion.div
-                            animate={{ x: [0, 10, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                          >
-                            <Sparkles className="w-10 h-10 text-[#D97706]" />
-                          </motion.div>
-                        </div>
+                        {featuredItems[currentFeaturedIndex].image}
                       </motion.div>
+                    )}
+                  </motion.div>
+
+                  {/* Item details */}
+                  <div className="flex-1 text-left">
+                    <div className="flex items-center gap-4 mb-6">
+                      <Star className="w-12 h-12 text-[#D97706] fill-[#D97706]" />
+                      <span className="text-[#EAD7B7] text-3xl font-semibold tracking-wider uppercase">
+                        Featured Special
+                      </span>
+                    </div>
+                    <h2 className="text-8xl font-bold text-[#FAF7F2] mb-8 drop-shadow-lg">
+                      {featuredItems[currentFeaturedIndex].name}
+                    </h2>
+                    <p className="text-4xl text-[#EAD7B7] mb-10 leading-relaxed">
+                      {featuredItems[currentFeaturedIndex].description}
+                    </p>
+                    <div className="flex items-center gap-6">
+                      <motion.div
+                        animate={{ scale: [1, 1.05, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="bg-gradient-to-r from-[#D97706] to-[#7B4B28] text-[#FAF7F2] text-6xl font-bold px-12 py-6 rounded-3xl shadow-2xl"
+                      >
+                        {featuredItems[currentFeaturedIndex].price}
+                      </motion.div>
+                      <Sparkles className="w-16 h-16 text-[#D97706]" />
                     </div>
                   </div>
                 </div>
 
-                {/* Slide indicators */}
+                {/* Item indicators */}
                 {featuredItems.length > 1 && (
-                  <div className="flex justify-center gap-3 mt-8">
+                  <div className="flex justify-center gap-4 mt-12">
                     {featuredItems.map((_, index) => (
-                      <motion.div
+                      <div
                         key={index}
-                        className={`h-3 rounded-full transition-all duration-500 ${
-                          index === currentSlide
-                            ? 'w-16 bg-[#D97706]'
-                            : 'w-3 bg-[#EAD7B7]/30'
+                        className={`h-4 rounded-full transition-all duration-500 ${
+                          index === currentFeaturedIndex
+                            ? 'w-20 bg-[#D97706]'
+                            : 'w-4 bg-[#EAD7B7]/40'
                         }`}
-                        animate={index === currentSlide ? { scale: [1, 1.2, 1] } : {}}
-                        transition={{ duration: 0.5, repeat: Infinity }}
                       />
                     ))}
                   </div>
                 )}
-              </motion.div>
-            </AnimatePresence>
-          ) : null}
-        </div>
-
-        {/* Rotating Quotes Section */}
-        <motion.div
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-          className="w-full max-w-4xl mb-8"
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentQuote}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.6 }}
-              className="text-center"
-            >
-              <div className="bg-gradient-to-r from-[#FAF7F2]/10 to-[#EAD7B7]/10 backdrop-blur-lg rounded-2xl p-8 border border-[#EAD7B7]/20 shadow-2xl">
-                <div className="flex justify-center mb-4">
-                  <Heart className="w-8 h-8 text-[#D97706] fill-[#D97706]" />
-                </div>
-                <p className="text-4xl text-[#FAF7F2] font-light italic mb-4 leading-relaxed">
-                  "{quotes[currentQuote].text}"
-                </p>
-                {quotes[currentQuote].author && (
-                  <p className="text-2xl text-[#EAD7B7] font-semibold">
-                    — {quotes[currentQuote].author}
-                  </p>
-                )}
               </div>
             </motion.div>
-          </AnimatePresence>
-        </motion.div>
+          )}
 
-        {/* Rotating Call-to-Action Messages */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1 }}
-          className="text-center mb-8"
-        >
-          <AnimatePresence mode="wait">
+          {/* PAGE 3: Quote 1 */}
+          {currentPage === 'quote1' && (
             <motion.div
-              key={currentCTA}
-              initial={{ opacity: 0, scale: 0.8, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="inline-block"
+              key="quote1"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              transition={{ duration: 1 }}
+              className="w-full max-w-5xl text-center"
             >
-              <motion.div
-                animate={{
-                  scale: [1, 1.1, 1],
-                  boxShadow: [
-                    '0 0 40px rgba(234,215,183,0.4)',
-                    '0 0 80px rgba(234,215,183,0.8)',
-                    '0 0 40px rgba(234,215,183,0.4)'
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="bg-gradient-to-r from-[#D97706] to-[#7B4B28] text-[#FAF7F2] text-5xl font-bold px-16 py-8 rounded-full border-4 border-[#EAD7B7] shadow-2xl"
-              >
-                {ctaMessages[currentCTA]}
-              </motion.div>
+              <div className="bg-gradient-to-br from-[#FAF7F2]/15 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-20 border-2 border-[#EAD7B7]/30 shadow-[0_0_80px_rgba(234,215,183,0.4)]">
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Heart className="w-20 h-20 text-[#D97706] fill-[#D97706] mx-auto mb-8" />
+                </motion.div>
+                <p className="text-6xl text-[#FAF7F2] font-light italic mb-8 leading-relaxed">
+                  "{getRandomQuote(1).text}"
+                </p>
+                <p className="text-4xl text-[#EAD7B7] font-semibold">
+                  — {getRandomQuote(1).author}
+                </p>
+              </div>
             </motion.div>
-          </AnimatePresence>
-        </motion.div>
+          )}
 
-        {/* Custom Cake Editor Promotion */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1.5 }}
-          className="text-center"
-        >
-          <motion.div
-            animate={{
-              scale: [1, 1.03, 1],
-              rotate: [0, 1, -1, 0]
-            }}
-            transition={{ duration: 3, repeat: Infinity }}
-            className="inline-block"
-          >
-            <div className="bg-gradient-to-br from-[#D97706]/90 via-[#7B4B28]/90 to-[#662B35]/90 backdrop-blur-xl text-[#FAF7F2] px-10 py-6 rounded-3xl border-2 border-[#EAD7B7]/50 shadow-[0_0_50px_rgba(217,119,6,0.6)]">
-              <div className="flex items-center gap-4">
+          {/* PAGE 4: Quote 2 */}
+          {currentPage === 'quote2' && (
+            <motion.div
+              key="quote2"
+              initial={{ opacity: 0, rotateY: 90 }}
+              animate={{ opacity: 1, rotateY: 0 }}
+              exit={{ opacity: 0, rotateY: -90 }}
+              transition={{ duration: 1 }}
+              className="w-full max-w-5xl text-center"
+            >
+              <div className="bg-gradient-to-br from-[#FAF7F2]/15 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-20 border-2 border-[#EAD7B7]/30 shadow-[0_0_80px_rgba(234,215,183,0.4)]">
                 <motion.div
                   animate={{ rotate: [0, 360] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                 >
-                  <Sparkles className="w-10 h-10 text-[#FFD700]" />
+                  <Sparkles className="w-20 h-20 text-[#D97706] mx-auto mb-8" />
                 </motion.div>
-                <div>
-                  <p className="text-2xl font-bold">🎨 NEW! Custom Cake Editor</p>
-                  <p className="text-lg text-[#EAD7B7]">Design your dream cake in stunning 3D • QR Code Enabled</p>
+                <p className="text-6xl text-[#FAF7F2] font-light italic mb-8 leading-relaxed">
+                  "{getRandomQuote(2).text}"
+                </p>
+                <p className="text-4xl text-[#EAD7B7] font-semibold">
+                  — {getRandomQuote(2).author}
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* PAGE 5: Custom Cake Promotion */}
+          {currentPage === 'custom-cake' && (
+            <motion.div
+              key="custom-cake"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 1 }}
+              className="w-full max-w-6xl text-center"
+            >
+              <div className="bg-gradient-to-br from-[#D97706]/30 via-[#7B4B28]/30 to-[#662B35]/30 backdrop-blur-xl rounded-3xl p-20 border-4 border-[#EAD7B7]/50 shadow-[0_0_100px_rgba(217,119,6,0.8)]">
+                <motion.div
+                  animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                  className="text-[200px] mb-8"
+                >
+                  🎨
+                </motion.div>
+                <h2 className="text-8xl font-bold text-[#FAF7F2] mb-6 drop-shadow-2xl">
+                  Custom Cake Editor
+                </h2>
+                <p className="text-5xl text-[#EAD7B7] mb-8">
+                  Design Your Dream Cake in Stunning 3D
+                </p>
+                <div className="flex items-center justify-center gap-12 mb-10">
+                  <motion.div
+                    animate={{ rotate: [0, 360] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Sparkles className="w-16 h-16 text-[#FFD700]" />
+                  </motion.div>
+                  <div className="text-4xl text-[#FAF7F2]">
+                    • QR Code Enabled •
+                  </div>
+                  <motion.div
+                    animate={{ rotate: [0, -360] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Cake className="w-16 h-16 text-[#FFD700]" />
+                  </motion.div>
                 </div>
                 <motion.div
-                  animate={{ rotate: [0, -360] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="bg-gradient-to-r from-[#FFD700] to-[#D97706] text-[#3A1F0F] text-6xl font-bold px-16 py-8 rounded-full shadow-2xl inline-block"
                 >
-                  <Cake className="w-10 h-10 text-[#FFD700]" />
+                  NEW FEATURE!
                 </motion.div>
               </div>
-            </div>
-          </motion.div>
-        </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Custom CSS for gradient animation */}
