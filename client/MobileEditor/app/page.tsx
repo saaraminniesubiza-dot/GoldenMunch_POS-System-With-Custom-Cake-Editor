@@ -100,6 +100,7 @@ function CakeEditorContent() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showTutorial, setShowTutorial] = useState(true);
   const [tutorialStep, setTutorialStep] = useState(0);
+  const [showFullscreenTip, setShowFullscreenTip] = useState(false);
 
   // Design Options from API
   const [options, setOptions] = useState<any>(null);
@@ -412,6 +413,16 @@ function CakeEditorContent() {
       // Success! Show confirmation modal
       setShowSuccessModal(true);
 
+      // Auto-close window after 8 seconds
+      setTimeout(() => {
+        window.close();
+        // Fallback if window.close() doesn't work (e.g., not opened by script)
+        // Redirect to a closing page or show a message
+        if (!window.closed) {
+          window.location.href = 'about:blank';
+        }
+      }, 8000);
+
     } catch (error: any) {
       console.error('Failed to submit:', error);
       alert(`❌ Failed to submit request: ${error.message || 'Unknown error'}\n\nPlease try again or contact staff for assistance.`);
@@ -426,34 +437,34 @@ function CakeEditorContent() {
 
   const tutorialSteps = [
     {
-      title: "Welcome to the Cake Designer! 🎂",
-      content: "Let's take a quick tour to help you create your perfect custom cake!",
-      target: "welcome"
+      title: "Welcome! 🎂",
+      content: "Let's explore the cake designer together!",
+      target: "welcome",
+      placement: "bottom" as const
     },
     {
-      title: "3D Cake Preview",
-      content: "This is your live 3D cake preview. Watch it update in real-time as you customize!",
-      target: "canvas"
+      title: "Toggle Controls",
+      content: "Tap this button to show/hide the customization panel for a full cake view!",
+      target: "toggle",
+      placement: "right" as const
     },
     {
-      title: "Toggle Controls Button",
-      content: "Tap this button to show or hide the customization panel. This gives you a full view of your cake!",
-      target: "toggle"
+      title: "Live Pricing",
+      content: "Your estimated price updates automatically as you customize!",
+      target: "price",
+      placement: "left" as const
     },
     {
-      title: "Price Display",
-      content: "Your estimated price is shown here. It updates automatically as you add features to your cake.",
-      target: "price"
-    },
-    {
-      title: "Customization Panel",
-      content: "Use this panel to customize every aspect of your cake - layers, flavors, frosting, decorations, and more!",
-      target: "panel"
+      title: "Control Panel",
+      content: "All customization options - layers, flavors, frosting, decorations, and more!",
+      target: "panel",
+      placement: "left" as const
     },
     {
       title: "Important Note! ⚠️",
-      content: "This 3D cake is just a preview and visualization. The actual cake may differ. Please wait for final verification and approval from our team.",
-      target: "disclaimer"
+      content: "This 3D cake is just a preview. The actual cake may differ. Wait for final verification from our team!",
+      target: "disclaimer",
+      placement: "bottom" as const
     }
   ];
 
@@ -463,12 +474,18 @@ function CakeEditorContent() {
     } else {
       setShowTutorial(false);
       localStorage.setItem('cakeEditorTutorialCompleted', 'true');
+      // Show fullscreen tip after tutorial
+      setShowFullscreenTip(true);
+      setTimeout(() => setShowFullscreenTip(false), 5000); // Hide after 5 seconds
     }
   };
 
   const handleSkipTutorial = () => {
     setShowTutorial(false);
     localStorage.setItem('cakeEditorTutorialCompleted', 'true');
+    // Show fullscreen tip after skipping tutorial
+    setShowFullscreenTip(true);
+    setTimeout(() => setShowFullscreenTip(false), 5000); // Hide after 5 seconds
   };
 
   // Check if user has seen tutorial
@@ -705,121 +722,96 @@ function CakeEditorContent() {
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 overflow-hidden">
-      {/* Tutorial Overlay */}
-      {showTutorial && (
-        <div className="fixed inset-0 bg-black/50 z-[100] pointer-events-none">
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-3xl p-8 max-w-md mx-4 shadow-2xl"
-            >
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <QuestionMarkCircleIcon className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-black mb-3">
-                  {tutorialSteps[tutorialStep].title}
-                </h3>
-                <p className="text-lg text-black/80 mb-6">
-                  {tutorialSteps[tutorialStep].content}
-                </p>
-
-                {/* Progress dots */}
-                <div className="flex justify-center gap-2 mb-6">
-                  {tutorialSteps.map((_, index) => (
-                    <div
-                      key={index}
-                      className={`h-2 rounded-full transition-all ${
-                        index === tutorialStep
-                          ? 'w-8 bg-purple-500'
-                          : 'w-2 bg-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                <div className="flex gap-3">
-                  {tutorialStep === 0 && (
-                    <Button
-                      onClick={handleSkipTutorial}
-                      className="flex-1 bg-gray-500 text-white font-bold py-6 text-lg"
-                    >
-                      Skip Tutorial
-                    </Button>
-                  )}
-                  <Button
-                    onClick={handleNextTutorialStep}
-                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-6 text-lg"
-                  >
-                    {tutorialStep === tutorialSteps.length - 1 ? "Got it!" : "Next"}
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      )}
-
       {/* Full Screen 3D Canvas */}
-      <div
-        className="absolute inset-0 z-0"
-        id="tutorial-canvas"
-      >
+      <div className="absolute inset-0 z-0">
         <CakeCanvas3D ref={canvasRef} design={design} options={options} />
       </div>
 
       {/* Toggle Controls Button */}
-      <Popover
-        isOpen={showTutorial && tutorialStep === 2}
-        placement="right"
-        showArrow
-      >
-        <PopoverTrigger>
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            onClick={() => setShowControls(!showControls)}
-            className="fixed top-4 left-4 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all"
-            id="tutorial-toggle"
-          >
-            {showControls ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
-          </motion.button>
-        </PopoverTrigger>
-        <PopoverContent className="bg-purple-500 text-white border-2 border-white">
-          <div className="px-4 py-3">
-            <div className="text-lg font-bold mb-1">👆 Toggle Controls</div>
-            <div className="text-sm">Click here to show/hide the panel</div>
-          </div>
-        </PopoverContent>
-      </Popover>
+      <div className="fixed top-2 left-2 sm:top-3 sm:left-3 z-50">
+        <Popover
+          isOpen={showTutorial && tutorialStep === 0}
+          placement={tutorialSteps[0].placement}
+          showArrow
+        >
+          <PopoverTrigger>
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={() => setShowControls(!showControls)}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-2 sm:p-3 rounded-full shadow-2xl hover:scale-110 transition-all active:scale-95"
+            >
+              {showControls ? <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" /> : <Bars3Icon className="w-4 h-4 sm:w-5 sm:h-5" />}
+            </motion.button>
+          </PopoverTrigger>
+          <PopoverContent className="bg-gradient-to-br from-purple-500 to-pink-500 text-white border-2 border-white max-w-xs">
+            <div className="p-3">
+              <div className="text-base font-bold mb-2">{tutorialSteps[0].title}</div>
+              <div className="text-sm mb-3">{tutorialSteps[0].content}</div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleSkipTutorial}
+                  className="flex-1 bg-white/20 text-white font-bold"
+                >
+                  Skip
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleNextTutorialStep}
+                  className="flex-1 bg-white text-purple-600 font-bold"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
 
       {/* Price Display */}
-      <Popover
-        isOpen={showTutorial && tutorialStep === 3}
-        placement="left"
-        showArrow
-      >
-        <PopoverTrigger>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="fixed top-4 right-4 z-50 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 border-2 border-purple-200"
-            id="tutorial-price"
-          >
-            <p className="text-sm font-bold text-black">Estimated Price</p>
-            <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              ₱{calculatePrice(design)}
-            </p>
-          </motion.div>
-        </PopoverTrigger>
-        <PopoverContent className="bg-purple-500 text-white border-2 border-white">
-          <div className="px-4 py-3">
-            <div className="text-lg font-bold mb-1">💰 Live Pricing</div>
-            <div className="text-sm">Updates as you customize</div>
-          </div>
-        </PopoverContent>
-      </Popover>
+      <div className="fixed top-2 right-2 sm:top-3 sm:right-3 z-50">
+        <Popover
+          isOpen={showTutorial && tutorialStep === 1}
+          placement={tutorialSteps[1].placement}
+          showArrow
+        >
+          <PopoverTrigger>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-white/95 backdrop-blur-xl rounded-lg sm:rounded-xl shadow-2xl p-2 sm:p-3 border-2 border-purple-200"
+            >
+              <p className="text-xs font-bold text-black">Price</p>
+              <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                ₱{calculatePrice(design)}
+              </p>
+            </motion.div>
+          </PopoverTrigger>
+          <PopoverContent className="bg-gradient-to-br from-purple-500 to-pink-500 text-white border-2 border-white max-w-xs">
+            <div className="p-3">
+              <div className="text-base font-bold mb-2">{tutorialSteps[1].title}</div>
+              <div className="text-sm mb-3">{tutorialSteps[1].content}</div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleSkipTutorial}
+                  className="flex-1 bg-white/20 text-white font-bold"
+                >
+                  Skip
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleNextTutorialStep}
+                  className="flex-1 bg-white text-purple-600 font-bold"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
 
       {/* Help Button (restart tutorial) */}
       {!showTutorial && (
@@ -830,44 +822,81 @@ function CakeEditorContent() {
             setShowTutorial(true);
             setTutorialStep(0);
           }}
-          className="fixed bottom-4 left-4 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all"
+          className="fixed bottom-2 left-2 sm:bottom-3 sm:left-3 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-2 rounded-full shadow-2xl hover:scale-110 transition-all"
         >
-          <QuestionMarkCircleIcon className="w-6 h-6" />
+          <QuestionMarkCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         </motion.button>
       )}
+
+      {/* Fullscreen Tip - Show after tutorial */}
+      <AnimatePresence>
+        {showFullscreenTip && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-16 left-1/2 transform -translate-x-1/2 z-50 max-w-sm"
+          >
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-xl shadow-2xl border-2 border-white">
+              <p className="text-sm font-bold text-center">
+                💡 Tip: For best experience, click the fullscreen button on your browser!
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hideable Controls Panel */}
       <AnimatePresence>
         {showControls && (
-          <Popover
-            isOpen={showTutorial && tutorialStep === 4}
-            placement="left"
-            showArrow
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed right-0 top-0 bottom-0 w-full xs:w-[85%] sm:w-80 md:w-[360px] bg-white/95 backdrop-blur-xl shadow-2xl z-40 overflow-y-auto"
           >
-            <PopoverTrigger>
-              <motion.div
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-white/95 backdrop-blur-xl shadow-2xl z-40 overflow-y-auto"
-                id="tutorial-panel"
-              >
-                {/* Header */}
-                <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 z-10">
-                  <h1 className="text-2xl font-bold">🎂 Customize Your Cake</h1>
-                  <p className="text-sm opacity-90">Step {currentStep + 1} of {STEPS.length}: {STEPS[currentStep].name}</p>
-                  <Progress value={progress} className="mt-3" classNames={{ indicator: 'bg-white' }} />
-                  {saving && (
-                    <div className="flex items-center gap-2 text-sm mt-2">
-                      <Spinner size="sm" color="white" />
-                      <span>Saving...</span>
-                    </div>
-                  )}
+            {/* Tutorial Popover for Panel */}
+            {showTutorial && tutorialStep === 2 && (
+              <div className="absolute -left-4 top-1/3 z-50">
+                <div className="bg-gradient-to-br from-purple-500 to-pink-500 text-white border-2 border-white rounded-lg shadow-2xl p-3 max-w-xs">
+                  <div className="text-base font-bold mb-2">{tutorialSteps[2].title}</div>
+                  <div className="text-sm mb-3">{tutorialSteps[2].content}</div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleSkipTutorial}
+                      className="flex-1 bg-white/20 text-white font-bold"
+                    >
+                      Skip
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleNextTutorialStep}
+                      className="flex-1 bg-white text-purple-600 font-bold"
+                    >
+                      Next
+                    </Button>
+                  </div>
                 </div>
+              </div>
+            )}
+
+            {/* Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 z-10">
+              <h1 className="text-lg sm:text-xl font-bold">🎂 Customize Your Cake</h1>
+              <p className="text-xs opacity-90">Step {currentStep + 1} of {STEPS.length}: {STEPS[currentStep].name}</p>
+              <Progress value={progress} className="mt-2" classNames={{ indicator: 'bg-white' }} />
+              {saving && (
+                <div className="flex items-center gap-2 text-xs mt-2">
+                  <Spinner size="sm" color="white" />
+                  <span>Saving...</span>
+                </div>
+              )}
+            </div>
 
             {/* Step Content */}
-            <div className="p-6">
+            <div className="p-3 sm:p-4">
               <motion.div
                 key={currentStep}
                 initial={{ opacity: 0, y: 20 }}
@@ -883,12 +912,12 @@ function CakeEditorContent() {
               </motion.div>
 
               {/* Navigation */}
-              <div className="flex gap-3 mt-8 sticky bottom-0 bg-white pt-4 pb-2 border-t">
+              <div className="flex gap-2 mt-4 sm:mt-6 sticky bottom-0 bg-white pt-3 pb-2 border-t">
                 {currentStep > 0 && (
                   <Button
                     onClick={handlePrevious}
                     startContent={<ArrowLeftIcon className="w-4 h-4" />}
-                    className="flex-1 bg-gray-600 text-white font-bold"
+                    className="flex-1 bg-gray-600 text-white font-bold text-sm py-3 sm:py-4"
                   >
                     Previous
                   </Button>
@@ -897,31 +926,38 @@ function CakeEditorContent() {
                   <Button
                     onClick={handleNext}
                     endContent={<ArrowRightIcon className="w-4 h-4" />}
-                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold"
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-sm py-3 sm:py-4"
                   >
-                    Next Step
+                    Next
                   </Button>
                 ) : (
                   <Button
                     onClick={handleSubmitClick}
                     isLoading={submitting}
-                    endContent={<CheckCircleIcon className="w-5 h-5" />}
-                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-lg py-6"
+                    endContent={<CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />}
+                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-sm sm:text-base py-4 sm:py-5"
                   >
-                    Submit for Review
+                    Submit
                   </Button>
                 )}
               </div>
+
+              {/* Disclaimer Tutorial Step */}
+              {showTutorial && tutorialStep === 3 && (
+                <div className="mt-4 bg-gradient-to-br from-purple-500 to-pink-500 text-white border-2 border-white rounded-lg shadow-2xl p-3">
+                  <div className="text-base font-bold mb-2">{tutorialSteps[3].title}</div>
+                  <div className="text-sm mb-3">{tutorialSteps[3].content}</div>
+                  <Button
+                    size="sm"
+                    onClick={handleNextTutorialStep}
+                    className="w-full bg-white text-purple-600 font-bold"
+                  >
+                    Got it!
+                  </Button>
+                </div>
+              )}
             </div>
-              </motion.div>
-            </PopoverTrigger>
-            <PopoverContent className="bg-purple-500 text-white border-2 border-white">
-              <div className="px-4 py-3">
-                <div className="text-lg font-bold mb-1">🎨 Control Panel</div>
-                <div className="text-sm">All customization options are here!</div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -940,27 +976,27 @@ function CakeEditorContent() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
             >
               <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-                  <CheckCircleIcon className="w-12 h-12 text-white" />
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                  <CheckCircleIcon className="w-10 h-10 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-black mb-4">Are you sure?</h2>
-                <p className="text-lg text-black/80 mb-8">
+                <h2 className="text-2xl font-bold text-black mb-3">Are you sure?</h2>
+                <p className="text-base text-black/80 mb-6">
                   Ready to submit your custom cake design for review?
                 </p>
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   <Button
                     onClick={() => setShowConfirmModal(false)}
-                    className="flex-1 bg-gray-600 text-white font-bold py-6 text-lg"
+                    className="flex-1 bg-gray-600 text-white font-bold py-4 text-base"
                   >
                     Go Back
                   </Button>
                   <Button
                     onClick={handleConfirmSubmit}
                     isLoading={submitting}
-                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-6 text-lg"
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 text-base"
                   >
                     Yes, Submit!
                   </Button>
@@ -984,23 +1020,23 @@ function CakeEditorContent() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl"
+              className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl"
             >
               <div className="text-center">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", delay: 0.2 }}
-                  className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center"
+                  className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center"
                 >
-                  <CheckCircleIcon className="w-16 h-16 text-white" />
+                  <CheckCircleIcon className="w-12 h-12 text-white" />
                 </motion.div>
 
                 <motion.h2
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="text-4xl font-bold text-black mb-4"
+                  className="text-3xl font-bold text-black mb-3"
                 >
                   Success! 🎉
                 </motion.h2>
@@ -1009,33 +1045,33 @@ function CakeEditorContent() {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="space-y-4 mb-8"
+                  className="space-y-3 mb-6"
                 >
-                  <p className="text-xl text-black font-semibold">
+                  <p className="text-lg text-black font-semibold">
                     Your cake will be up for checking and verification
                   </p>
-                  <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 border-2 border-purple-200">
-                    <p className="text-lg text-black font-bold mb-3">📧 What's Next?</p>
-                    <ul className="text-left text-black/80 space-y-2">
-                      <li className="flex items-start gap-3">
-                        <span className="text-xl">✉️</span>
+                  <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 border-2 border-purple-200">
+                    <p className="text-base text-black font-bold mb-2">📧 What's Next?</p>
+                    <ul className="text-left text-black/80 space-y-2 text-sm">
+                      <li className="flex items-start gap-2">
+                        <span className="text-lg">✉️</span>
                         <span className="font-semibold">Check your email for further information about your order</span>
                       </li>
-                      <li className="flex items-start gap-3">
-                        <span className="text-xl">⏱️</span>
+                      <li className="flex items-start gap-2">
+                        <span className="text-lg">⏱️</span>
                         <span className="font-semibold">Typical response time is a few hours to a day</span>
                       </li>
-                      <li className="flex items-start gap-3">
-                        <span className="text-xl">💰</span>
+                      <li className="flex items-start gap-2">
+                        <span className="text-lg">💰</span>
                         <span className="font-semibold">We'll send you the final pricing and confirmation</span>
                       </li>
                     </ul>
                   </div>
 
                   {/* Important Disclaimer */}
-                  <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-6 border-2 border-amber-300 mt-4">
-                    <p className="text-lg text-black font-bold mb-2">⚠️ Important Note</p>
-                    <p className="text-black/80 font-semibold text-sm">
+                  <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl p-4 border-2 border-amber-300 mt-3">
+                    <p className="text-base text-black font-bold mb-2">⚠️ Important Note</p>
+                    <p className="text-black/80 font-semibold text-xs">
                       The 3D cake preview is just a visualization. The actual cake may differ from what you see.
                       Please wait for final verification and approval from our team before your cake is prepared.
                     </p>
@@ -1049,7 +1085,7 @@ function CakeEditorContent() {
                 >
                   <Button
                     onClick={() => window.location.reload()}
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-6 text-lg"
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 text-base"
                   >
                     Create Another Cake
                   </Button>
