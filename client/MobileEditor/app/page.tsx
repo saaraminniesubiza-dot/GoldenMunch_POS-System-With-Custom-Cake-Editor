@@ -8,7 +8,8 @@ import { Card, CardBody } from '@nextui-org/card';
 import { Button } from '@nextui-org/button';
 import { Progress } from '@nextui-org/progress';
 import { Spinner } from '@nextui-org/spinner';
-import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon, DevicePhoneMobileIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon, DevicePhoneMobileIcon, Bars3Icon, XMarkIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { Popover, PopoverTrigger, PopoverContent } from '@nextui-org/popover';
 import StepCustomerInfo from '@/components/cake-editor/steps/StepCustomerInfo';
 import StepLayers from '@/components/cake-editor/steps/StepLayers';
 import StepFlavor from '@/components/cake-editor/steps/StepFlavor';
@@ -97,6 +98,8 @@ function CakeEditorContent() {
   const [showControls, setShowControls] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(true);
+  const [tutorialStep, setTutorialStep] = useState(0);
 
   // Design Options from API
   const [options, setOptions] = useState<any>(null);
@@ -421,6 +424,61 @@ function CakeEditorContent() {
     setDesign({ ...design, ...updates });
   };
 
+  const tutorialSteps = [
+    {
+      title: "Welcome to the Cake Designer! 🎂",
+      content: "Let's take a quick tour to help you create your perfect custom cake!",
+      target: "welcome"
+    },
+    {
+      title: "3D Cake Preview",
+      content: "This is your live 3D cake preview. Watch it update in real-time as you customize!",
+      target: "canvas"
+    },
+    {
+      title: "Toggle Controls Button",
+      content: "Tap this button to show or hide the customization panel. This gives you a full view of your cake!",
+      target: "toggle"
+    },
+    {
+      title: "Price Display",
+      content: "Your estimated price is shown here. It updates automatically as you add features to your cake.",
+      target: "price"
+    },
+    {
+      title: "Customization Panel",
+      content: "Use this panel to customize every aspect of your cake - layers, flavors, frosting, decorations, and more!",
+      target: "panel"
+    },
+    {
+      title: "Important Note! ⚠️",
+      content: "This 3D cake is just a preview and visualization. The actual cake may differ. Please wait for final verification and approval from our team.",
+      target: "disclaimer"
+    }
+  ];
+
+  const handleNextTutorialStep = () => {
+    if (tutorialStep < tutorialSteps.length - 1) {
+      setTutorialStep(tutorialStep + 1);
+    } else {
+      setShowTutorial(false);
+      localStorage.setItem('cakeEditorTutorialCompleted', 'true');
+    }
+  };
+
+  const handleSkipTutorial = () => {
+    setShowTutorial(false);
+    localStorage.setItem('cakeEditorTutorialCompleted', 'true');
+  };
+
+  // Check if user has seen tutorial
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('cakeEditorTutorialCompleted');
+    if (hasSeenTutorial === 'true') {
+      setShowTutorial(false);
+    }
+  }, []);
+
   // Loading state
   if (loading) {
     return (
@@ -647,55 +705,166 @@ function CakeEditorContent() {
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 overflow-hidden">
+      {/* Tutorial Overlay */}
+      {showTutorial && (
+        <div className="fixed inset-0 bg-black/50 z-[100] pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-3xl p-8 max-w-md mx-4 shadow-2xl"
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                  <QuestionMarkCircleIcon className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-black mb-3">
+                  {tutorialSteps[tutorialStep].title}
+                </h3>
+                <p className="text-lg text-black/80 mb-6">
+                  {tutorialSteps[tutorialStep].content}
+                </p>
+
+                {/* Progress dots */}
+                <div className="flex justify-center gap-2 mb-6">
+                  {tutorialSteps.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`h-2 rounded-full transition-all ${
+                        index === tutorialStep
+                          ? 'w-8 bg-purple-500'
+                          : 'w-2 bg-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <div className="flex gap-3">
+                  {tutorialStep === 0 && (
+                    <Button
+                      onClick={handleSkipTutorial}
+                      className="flex-1 bg-gray-500 text-white font-bold py-6 text-lg"
+                    >
+                      Skip Tutorial
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleNextTutorialStep}
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-6 text-lg"
+                  >
+                    {tutorialStep === tutorialSteps.length - 1 ? "Got it!" : "Next"}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      )}
+
       {/* Full Screen 3D Canvas */}
-      <div className="absolute inset-0 z-0">
+      <div
+        className="absolute inset-0 z-0"
+        id="tutorial-canvas"
+      >
         <CakeCanvas3D ref={canvasRef} design={design} options={options} />
       </div>
 
       {/* Toggle Controls Button */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        onClick={() => setShowControls(!showControls)}
-        className="fixed top-4 left-4 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all"
+      <Popover
+        isOpen={showTutorial && tutorialStep === 2}
+        placement="right"
+        showArrow
       >
-        {showControls ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
-      </motion.button>
+        <PopoverTrigger>
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            onClick={() => setShowControls(!showControls)}
+            className="fixed top-4 left-4 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all"
+            id="tutorial-toggle"
+          >
+            {showControls ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+          </motion.button>
+        </PopoverTrigger>
+        <PopoverContent className="bg-purple-500 text-white border-2 border-white">
+          <div className="px-4 py-3">
+            <div className="text-lg font-bold mb-1">👆 Toggle Controls</div>
+            <div className="text-sm">Click here to show/hide the panel</div>
+          </div>
+        </PopoverContent>
+      </Popover>
 
       {/* Price Display */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed top-4 right-4 z-50 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 border-2 border-purple-200"
+      <Popover
+        isOpen={showTutorial && tutorialStep === 3}
+        placement="left"
+        showArrow
       >
-        <p className="text-sm font-bold text-black">Estimated Price</p>
-        <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-          ₱{calculatePrice(design)}
-        </p>
-      </motion.div>
+        <PopoverTrigger>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed top-4 right-4 z-50 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 border-2 border-purple-200"
+            id="tutorial-price"
+          >
+            <p className="text-sm font-bold text-black">Estimated Price</p>
+            <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              ₱{calculatePrice(design)}
+            </p>
+          </motion.div>
+        </PopoverTrigger>
+        <PopoverContent className="bg-purple-500 text-white border-2 border-white">
+          <div className="px-4 py-3">
+            <div className="text-lg font-bold mb-1">💰 Live Pricing</div>
+            <div className="text-sm">Updates as you customize</div>
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      {/* Help Button (restart tutorial) */}
+      {!showTutorial && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={() => {
+            setShowTutorial(true);
+            setTutorialStep(0);
+          }}
+          className="fixed bottom-4 left-4 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all"
+        >
+          <QuestionMarkCircleIcon className="w-6 h-6" />
+        </motion.button>
+      )}
 
       {/* Hideable Controls Panel */}
       <AnimatePresence>
         {showControls && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-white/95 backdrop-blur-xl shadow-2xl z-40 overflow-y-auto"
+          <Popover
+            isOpen={showTutorial && tutorialStep === 4}
+            placement="left"
+            showArrow
           >
-            {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 z-10">
-              <h1 className="text-2xl font-bold">🎂 Customize Your Cake</h1>
-              <p className="text-sm opacity-90">Step {currentStep + 1} of {STEPS.length}: {STEPS[currentStep].name}</p>
-              <Progress value={progress} className="mt-3" classNames={{ indicator: 'bg-white' }} />
-              {saving && (
-                <div className="flex items-center gap-2 text-sm mt-2">
-                  <Spinner size="sm" color="white" />
-                  <span>Saving...</span>
+            <PopoverTrigger>
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-white/95 backdrop-blur-xl shadow-2xl z-40 overflow-y-auto"
+                id="tutorial-panel"
+              >
+                {/* Header */}
+                <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 z-10">
+                  <h1 className="text-2xl font-bold">🎂 Customize Your Cake</h1>
+                  <p className="text-sm opacity-90">Step {currentStep + 1} of {STEPS.length}: {STEPS[currentStep].name}</p>
+                  <Progress value={progress} className="mt-3" classNames={{ indicator: 'bg-white' }} />
+                  {saving && (
+                    <div className="flex items-center gap-2 text-sm mt-2">
+                      <Spinner size="sm" color="white" />
+                      <span>Saving...</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
             {/* Step Content */}
             <div className="p-6">
@@ -744,7 +913,15 @@ function CakeEditorContent() {
                 )}
               </div>
             </div>
-          </motion.div>
+              </motion.div>
+            </PopoverTrigger>
+            <PopoverContent className="bg-purple-500 text-white border-2 border-white">
+              <div className="px-4 py-3">
+                <div className="text-lg font-bold mb-1">🎨 Control Panel</div>
+                <div className="text-sm">All customization options are here!</div>
+              </div>
+            </PopoverContent>
+          </Popover>
         )}
       </AnimatePresence>
 
@@ -853,6 +1030,15 @@ function CakeEditorContent() {
                         <span className="font-semibold">We'll send you the final pricing and confirmation</span>
                       </li>
                     </ul>
+                  </div>
+
+                  {/* Important Disclaimer */}
+                  <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-6 border-2 border-amber-300 mt-4">
+                    <p className="text-lg text-black font-bold mb-2">⚠️ Important Note</p>
+                    <p className="text-black/80 font-semibold text-sm">
+                      The 3D cake preview is just a visualization. The actual cake may differ from what you see.
+                      Please wait for final verification and approval from our team before your cake is prepared.
+                    </p>
                   </div>
                 </motion.div>
 
