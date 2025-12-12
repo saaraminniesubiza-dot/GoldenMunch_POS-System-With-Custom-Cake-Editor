@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cake, Sparkles, Heart, Star, Clock } from "lucide-react";
+import { Cake, Sparkles, Heart, Star, Clock, AlertCircle } from "lucide-react";
+import { MenuService } from "@/services/menu.service";
+import { MenuItem, ItemType } from "@/types/api";
 
 interface FeaturedItem {
   id: number;
@@ -17,43 +19,47 @@ interface Quote {
   author?: string;
 }
 
+// Emoji mapping based on item types
+const getEmojiForItemType = (itemType: ItemType, itemName: string): string => {
+  // Check item name for specific keywords
+  const nameLower = itemName.toLowerCase();
+
+  if (nameLower.includes('chocolate')) return '🍫';
+  if (nameLower.includes('strawberry')) return '🍓';
+  if (nameLower.includes('vanilla')) return '🍦';
+  if (nameLower.includes('lemon')) return '🍋';
+  if (nameLower.includes('coffee')) return '☕';
+  if (nameLower.includes('caramel')) return '🍮';
+  if (nameLower.includes('cheese')) return '🧀';
+  if (nameLower.includes('custom')) return '🎨';
+
+  // Fallback to item type
+  switch (itemType) {
+    case ItemType.CAKE:
+      return '🎂';
+    case ItemType.PASTRY:
+      return '🥐';
+    case ItemType.BEVERAGE:
+      return '☕';
+    case ItemType.SNACK:
+      return '🍪';
+    case ItemType.DESSERT:
+      return '🍰';
+    case ItemType.BREAD:
+      return '🍞';
+    default:
+      return '🧁';
+  }
+};
+
 export default function IdlePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentQuote, setCurrentQuote] = useState(0);
   const [currentCTA, setCurrentCTA] = useState(0);
   const [floatingElements, setFloatingElements] = useState<Array<{ id: number; x: number; y: number; emoji: string }>>([]);
-
-  // Featured menu items - You can fetch these from API later
-  const featuredItems: FeaturedItem[] = [
-    {
-      id: 1,
-      name: "Chocolate Dream Cake",
-      image: "🍫",
-      description: "Rich chocolate layers with creamy ganache",
-      price: "₱850"
-    },
-    {
-      id: 2,
-      name: "Strawberry Delight",
-      image: "🍓",
-      description: "Fresh strawberries with vanilla cream",
-      price: "₱750"
-    },
-    {
-      id: 3,
-      name: "Classic Cupcakes",
-      image: "🧁",
-      description: "Assorted flavors, freshly baked daily",
-      price: "₱150"
-    },
-    {
-      id: 4,
-      name: "Custom Cake Creation",
-      image: "🎂",
-      description: "Design your dream cake in 3D",
-      price: "From ₱1,200"
-    }
-  ];
+  const [featuredItems, setFeaturedItems] = useState<FeaturedItem[]>([]);
+  const [isLoadingItems, setIsLoadingItems] = useState(true);
+  const [itemsError, setItemsError] = useState<string | null>(null);
 
   // Promotional quotes that rotate
   const quotes: Quote[] = [
@@ -79,6 +85,74 @@ export default function IdlePage() {
 
   // Floating bakery emojis
   const bakeryEmojis = ['🍰', '🧁', '🎂', '🍪', '🥐', '🍩', '🥧', '✨', '⭐', '💫'];
+
+  // Fetch featured items from API
+  useEffect(() => {
+    const fetchFeaturedItems = async () => {
+      try {
+        setIsLoadingItems(true);
+        setItemsError(null);
+
+        console.log('🎯 [Idle] Fetching featured menu items...');
+
+        // Fetch featured items from API
+        const items = await MenuService.getMenuItems({ is_featured: true });
+
+        console.log('✅ [Idle] Featured items fetched:', {
+          count: items.length,
+          items: items.map(i => ({ id: i.menu_item_id, name: i.name, price: i.current_price }))
+        });
+
+        // Transform API data to FeaturedItem format
+        const transformedItems: FeaturedItem[] = items
+          .filter(item => item.status === 'available') // Only show available items
+          .slice(0, 6) // Limit to 6 items maximum
+          .map(item => ({
+            id: item.menu_item_id,
+            name: item.name,
+            image: item.image_url || getEmojiForItemType(item.item_type, item.name),
+            description: item.description || `Delicious ${item.name.toLowerCase()}`,
+            price: item.current_price ? `₱${item.current_price.toFixed(2)}` : 'Price varies'
+          }));
+
+        // If no featured items, fallback to showing custom cake option
+        if (transformedItems.length === 0) {
+          console.warn('⚠️  [Idle] No featured items found, showing custom cake option');
+          setFeaturedItems([
+            {
+              id: 0,
+              name: "Custom Cake Creation",
+              image: "🎨",
+              description: "Design your dream cake in stunning 3D",
+              price: "From ₱1,200"
+            }
+          ]);
+        } else {
+          setFeaturedItems(transformedItems);
+        }
+
+        console.log('✅ [Idle] Featured items ready for display:', transformedItems.length);
+      } catch (error) {
+        console.error('❌ [Idle] Error fetching featured items:', error);
+        setItemsError('Unable to load featured items');
+
+        // Fallback to custom cake option on error
+        setFeaturedItems([
+          {
+            id: 0,
+            name: "Custom Cake Creation",
+            image: "🎨",
+            description: "Design your dream cake in stunning 3D",
+            price: "From ₱1,200"
+          }
+        ]);
+      } finally {
+        setIsLoadingItems(false);
+      }
+    };
+
+    fetchFeaturedItems();
+  }, []);
 
   // Generate floating elements on mount
   useEffect(() => {
@@ -216,81 +290,128 @@ export default function IdlePage() {
 
         {/* Featured Items Carousel */}
         <div className="w-full max-w-6xl mb-12">
-          <AnimatePresence mode="wait">
+          {isLoadingItems ? (
+            // Loading state
             <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0, scale: 0.8, rotateY: 90 }}
-              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-              exit={{ opacity: 0, scale: 0.8, rotateY: -90 }}
-              transition={{ duration: 0.8 }}
-              className="relative"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-gradient-to-br from-[#FAF7F2]/20 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-12 shadow-[0_0_60px_rgba(234,215,183,0.3)] border-2 border-[#EAD7B7]/30"
             >
-              <div className="bg-gradient-to-br from-[#FAF7F2]/20 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-12 shadow-[0_0_60px_rgba(234,215,183,0.3)] border-2 border-[#EAD7B7]/30">
-                <div className="flex items-center justify-center gap-16">
-                  {/* Item emoji/image */}
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      rotate: [0, 5, -5, 0]
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    className="text-[200px] drop-shadow-2xl"
-                  >
-                    {featuredItems[currentSlide].image}
-                  </motion.div>
-
-                  {/* Item details */}
-                  <div className="flex-1 text-left">
-                    <motion.div
-                      initial={{ x: 50, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      <div className="flex items-center gap-3 mb-4">
-                        <Star className="w-8 h-8 text-[#D97706] fill-[#D97706]" />
-                        <span className="text-[#EAD7B7] text-2xl font-semibold tracking-wider uppercase">
-                          Featured Special
-                        </span>
-                      </div>
-                      <h2 className="text-6xl font-bold text-[#FAF7F2] mb-6 drop-shadow-lg">
-                        {featuredItems[currentSlide].name}
-                      </h2>
-                      <p className="text-3xl text-[#EAD7B7] mb-8 leading-relaxed">
-                        {featuredItems[currentSlide].description}
-                      </p>
-                      <div className="flex items-center gap-4">
-                        <div className="bg-gradient-to-r from-[#D97706] to-[#7B4B28] text-[#FAF7F2] text-4xl font-bold px-8 py-4 rounded-2xl shadow-2xl">
-                          {featuredItems[currentSlide].price}
-                        </div>
-                        <motion.div
-                          animate={{ x: [0, 10, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                        >
-                          <Sparkles className="w-10 h-10 text-[#D97706]" />
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Slide indicators */}
-              <div className="flex justify-center gap-3 mt-8">
-                {featuredItems.map((_, index) => (
-                  <motion.div
-                    key={index}
-                    className={`h-3 rounded-full transition-all duration-500 ${
-                      index === currentSlide
-                        ? 'w-16 bg-[#D97706]'
-                        : 'w-3 bg-[#EAD7B7]/30'
-                    }`}
-                    animate={index === currentSlide ? { scale: [1, 1.2, 1] } : {}}
-                    transition={{ duration: 0.5, repeat: Infinity }}
-                  />
-                ))}
+              <div className="flex items-center justify-center gap-6">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles className="w-16 h-16 text-[#D97706]" />
+                </motion.div>
+                <p className="text-4xl text-[#FAF7F2] font-light">Loading our featured specials...</p>
               </div>
             </motion.div>
-          </AnimatePresence>
+          ) : itemsError ? (
+            // Error state
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-gradient-to-br from-[#FAF7F2]/20 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-12 shadow-[0_0_60px_rgba(234,215,183,0.3)] border-2 border-[#EAD7B7]/30"
+            >
+              <div className="flex items-center justify-center gap-6">
+                <AlertCircle className="w-16 h-16 text-[#D97706]" />
+                <div>
+                  <p className="text-3xl text-[#FAF7F2] font-semibold mb-2">Oops! Something went wrong</p>
+                  <p className="text-xl text-[#EAD7B7]">{itemsError}</p>
+                </div>
+              </div>
+            </motion.div>
+          ) : featuredItems.length > 0 ? (
+            // Featured items carousel
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, scale: 0.8, rotateY: 90 }}
+                animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                exit={{ opacity: 0, scale: 0.8, rotateY: -90 }}
+                transition={{ duration: 0.8 }}
+                className="relative"
+              >
+                <div className="bg-gradient-to-br from-[#FAF7F2]/20 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-12 shadow-[0_0_60px_rgba(234,215,183,0.3)] border-2 border-[#EAD7B7]/30">
+                  <div className="flex items-center justify-center gap-16">
+                    {/* Item emoji/image */}
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.1, 1],
+                        rotate: [0, 5, -5, 0]
+                      }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                      className="drop-shadow-2xl"
+                    >
+                      {featuredItems[currentSlide].image.startsWith('http') ? (
+                        <img
+                          src={featuredItems[currentSlide].image}
+                          alt={featuredItems[currentSlide].name}
+                          className="w-[200px] h-[200px] object-cover rounded-2xl"
+                        />
+                      ) : (
+                        <div className="text-[200px]">
+                          {featuredItems[currentSlide].image}
+                        </div>
+                      )}
+                    </motion.div>
+
+                    {/* Item details */}
+                    <div className="flex-1 text-left">
+                      <motion.div
+                        initial={{ x: 50, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <div className="flex items-center gap-3 mb-4">
+                          <Star className="w-8 h-8 text-[#D97706] fill-[#D97706]" />
+                          <span className="text-[#EAD7B7] text-2xl font-semibold tracking-wider uppercase">
+                            Featured Special
+                          </span>
+                        </div>
+                        <h2 className="text-6xl font-bold text-[#FAF7F2] mb-6 drop-shadow-lg">
+                          {featuredItems[currentSlide].name}
+                        </h2>
+                        <p className="text-3xl text-[#EAD7B7] mb-8 leading-relaxed">
+                          {featuredItems[currentSlide].description}
+                        </p>
+                        <div className="flex items-center gap-4">
+                          <div className="bg-gradient-to-r from-[#D97706] to-[#7B4B28] text-[#FAF7F2] text-4xl font-bold px-8 py-4 rounded-2xl shadow-2xl">
+                            {featuredItems[currentSlide].price}
+                          </div>
+                          <motion.div
+                            animate={{ x: [0, 10, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          >
+                            <Sparkles className="w-10 h-10 text-[#D97706]" />
+                          </motion.div>
+                        </div>
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slide indicators */}
+                {featuredItems.length > 1 && (
+                  <div className="flex justify-center gap-3 mt-8">
+                    {featuredItems.map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`h-3 rounded-full transition-all duration-500 ${
+                          index === currentSlide
+                            ? 'w-16 bg-[#D97706]'
+                            : 'w-3 bg-[#EAD7B7]/30'
+                        }`}
+                        animate={index === currentSlide ? { scale: [1, 1.2, 1] } : {}}
+                        transition={{ duration: 0.5, repeat: Infinity }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          ) : null}
         </div>
 
         {/* Rotating Quotes Section */}
