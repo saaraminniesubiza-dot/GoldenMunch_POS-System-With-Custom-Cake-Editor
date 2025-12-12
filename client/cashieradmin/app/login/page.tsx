@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@heroui/button';
-import { Input } from '@heroui/input';
-import { Card, CardBody, CardHeader } from '@heroui/card';
-import { Tabs, Tab } from '@heroui/tabs';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState } from "react";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Tabs, Tab } from "@heroui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [loginType, setLoginType] = useState<'admin' | 'cashier'>('admin');
+  const [error, setError] = useState("");
+  const [loginType, setLoginType] = useState<"admin" | "cashier">("admin");
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
-      await login(username, password, loginType === 'cashier');
+      await login(username, password, loginType === "cashier");
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -42,19 +42,24 @@ export default function LoginPage() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-light-caramel via-muted-clay to-light-caramel bg-clip-text text-transparent">
               GoldenMunch POS
             </h1>
-            <p className="text-sm text-warm-beige font-medium mt-2">Admin & Cashier Portal</p>
+            <p className="text-sm text-warm-beige font-medium mt-2">
+              Admin & Cashier Portal
+            </p>
           </div>
         </CardHeader>
         <CardBody className="px-8 pb-10 pt-6">
           <Tabs
             selectedKey={loginType}
-            onSelectionChange={(key) => setLoginType(key as 'admin' | 'cashier')}
+            onSelectionChange={(key) =>
+              setLoginType(key as "admin" | "cashier")
+            }
             fullWidth
             color="primary"
             className="mb-8"
             classNames={{
               tabList: "bg-soft-sand/50 p-1 border border-light-caramel/20",
-              cursor: "bg-gradient-to-r from-light-caramel to-muted-clay shadow-caramel",
+              cursor:
+                "bg-gradient-to-r from-light-caramel to-muted-clay shadow-caramel",
               tab: "text-warm-beige data-[selected=true]:text-white font-semibold",
             }}
           >
@@ -64,8 +69,12 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <Input
-              label={loginType === 'admin' ? 'Username' : 'Cashier Code'}
-              placeholder={loginType === 'admin' ? 'Enter your username' : 'Enter cashier code'}
+              label={loginType === "admin" ? "Username" : "Cashier Code"}
+              placeholder={
+                loginType === "admin"
+                  ? "Enter your username"
+                  : "Enter cashier code"
+              }
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -74,23 +83,29 @@ export default function LoginPage() {
               classNames={{
                 input: "text-muted-clay font-medium",
                 label: "text-warm-beige font-semibold",
-                inputWrapper: "border-light-caramel/40 hover:border-muted-clay focus-within:border-muted-clay bg-cream-white/50",
+                inputWrapper:
+                  "border-light-caramel/40 hover:border-muted-clay focus-within:border-muted-clay bg-cream-white/50",
               }}
             />
             <Input
-              label={loginType === 'admin' ? 'Password' : 'PIN'}
-              placeholder={loginType === 'admin' ? 'Enter your password' : 'Enter 4-digit PIN'}
+              label={loginType === "admin" ? "Password" : "PIN"}
+              placeholder={
+                loginType === "admin"
+                  ? "Enter your password"
+                  : "Enter 6-digit PIN"
+              }
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               variant="bordered"
               color="primary"
-              maxLength={loginType === 'cashier' ? 4 : undefined}
+              maxLength={loginType === "cashier" ? 4 : undefined}
               classNames={{
                 input: "text-muted-clay font-medium",
                 label: "text-warm-beige font-semibold",
-                inputWrapper: "border-light-caramel/40 hover:border-muted-clay focus-within:border-muted-clay bg-cream-white/50",
+                inputWrapper:
+                  "border-light-caramel/40 hover:border-muted-clay focus-within:border-muted-clay bg-cream-white/50",
               }}
             />
 
@@ -106,7 +121,7 @@ export default function LoginPage() {
               isLoading={isLoading}
               className="mt-3 bg-gradient-to-r from-light-caramel via-muted-clay to-light-caramel text-white font-bold shadow-caramel hover:shadow-xl hover:scale-105 transition-all duration-300 border border-light-caramel/30"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
