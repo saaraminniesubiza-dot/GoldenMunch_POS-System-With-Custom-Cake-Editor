@@ -50,6 +50,7 @@ export default function IdlePage() {
   const [currentPage, setCurrentPage] = useState<PageType>('welcome');
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
   const [floatingElements, setFloatingElements] = useState<Array<{ id: number; x: number; y: number; emoji: string }>>([]);
+  const [sparkleElements, setSparkleElements] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const [featuredItems, setFeaturedItems] = useState<FeaturedItem[]>([]);
   const [isLoadingItems, setIsLoadingItems] = useState(true);
 
@@ -119,7 +120,7 @@ export default function IdlePage() {
     fetchFeaturedItems();
   }, []);
 
-  // Generate floating elements
+  // Generate floating elements and sparkles
   useEffect(() => {
     const elements = Array.from({ length: 15 }, (_, i) => ({
       id: i,
@@ -128,6 +129,13 @@ export default function IdlePage() {
       emoji: bakeryEmojis[Math.floor(Math.random() * bakeryEmojis.length)]
     }));
     setFloatingElements(elements);
+
+    const sparkles = Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100
+    }));
+    setSparkleElements(sparkles);
   }, []);
 
   // Page rotation logic - 30-40 seconds per page
@@ -220,13 +228,13 @@ export default function IdlePage() {
 
       {/* Sparkle effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(30)].map((_, i) => (
+        {sparkleElements.map((sparkle) => (
           <motion.div
-            key={i}
+            key={sparkle.id}
             className="absolute w-2 h-2 bg-[#EAD7B7] rounded-full"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${sparkle.x}%`,
+              top: `${sparkle.y}%`,
             }}
             animate={{
               opacity: [0, 1, 0],
@@ -234,7 +242,7 @@ export default function IdlePage() {
             }}
             transition={{
               duration: 3,
-              delay: i * 0.1,
+              delay: sparkle.id * 0.1,
               repeat: Infinity,
               ease: "easeInOut",
             }}
