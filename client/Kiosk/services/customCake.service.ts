@@ -129,23 +129,115 @@ export class CustomCakeService {
   }
 
   /**
-   * Get session details
+   * Validate session token (called from mobile editor)
+   * Returns session validation info
    */
-  static async getSession(sessionId: string): Promise<any> {
+  static async validateSession(sessionToken: string): Promise<any> {
     try {
+      console.log('🔵 [Mobile] Validating session...', {
+        sessionToken: sessionToken.substring(0, 30) + '...',
+      });
+
       const response = await apiClient.get<ApiResponse<any>>(
-        `/custom-cake/session/${sessionId}`
+        `/custom-cake/session/${sessionToken}`
       );
 
+      console.log('🟢 [Mobile] Session validated:', {
+        status: response.data.data?.status,
+        minutesRemaining: response.data.data?.minutesRemaining,
+      });
+
       if (!response.data.data) {
-        throw new Error('Session not found');
+        throw new Error('Session not found or expired');
       }
 
       return response.data.data;
     } catch (error) {
-      console.error('Error getting session:', error);
+      console.error('🔴 [Mobile] Error validating session:', error);
       throw error;
     }
+  }
+
+  /**
+   * Get all available customization options (flavors, sizes, themes)
+   * This is the correct endpoint for loading design options
+   */
+  static async getDesignOptions(): Promise<any> {
+    try {
+      console.log('🔵 [Mobile] Fetching design options...');
+
+      const response = await apiClient.get<ApiResponse<any>>(
+        '/custom-cake/options'
+      );
+
+      console.log('🟢 [Mobile] Design options loaded:', {
+        flavorsCount: response.data.data?.flavors?.length || 0,
+        sizesCount: response.data.data?.sizes?.length || 0,
+        themesCount: response.data.data?.themes?.length || 0,
+      });
+
+      if (!response.data.data) {
+        throw new Error('Failed to load design options');
+      }
+
+      return response.data.data;
+    } catch (error) {
+      console.error('🔴 [Mobile] Error fetching design options:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Save draft of custom cake design (auto-save)
+   */
+  static async saveDraft(draftData: any): Promise<any> {
+    try {
+      console.log('🔵 [Mobile] Saving draft...');
+
+      const response = await apiClient.post<ApiResponse<any>>(
+        '/custom-cake/save-draft',
+        draftData
+      );
+
+      console.log('🟢 [Mobile] Draft saved:', {
+        requestId: response.data.data?.request_id,
+      });
+
+      return response.data.data;
+    } catch (error) {
+      console.error('🔴 [Mobile] Error saving draft:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Submit custom cake for admin review
+   */
+  static async submitForReview(requestId: number): Promise<any> {
+    try {
+      console.log('🔵 [Mobile] Submitting for review...', { requestId });
+
+      const response = await apiClient.post<ApiResponse<any>>(
+        '/custom-cake/submit',
+        { request_id: requestId }
+      );
+
+      console.log('🟢 [Mobile] Submitted successfully');
+
+      return response.data.data;
+    } catch (error) {
+      console.error('🔴 [Mobile] Error submitting for review:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get session details (DEPRECATED - use validateSession instead)
+   * @deprecated Use validateSession for session validation
+   */
+  static async getSession(sessionId: string): Promise<any> {
+    console.warn('⚠️  getSession is deprecated, use validateSession instead');
+    return this.validateSession(sessionId);
   }
 }
 
