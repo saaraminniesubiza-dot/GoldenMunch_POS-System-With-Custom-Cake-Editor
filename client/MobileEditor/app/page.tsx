@@ -8,7 +8,7 @@ import { Card, CardBody } from '@nextui-org/card';
 import { Button } from '@nextui-org/button';
 import { Progress } from '@nextui-org/progress';
 import { Spinner } from '@nextui-org/spinner';
-import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon, DevicePhoneMobileIcon } from '@heroicons/react/24/outline';
 import StepCustomerInfo from '@/components/cake-editor/steps/StepCustomerInfo';
 import StepLayers from '@/components/cake-editor/steps/StepLayers';
 import StepFlavor from '@/components/cake-editor/steps/StepFlavor';
@@ -93,6 +93,7 @@ function CakeEditorContent() {
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [requestId, setRequestId] = useState<number | null>(null);
+  const [isLandscape, setIsLandscape] = useState(false);
 
   // Design Options from API
   const [options, setOptions] = useState<any>(null);
@@ -109,6 +110,26 @@ function CakeEditorContent() {
     candle_type: 'regular',
     decorations_3d: [],
   });
+
+  // Check orientation on mount and on resize
+  useEffect(() => {
+    const checkOrientation = () => {
+      const isCurrentlyLandscape = window.innerWidth > window.innerHeight;
+      setIsLandscape(isCurrentlyLandscape);
+    };
+
+    // Check on mount
+    checkOrientation();
+
+    // Listen for orientation changes
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
 
   // Validate session on mount
   useEffect(() => {
@@ -479,6 +500,136 @@ function CakeEditorContent() {
             </Button>
           </CardBody>
         </Card>
+      </div>
+    );
+  }
+
+  // Landscape mode prompt - Show before editor
+  if (!isLandscape) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500 p-6 overflow-hidden">
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="text-center max-w-md w-full"
+          >
+            {/* Animated Phone Icon */}
+            <motion.div
+              className="mb-8 flex justify-center"
+              animate={{
+                rotate: [0, 0, 90, 90, 0],
+                scale: [1, 1.1, 1.1, 1.1, 1],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+                times: [0, 0.2, 0.5, 0.8, 1],
+              }}
+            >
+              <div className="relative">
+                {/* Outer glow */}
+                <motion.div
+                  className="absolute inset-0 rounded-3xl bg-white/30 blur-xl"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.5, 0.8, 0.5],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+
+                {/* Phone container */}
+                <div className="relative bg-white rounded-3xl p-4 shadow-2xl w-32 h-48 flex items-center justify-center">
+                  <DevicePhoneMobileIcon className="w-20 h-20 text-purple-600" />
+                </div>
+
+                {/* Rotation arrows */}
+                <motion.div
+                  className="absolute -right-12 top-1/2 transform -translate-y-1/2"
+                  animate={{
+                    x: [0, 10, 0],
+                    opacity: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                  </svg>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Message */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl"
+            >
+              <h1 className="text-4xl font-bold text-black mb-4">
+                Please Rotate Your Device
+              </h1>
+              <p className="text-xl text-black/80 font-semibold mb-6">
+                For the best cake designing experience, please turn your phone to landscape mode
+              </p>
+
+              <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 border-2 border-purple-200">
+                <p className="text-lg text-black font-bold mb-3">
+                  🎨 Why Landscape Mode?
+                </p>
+                <ul className="text-left text-black/80 space-y-2 text-base">
+                  <li className="flex items-start gap-3">
+                    <span className="text-xl">✨</span>
+                    <span className="font-semibold">Better 3D cake preview</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-xl">🎯</span>
+                    <span className="font-semibold">Easier design controls</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-xl">📱</span>
+                    <span className="font-semibold">More screen space to create</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Pulsing hint */}
+              <motion.div
+                className="mt-6"
+                animate={{
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <p className="text-sm text-black/70 font-medium">
+                  🔄 Rotate your device now to continue
+                </p>
+              </motion.div>
+            </motion.div>
+
+            {/* Decorative elements */}
+            <div className="absolute top-10 left-10 text-6xl opacity-20 animate-bounce">
+              🎂
+            </div>
+            <div className="absolute bottom-10 right-10 text-6xl opacity-20 animate-bounce" style={{ animationDelay: '0.5s' }}>
+              🍰
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     );
   }
