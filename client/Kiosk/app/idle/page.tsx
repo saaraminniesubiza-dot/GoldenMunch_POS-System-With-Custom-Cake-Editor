@@ -20,6 +20,7 @@ interface Quote {
 export default function IdlePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentQuote, setCurrentQuote] = useState(0);
+  const [currentCTA, setCurrentCTA] = useState(0);
   const [floatingElements, setFloatingElements] = useState<Array<{ id: number; x: number; y: number; emoji: string }>>([]);
 
   // Featured menu items - You can fetch these from API later
@@ -64,6 +65,18 @@ export default function IdlePage() {
     { text: "Creating memories, one cake at a time", author: "Golden Munch" }
   ];
 
+  // Call-to-action messages with variations
+  const ctaMessages: string[] = [
+    "Click Anywhere to Order NOW!",
+    "Tap to Start Your Sweet Journey!",
+    "Touch Screen to Order Your Favorites!",
+    "Ready to Order? Click Here!",
+    "Your Perfect Cake Awaits - Click Now!",
+    "Start Ordering Delicious Treats!",
+    "Click to Design Your Custom Cake!",
+    "Tap Anywhere to Begin Ordering!"
+  ];
+
   // Floating bakery emojis
   const bakeryEmojis = ['🍰', '🧁', '🎂', '🍪', '🥐', '🍩', '🥧', '✨', '⭐', '💫'];
 
@@ -93,6 +106,14 @@ export default function IdlePage() {
     }, 7000);
     return () => clearInterval(timer);
   }, [quotes.length]);
+
+  // Auto-rotate CTA messages every 3 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentCTA((prev) => (prev + 1) % ctaMessages.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [ctaMessages.length]);
 
   // Handle touch to return to menu
   const handleInteraction = useCallback(() => {
@@ -305,22 +326,74 @@ export default function IdlePage() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Call to action */}
+        {/* Rotating Call-to-Action Messages */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 1 }}
+          className="text-center mb-8"
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentCTA}
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="inline-block"
+            >
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  boxShadow: [
+                    '0 0 40px rgba(234,215,183,0.4)',
+                    '0 0 80px rgba(234,215,183,0.8)',
+                    '0 0 40px rgba(234,215,183,0.4)'
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="bg-gradient-to-r from-[#D97706] to-[#7B4B28] text-[#FAF7F2] text-5xl font-bold px-16 py-8 rounded-full border-4 border-[#EAD7B7] shadow-2xl"
+              >
+                {ctaMessages[currentCTA]}
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Custom Cake Editor Promotion */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1.5 }}
           className="text-center"
         >
           <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={{
+              scale: [1, 1.03, 1],
+              rotate: [0, 1, -1, 0]
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
             className="inline-block"
           >
-            <div className="bg-gradient-to-r from-[#FAF7F2]/20 to-[#EAD7B7]/20 backdrop-blur-md text-[#FAF7F2] text-3xl font-semibold px-12 py-6 rounded-full border-2 border-[#EAD7B7]/40 shadow-2xl flex items-center gap-4">
-              <Clock className="w-8 h-8" />
-              <span>Touch screen to start ordering</span>
-              <Cake className="w-8 h-8" />
+            <div className="bg-gradient-to-br from-[#D97706]/90 via-[#7B4B28]/90 to-[#662B35]/90 backdrop-blur-xl text-[#FAF7F2] px-10 py-6 rounded-3xl border-2 border-[#EAD7B7]/50 shadow-[0_0_50px_rgba(217,119,6,0.6)]">
+              <div className="flex items-center gap-4">
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles className="w-10 h-10 text-[#FFD700]" />
+                </motion.div>
+                <div>
+                  <p className="text-2xl font-bold">🎨 NEW! Custom Cake Editor</p>
+                  <p className="text-lg text-[#EAD7B7]">Design your dream cake in stunning 3D • QR Code Enabled</p>
+                </div>
+                <motion.div
+                  animate={{ rotate: [0, -360] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                >
+                  <Cake className="w-10 h-10 text-[#FFD700]" />
+                </motion.div>
+              </div>
             </div>
           </motion.div>
         </motion.div>
