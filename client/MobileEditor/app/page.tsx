@@ -8,7 +8,8 @@ import { Card, CardBody } from '@nextui-org/card';
 import { Button } from '@nextui-org/button';
 import { Progress } from '@nextui-org/progress';
 import { Spinner } from '@nextui-org/spinner';
-import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon, DevicePhoneMobileIcon, Bars3Icon, XMarkIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { Popover, PopoverTrigger, PopoverContent } from '@nextui-org/popover';
 import StepCustomerInfo from '@/components/cake-editor/steps/StepCustomerInfo';
 import StepLayers from '@/components/cake-editor/steps/StepLayers';
 import StepFlavor from '@/components/cake-editor/steps/StepFlavor';
@@ -93,6 +94,14 @@ function CakeEditorContent() {
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [requestId, setRequestId] = useState<number | null>(null);
+  const [isLandscape, setIsLandscape] = useState(false);
+  const [showLandscapeBanner, setShowLandscapeBanner] = useState(true);
+  const [showControls, setShowControls] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(true);
+  const [tutorialStep, setTutorialStep] = useState(0);
+  const [showFullscreenTip, setShowFullscreenTip] = useState(false);
 
   // Design Options from API
   const [options, setOptions] = useState<any>(null);
@@ -109,6 +118,26 @@ function CakeEditorContent() {
     candle_type: 'regular',
     decorations_3d: [],
   });
+
+  // Check orientation on mount and on resize
+  useEffect(() => {
+    const checkOrientation = () => {
+      const isCurrentlyLandscape = window.innerWidth > window.innerHeight;
+      setIsLandscape(isCurrentlyLandscape);
+    };
+
+    // Check on mount
+    checkOrientation();
+
+    // Listen for orientation changes
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
 
   // Validate session on mount
   useEffect(() => {
@@ -306,6 +335,15 @@ function CakeEditorContent() {
     return screenshots;
   };
 
+  const handleSubmitClick = () => {
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setShowConfirmModal(false);
+    await handleSubmit();
+  };
+
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
@@ -318,9 +356,8 @@ function CakeEditorContent() {
         // Simulate a delay
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        alert(`🔧 DEBUG MODE - Design Preview:\n\nCustomer: ${design.customer_name}\nEmail: ${design.customer_email}\nPhone: ${design.customer_phone}\nLayers: ${design.num_layers}\nFrosting: ${design.frosting_type}\nColor: ${design.frosting_color}\n\n(This is a debug preview - no actual submission occurred)`);
-
         setSubmitting(false);
+        setShowSuccessModal(true);
         return;
       }
 
@@ -374,11 +411,18 @@ function CakeEditorContent() {
 
       const result = await submitResponse.json();
 
-      // Success! Show confirmation
-      alert(`✅ Success! Your custom cake request has been submitted!\n\nRequest ID: ${requestId}\n\nWe'll review your design and contact you at ${design.customer_email} within 24 hours with pricing and availability.`);
+      // Success! Show confirmation modal
+      setShowSuccessModal(true);
 
-      // Optionally redirect to a success page
-      // window.location.href = '/custom-cake/success';
+      // Auto-close window after 8 seconds
+      setTimeout(() => {
+        window.close();
+        // Fallback if window.close() doesn't work (e.g., not opened by script)
+        // Redirect to a closing page or show a message
+        if (!window.closed) {
+          window.location.href = 'about:blank';
+        }
+      }, 8000);
 
     } catch (error: any) {
       console.error('Failed to submit:', error);
@@ -391,6 +435,61 @@ function CakeEditorContent() {
   const updateDesign = (updates: Partial<CakeDesign>) => {
     setDesign({ ...design, ...updates });
   };
+
+  const tutorialSteps = [
+    {
+      title: "Welcome! 🎂",
+      content: "Let's explore the new mobile-friendly cake designer!",
+      target: "welcome",
+      placement: "top" as const
+    },
+    {
+      title: "Live Pricing",
+      content: "Your estimated price updates automatically as you customize! Tap to see details.",
+      target: "price",
+      placement: "top" as const
+    },
+    {
+      title: "Control Panel",
+      content: "Swipe or tap the toggle button to show/hide this panel for a full 3D cake view!",
+      target: "panel",
+      placement: "top" as const
+    },
+    {
+      title: "Important Note! ⚠️",
+      content: "This 3D cake is just a preview. The actual cake may differ. Wait for final verification from our team!",
+      target: "disclaimer",
+      placement: "top" as const
+    }
+  ];
+
+  const handleNextTutorialStep = () => {
+    if (tutorialStep < tutorialSteps.length - 1) {
+      setTutorialStep(tutorialStep + 1);
+    } else {
+      setShowTutorial(false);
+      localStorage.setItem('cakeEditorTutorialCompleted', 'true');
+      // Show fullscreen tip after tutorial
+      setShowFullscreenTip(true);
+      setTimeout(() => setShowFullscreenTip(false), 5000); // Hide after 5 seconds
+    }
+  };
+
+  const handleSkipTutorial = () => {
+    setShowTutorial(false);
+    localStorage.setItem('cakeEditorTutorialCompleted', 'true');
+    // Show fullscreen tip after skipping tutorial
+    setShowFullscreenTip(true);
+    setTimeout(() => setShowFullscreenTip(false), 5000); // Hide after 5 seconds
+  };
+
+  // Check if user has seen tutorial
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('cakeEditorTutorialCompleted');
+    if (hasSeenTutorial === 'true') {
+      setShowTutorial(false);
+    }
+  }, []);
 
   // Loading state
   if (loading) {
@@ -483,115 +582,437 @@ function CakeEditorContent() {
     );
   }
 
+  // Landscape mode banner - Optional suggestion (no longer blocking)
+  const LandscapeSuggestionBanner = () => {
+    if (isLandscape || !showLandscapeBanner) return null;
+
+    return (
+      <motion.div
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -100, opacity: 0 }}
+        className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 text-white shadow-2xl"
+      >
+        <div className="p-3 sm:p-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1">
+            <DevicePhoneMobileIcon className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 animate-pulse" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm sm:text-base font-bold">💡 Better in Landscape!</p>
+              <p className="text-xs sm:text-sm opacity-90">Rotate for a better view of your cake</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowLandscapeBanner(false)}
+            className="p-2 hover:bg-white/20 rounded-full transition-colors flex-shrink-0"
+            aria-label="Dismiss banner"
+          >
+            <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+        </div>
+      </motion.div>
+    );
+  };
+
   const CurrentStepComponent = STEPS[currentStep].component;
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-pink-50">
-      {/* Debug Mode Banner */}
-      {debugMode && process.env.NODE_ENV !== 'production' && (
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 text-center text-sm font-semibold shadow-lg">
-          🔧 DEBUG MODE ACTIVE - Session validation bypassed | No data will be saved
-        </div>
-      )}
+    <div className="fixed inset-0 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 overflow-hidden">
+      {/* Landscape Suggestion Banner (Optional, Dismissible) */}
+      <LandscapeSuggestionBanner />
 
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">🎂 Custom Cake Designer</h1>
-              <p className="text-sm text-gray-600">Step {currentStep + 1} of {STEPS.length}: {STEPS[currentStep].name}</p>
-            </div>
-            {saving && (
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Spinner size="sm" />
-                <span>Saving...</span>
-              </div>
-            )}
-          </div>
-          <Progress value={progress} color="warning" className="max-w-full" />
-        </div>
+      {/* Full Screen 3D Canvas */}
+      <div className="absolute inset-0 z-0">
+        <CakeCanvas3D ref={canvasRef} design={design} options={options} />
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-4 lg:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 3D Preview */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="order-2 lg:order-1"
-          >
-            <Card className="sticky top-24">
-              <CardBody className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Live Preview</h3>
-                <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden">
-                  <CakeCanvas3D ref={canvasRef} design={design} options={options} />
-                </div>
-                <div className="mt-4 p-3 bg-amber-50 rounded-lg">
-                  <p className="text-sm font-medium text-amber-900">Estimated Price</p>
-                  <p className="text-2xl font-bold text-amber-600">₱{calculatePrice(design)}</p>
-                </div>
-              </CardBody>
-            </Card>
-          </motion.div>
+      {/* Toggle Controls Button - Moved to bottom center when footer is hidden */}
+      <div className={`fixed ${showControls ? 'bottom-2 left-2' : 'bottom-4 left-1/2 -translate-x-1/2'} sm:bottom-4 z-50 transition-all`}>
+        <Popover
+          isOpen={showTutorial && tutorialStep === 0}
+          placement={tutorialSteps[0].placement}
+          showArrow
+        >
+          <PopoverTrigger>
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={() => setShowControls(!showControls)}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 sm:p-4 rounded-full shadow-2xl hover:scale-110 transition-all active:scale-95 min-w-[48px] min-h-[48px] flex items-center justify-center"
+              aria-label={showControls ? "Hide controls" : "Show controls"}
+            >
+              {showControls ? (
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                </svg>
+              )}
+            </motion.button>
+          </PopoverTrigger>
+          <PopoverContent className="bg-gradient-to-br from-purple-500 to-pink-500 text-white border-2 border-white max-w-xs">
+            <div className="p-3">
+              <div className="text-base font-bold mb-2">{tutorialSteps[0].title}</div>
+              <div className="text-sm mb-3">{tutorialSteps[0].content}</div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleSkipTutorial}
+                  className="flex-1 bg-white/20 text-white font-bold"
+                >
+                  Skip
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleNextTutorialStep}
+                  className="flex-1 bg-white text-purple-600 font-bold"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
 
-          {/* Step Content */}
+
+      {/* Help Button (restart tutorial) - Moved to top right */}
+      {!showTutorial && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={() => {
+            setShowTutorial(true);
+            setTutorialStep(0);
+          }}
+          className="fixed top-2 right-2 sm:top-3 sm:right-3 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all min-w-[48px] min-h-[48px] flex items-center justify-center"
+          aria-label="Restart tutorial"
+        >
+          <QuestionMarkCircleIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+        </motion.button>
+      )}
+
+      {/* Fullscreen Tip - Show after tutorial */}
+      <AnimatePresence>
+        {showFullscreenTip && (
           <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="order-1 lg:order-2"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-16 left-1/2 transform -translate-x-1/2 z-50 max-w-sm"
           >
-            <Card>
-              <CardBody className="p-6">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-xl shadow-2xl border-2 border-white">
+              <p className="text-sm font-bold text-center">
+                💡 Tip: For best experience, click the fullscreen button on your browser!
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Hideable Controls Footer Panel */}
+      <AnimatePresence>
+        {showControls && (
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed left-0 right-0 bottom-0 bg-white/98 backdrop-blur-xl shadow-2xl z-40 rounded-t-3xl border-t-4 border-purple-300 max-h-[75vh] flex flex-col"
+          >
+            {/* Drag Handle */}
+            <div className="flex justify-center pt-2 pb-1">
+              <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+            </div>
+
+            {/* Header with Price and Progress */}
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 flex-shrink-0">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex-1">
+                  <h1 className="text-base sm:text-lg font-bold">🎂 Customize Your Cake</h1>
+                  <p className="text-xs opacity-90">Step {currentStep + 1} of {STEPS.length}: {STEPS[currentStep].name}</p>
+                </div>
+                <Popover
+                  isOpen={showTutorial && tutorialStep === 1}
+                  placement="top"
+                  showArrow
+                >
+                  <PopoverTrigger>
+                    <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 ml-3">
+                      <p className="text-xs font-bold">Est. Price</p>
+                      <p className="text-lg sm:text-xl font-bold">₱{calculatePrice(design)}</p>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="bg-gradient-to-br from-purple-500 to-pink-500 text-white border-2 border-white max-w-xs">
+                    <div className="p-3">
+                      <div className="text-base font-bold mb-2">{tutorialSteps[1].title}</div>
+                      <div className="text-sm mb-3">{tutorialSteps[1].content}</div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={handleSkipTutorial}
+                          className="flex-1 bg-white/20 text-white font-bold"
+                        >
+                          Skip
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleNextTutorialStep}
+                          className="flex-1 bg-white text-purple-600 font-bold"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <Progress value={progress} className="mt-1" classNames={{ indicator: 'bg-white' }} size="sm" />
+              {saving && (
+                <div className="flex items-center gap-2 text-xs mt-2">
+                  <Spinner size="sm" color="white" />
+                  <span>Saving...</span>
+                </div>
+              )}
+            </div>
+
+            {/* Tutorial Popover for Panel */}
+            <Popover
+              isOpen={showTutorial && tutorialStep === 2}
+              placement="top"
+              showArrow
+            >
+              <PopoverTrigger>
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-1 z-10"></div>
+              </PopoverTrigger>
+              <PopoverContent className="bg-gradient-to-br from-purple-500 to-pink-500 text-white border-2 border-white max-w-xs">
+                <div className="p-3">
+                  <div className="text-base font-bold mb-2">{tutorialSteps[2].title}</div>
+                  <div className="text-sm mb-3">{tutorialSteps[2].content}</div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleSkipTutorial}
+                      className="flex-1 bg-white/20 text-white font-bold"
+                    >
+                      Skip
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleNextTutorialStep}
+                      className="flex-1 bg-white text-purple-600 font-bold"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Scrollable Step Content */}
+            <div className="overflow-y-auto flex-1 px-4 py-3">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
                 <CurrentStepComponent
                   design={design}
                   updateDesign={updateDesign}
                   options={options}
                 />
+              </motion.div>
 
-                {/* Navigation */}
-                <div className="flex gap-3 mt-8">
-                  {currentStep > 0 && (
-                    <Button
-                      variant="flat"
-                      onClick={handlePrevious}
-                      startContent={<ArrowLeftIcon className="w-4 h-4" />}
-                      className="flex-1"
-                    >
-                      Previous
-                    </Button>
-                  )}
-                  {currentStep < STEPS.length - 1 ? (
-                    <Button
-                      color="primary"
-                      onClick={handleNext}
-                      endContent={<ArrowRightIcon className="w-4 h-4" />}
-                      className="flex-1"
-                    >
-                      Next Step
-                    </Button>
-                  ) : (
-                    <Button
-                      color="success"
-                      onClick={handleSubmit}
-                      isLoading={submitting}
-                      endContent={<CheckCircleIcon className="w-5 h-5" />}
-                      className="flex-1"
-                    >
-                      Submit for Review
-                    </Button>
-                  )}
+              {/* Disclaimer Tutorial Step */}
+              {showTutorial && tutorialStep === 3 && (
+                <div className="mt-4 bg-gradient-to-br from-purple-500 to-pink-500 text-white border-2 border-white rounded-lg shadow-2xl p-3">
+                  <div className="text-base font-bold mb-2">{tutorialSteps[3].title}</div>
+                  <div className="text-sm mb-3">{tutorialSteps[3].content}</div>
+                  <Button
+                    size="sm"
+                    onClick={handleNextTutorialStep}
+                    className="w-full bg-white text-purple-600 font-bold"
+                  >
+                    Got it!
+                  </Button>
                 </div>
-              </CardBody>
-            </Card>
+              )}
+            </div>
+
+            {/* Navigation Buttons - Sticky at bottom */}
+            <div className="flex-shrink-0 bg-white border-t-2 border-gray-200 px-4 py-3 safe-area-inset-bottom">
+              <div className="flex gap-2">
+                {currentStep > 0 && (
+                  <Button
+                    onClick={handlePrevious}
+                    startContent={<ArrowLeftIcon className="w-4 h-4" />}
+                    className="flex-1 bg-gray-600 text-white font-bold text-sm py-5 min-h-[48px]"
+                  >
+                    Previous
+                  </Button>
+                )}
+                {currentStep < STEPS.length - 1 ? (
+                  <Button
+                    onClick={handleNext}
+                    endContent={<ArrowRightIcon className="w-4 h-4" />}
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-sm py-5 min-h-[48px]"
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSubmitClick}
+                    isLoading={submitting}
+                    endContent={<CheckCircleIcon className="w-5 h-5" />}
+                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-base py-5 min-h-[48px]"
+                  >
+                    Submit
+                  </Button>
+                )}
+              </div>
+            </div>
           </motion.div>
-        </div>
-      </div>
+        )}
+      </AnimatePresence>
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                  <CheckCircleIcon className="w-10 h-10 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-black mb-3">Are you sure?</h2>
+                <p className="text-base text-black/80 mb-6">
+                  Ready to submit your custom cake design for review?
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="flex-1 bg-gray-600 text-white font-bold py-4 text-base"
+                  >
+                    Go Back
+                  </Button>
+                  <Button
+                    onClick={handleConfirmSubmit}
+                    isLoading={submitting}
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 text-base"
+                  >
+                    Yes, Submit!
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl"
+            >
+              <div className="text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", delay: 0.2 }}
+                  className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center"
+                >
+                  <CheckCircleIcon className="w-12 h-12 text-white" />
+                </motion.div>
+
+                <motion.h2
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-3xl font-bold text-black mb-3"
+                >
+                  Success! 🎉
+                </motion.h2>
+
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="space-y-3 mb-6"
+                >
+                  <p className="text-lg text-black font-semibold">
+                    Your cake will be up for checking and verification
+                  </p>
+                  <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 border-2 border-purple-200">
+                    <p className="text-base text-black font-bold mb-2">📧 What's Next?</p>
+                    <ul className="text-left text-black/80 space-y-2 text-sm">
+                      <li className="flex items-start gap-2">
+                        <span className="text-lg">✉️</span>
+                        <span className="font-semibold">Check your email for further information about your order</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-lg">⏱️</span>
+                        <span className="font-semibold">Typical response time is a few hours to a day</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-lg">💰</span>
+                        <span className="font-semibold">We'll send you the final pricing and confirmation</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Important Disclaimer */}
+                  <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl p-4 border-2 border-amber-300 mt-3">
+                    <p className="text-base text-black font-bold mb-2">⚠️ Important Note</p>
+                    <p className="text-black/80 font-semibold text-xs">
+                      The 3D cake preview is just a visualization. The actual cake may differ from what you see.
+                      Please wait for final verification and approval from our team before your cake is prepared.
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <Button
+                    onClick={() => window.location.reload()}
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 text-base"
+                  >
+                    Create Another Cake
+                  </Button>
+                </motion.div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

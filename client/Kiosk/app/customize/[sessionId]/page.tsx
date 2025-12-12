@@ -48,20 +48,44 @@ export default function CustomizeCakePage() {
       setLoading(true);
       setError(null);
 
-      // Get session details
-      const sessionData = await CustomCakeService.getSession(sessionId);
+      console.log('📱 [Customize] Loading session:', sessionId);
+
+      // Step 1: Validate the session token
+      const sessionData = await CustomCakeService.validateSession(sessionId);
       setSession(sessionData);
 
-      // Load customization options (using a dummy menu item ID or generic options)
-      // In production, you might want to load these based on the specific cake type
-      const itemDetails = await MenuService.getItemDetails(sessionData.menuItemId || 1);
+      console.log('✅ [Customize] Session validated:', {
+        status: sessionData.status,
+        minutesRemaining: sessionData.minutesRemaining,
+      });
 
-      if (itemDetails.flavors) setFlavors(itemDetails.flavors);
-      if (itemDetails.sizes) setSizes(itemDetails.sizes);
-      if (itemDetails.themes) setThemes(itemDetails.themes);
+      // Step 2: Load customization options (flavors, sizes, themes)
+      const options = await CustomCakeService.getDesignOptions();
+
+      console.log('✅ [Customize] Design options loaded:', {
+        flavors: options.flavors?.length || 0,
+        sizes: options.sizes?.length || 0,
+        themes: options.themes?.length || 0,
+      });
+
+      if (options.flavors) setFlavors(options.flavors);
+      if (options.sizes) setSizes(options.sizes);
+      if (options.themes) setThemes(options.themes);
     } catch (err: any) {
-      console.error('Error loading session:', err);
-      setError(err.message || 'Failed to load session. It may have expired.');
+      console.error('❌ [Customize] Error loading session:', err);
+
+      // Provide user-friendly error messages
+      let errorMessage = 'Failed to load session. It may have expired.';
+
+      if (err.response?.status === 404) {
+        errorMessage = 'Session not found. Please generate a new QR code from the kiosk.';
+      } else if (err.response?.status === 410) {
+        errorMessage = 'Session has expired. Sessions are valid for 2 hours. Please generate a new QR code.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -76,19 +100,33 @@ export default function CustomizeCakePage() {
     try {
       setSaving(true);
 
-      const customizationData = {
-        flavor_id: parseInt(selectedFlavor),
-        size_id: parseInt(selectedSize),
+      console.log('📤 [Customize] Submitting customization...');
+
+      // Prepare draft data with session token
+      const draftData = {
+        session_token: sessionId,
+        num_layers: 1, // For now, single layer - can be extended later
+        layer_1_flavor_id: parseInt(selectedFlavor),
+        layer_1_size_id: parseInt(selectedSize),
         theme_id: selectedTheme ? parseInt(selectedTheme) : undefined,
         frosting_color: frostingColor || undefined,
-        frosting_type: frostingType || undefined,
+        frosting_type: frostingType || 'buttercream',
         decoration_details: decorationDetails || undefined,
         cake_text: cakeText || undefined,
         special_instructions: specialInstructions || undefined,
-        design_complexity: designComplexity,
+        // You can add customer info here if collected
+        customer_name: undefined, // TODO: Add customer info form
+        customer_email: undefined,
+        customer_phone: undefined,
       };
 
-      await CustomCakeService.completeCustomization(sessionId, customizationData);
+      // Step 1: Save draft to get request_id
+      const savedDraft = await CustomCakeService.saveDraft(draftData);
+      console.log('✅ [Customize] Draft saved:', savedDraft);
+
+      // Step 2: Submit for review
+      await CustomCakeService.submitForReview(savedDraft.request_id);
+      console.log('✅ [Customize] Submitted for review');
 
       // Show success message
       alert('🎉 Your custom cake design has been submitted! Please return to the kiosk.');
@@ -96,8 +134,20 @@ export default function CustomizeCakePage() {
       // Redirect to a success page
       router.push('/customize/success');
     } catch (err: any) {
-      console.error('Error submitting customization:', err);
-      alert('Failed to submit your design. Please try again.');
+      console.error('❌ [Customize] Error submitting customization:', err);
+
+      // Provide user-friendly error message
+      let errorMessage = 'Failed to submit your design. Please try again.';
+
+      if (err.response?.status === 400) {
+        errorMessage = err.response?.data?.message || 'Invalid customization data. Please check all required fields.';
+      } else if (err.response?.status === 404) {
+        errorMessage = 'Session not found. Please generate a new QR code from the kiosk.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      alert(errorMessage);
     } finally {
       setSaving(false);
     }

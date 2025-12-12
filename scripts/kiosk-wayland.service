@@ -1,0 +1,17 @@
+[Unit]
+Description=GoldenMunch Kiosk Application (Wayland)
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+Environment="NODE_ENV=production"
+ExecStartPre=/bin/sleep 5
+ExecStart=%h/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk-wayland.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
