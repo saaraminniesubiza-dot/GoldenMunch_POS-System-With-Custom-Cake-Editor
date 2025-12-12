@@ -1,1289 +1,345 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Cake, Sparkles, Heart, Star, Clock } from "lucide-react";
 
-interface Cake {
+interface FeaturedItem {
   id: number;
-  x: number;
-  y: number;
-  emoji: string;
-  isSpecial: boolean;
+  name: string;
+  image: string;
+  description: string;
+  price: string;
 }
 
-interface Ghost {
-  id: number;
-  x: number;
-  y: number;
-  color: string;
-  direction: Position;
-  behavior: 'wander' | 'scared' | 'aggression';
-  aggressionTimer: number; // Countdown when in aggression mode (5 seconds)
-  aggressionCooldown: number; // Cooldown period before can aggro again
-  onCooldown: boolean;
-}
-
-interface Position {
-  x: number;
-  y: number;
-}
-
-interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  color: string;
-  emoji?: string;
-}
-
-interface Obstacle {
-  id: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  color: string;
-}
-
-interface PathNode {
-  x: number;
-  y: number;
-  g: number;
-  h: number;
-  f: number;
-  parent: PathNode | null;
+interface Quote {
+  text: string;
+  author?: string;
 }
 
 export default function IdlePage() {
-  // Start Pacman in a safe position away from walls (15, 15 is in top-left area)
-  const [pacmanPosition, setPacmanPosition] = useState<Position>({ x: 15, y: 15 });
-  const [pacmanDirection, setPacmanDirection] = useState<Position>({ x: 1, y: 0 });
-  const [pacmanPath, setPacmanPath] = useState<Position[]>([]);
-  const [pacmanBehavior, setPacmanBehavior] = useState<'cake_hunting' | 'run' | 'hunting_ghosts'>('cake_hunting');
-  const [cakes, setCakes] = useState<Cake[]>([]);
-  const [ghosts, setGhosts] = useState<Ghost[]>([]);
-  const [isEating, setIsEating] = useState(false);
-  const [mouthOpen, setMouthOpen] = useState(true);
-  const [powerMode, setPowerMode] = useState(false);
-  const [powerTimeLeft, setPowerTimeLeft] = useState(0);
-  const [pacmanStuckCounter, setPacmanStuckCounter] = useState(0);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const [obstacles, setObstacles] = useState<Obstacle[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentQuote, setCurrentQuote] = useState(0);
+  const [floatingElements, setFloatingElements] = useState<Array<{ id: number; x: number; y: number; emoji: string }>>([]);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const cakeIdRef = useRef(0);
-  const ghostIdRef = useRef(0);
-  const particleIdRef = useRef(0);
-  const obstacleIdRef = useRef(0);
-  const lastPacmanPos = useRef<Position>({ x: 15, y: 15 });
-  const powerModeRef = useRef(false);
-  const obstaclesRef = useRef<Obstacle[]>([]);
-  const pacmanPosRef = useRef<Position>({ x: 15, y: 15 });
-  const pacmanDirRef = useRef<Position>({ x: 1, y: 0 });
-  const pacmanBehaviorRef = useRef<'cake_hunting' | 'run' | 'hunting_ghosts'>('cake_hunting');
-  const cakesRef = useRef<Cake[]>([]);
-  const ghostsRef = useRef<Ghost[]>([]);
-  const pacmanPathRef = useRef<Position[]>([]);
-  const pacmanStuckCounterRef = useRef(0);
+  // Featured menu items - You can fetch these from API later
+  const featuredItems: FeaturedItem[] = [
+    {
+      id: 1,
+      name: "Chocolate Dream Cake",
+      image: "🍫",
+      description: "Rich chocolate layers with creamy ganache",
+      price: "₱850"
+    },
+    {
+      id: 2,
+      name: "Strawberry Delight",
+      image: "🍓",
+      description: "Fresh strawberries with vanilla cream",
+      price: "₱750"
+    },
+    {
+      id: 3,
+      name: "Classic Cupcakes",
+      image: "🧁",
+      description: "Assorted flavors, freshly baked daily",
+      price: "₱150"
+    },
+    {
+      id: 4,
+      name: "Custom Cake Creation",
+      image: "🎂",
+      description: "Design your dream cake in 3D",
+      price: "From ₱1,200"
+    }
+  ];
 
-  const cakeEmojis = ['🎂', '🧁', '🍰', '🍪', '🍩', '🥧'];
-  const specialCakeEmoji = '⭐';
-  const ghostColors = ['#FF69B4', '#00CED1', '#FF6347', '#98FB98'];
+  // Promotional quotes that rotate
+  const quotes: Quote[] = [
+    { text: "Life is short, eat dessert first!", author: "Jacques Torres" },
+    { text: "Every cake has a story to tell", author: "Golden Munch" },
+    { text: "Happiness is a slice of cake", author: "Anonymous" },
+    { text: "Baked fresh daily with love", author: "Golden Munch" },
+    { text: "Where sweetness meets perfection", author: "Golden Munch" },
+    { text: "Creating memories, one cake at a time", author: "Golden Munch" }
+  ];
 
-  // Sync refs with state
+  // Floating bakery emojis
+  const bakeryEmojis = ['🍰', '🧁', '🎂', '🍪', '🥐', '🍩', '🥧', '✨', '⭐', '💫'];
+
+  // Generate floating elements on mount
   useEffect(() => {
-    obstaclesRef.current = obstacles;
-  }, [obstacles]);
-
-  useEffect(() => {
-    pacmanPosRef.current = pacmanPosition;
-  }, [pacmanPosition]);
-
-  useEffect(() => {
-    pacmanDirRef.current = pacmanDirection;
-  }, [pacmanDirection]);
-
-  useEffect(() => {
-    cakesRef.current = cakes;
-  }, [cakes]);
-
-  useEffect(() => {
-    ghostsRef.current = ghosts;
-  }, [ghosts]);
-
-  useEffect(() => {
-    pacmanPathRef.current = pacmanPath;
-  }, [pacmanPath]);
-
-  useEffect(() => {
-    pacmanStuckCounterRef.current = pacmanStuckCounter;
-  }, [pacmanStuckCounter]);
-
-  useEffect(() => {
-    pacmanBehaviorRef.current = pacmanBehavior;
-  }, [pacmanBehavior]);
-
-  // Helper function to check if a position collides with any obstacle
-  const isInsideObstacle = useCallback((x: number, y: number, margin: number = 2): boolean => {
-    return obstaclesRef.current.some(obstacle => {
-      const obstacleLeft = obstacle.x - margin;
-      const obstacleRight = obstacle.x + obstacle.width + margin;
-      const obstacleTop = obstacle.y - margin;
-      const obstacleBottom = obstacle.y + obstacle.height + margin;
-
-      return x >= obstacleLeft && x <= obstacleRight &&
-             y >= obstacleTop && y <= obstacleBottom;
-    });
+    const elements = Array.from({ length: 15 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      emoji: bakeryEmojis[Math.floor(Math.random() * bakeryEmojis.length)]
+    }));
+    setFloatingElements(elements);
   }, []);
 
-  // Line-of-sight check: Can point A see point B without obstacles in between?
-  const hasLineOfSight = useCallback((from: Position, to: Position): boolean => {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    // Sample points along the line
-    const steps = Math.ceil(distance / 2); // Check every 2 units
-
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const checkX = from.x + dx * t;
-      const checkY = from.y + dy * t;
-
-      // If any point along the line hits an obstacle, no line of sight
-      if (isInsideObstacle(checkX, checkY, 0)) {
-        return false;
-      }
-    }
-
-    return true;
-  }, [isInsideObstacle]);
-
-  // A* Pathfinding Algorithm
-  // Uses heuristic-based search with f(n) = g(n) + h(n) scoring
-  // - g(n): Cost from start to current node
-  // - h(n): Estimated cost from current node to goal (Manhattan/Euclidean distance)
-  // - f(n): Total estimated cost through current node
-  // Efficiently finds shortest path while avoiding obstacles
-  const findPath = useCallback((start: Position, goal: Position, avoidPoints: Position[] = []): Position[] => {
-    console.log('\n🔍 FINDPATH CALLED:');
-    console.log('  Start:', { x: start?.x?.toFixed(1), y: start?.y?.toFixed(1) });
-    console.log('  Goal:', { x: goal?.x?.toFixed(1), y: goal?.y?.toFixed(1) });
-    console.log('  Avoid Points:', avoidPoints.length);
-
-    // Validate inputs
-    if (!start || !goal) {
-      console.log('  ❌ INVALID INPUT - Returning default position');
-      return [start || { x: 50, y: 50 }];
-    }
-
-    const distance = Math.sqrt(Math.pow(goal.x - start.x, 2) + Math.pow(goal.y - start.y, 2));
-    console.log('  Direct Distance:', distance.toFixed(2));
-
-    if (distance < 3) {
-      console.log('  ✅ ALREADY AT GOAL - Returning start position');
-      return [start];
-    }
-
-    const GRID_SIZE = 5;
-    const MAX_ITERATIONS = 100;
-    const BOUNDS = { min: 5, max: 95 }; // Account for wall thickness
-
-    // Helper: Check if position is walkable
-    const isWalkable = (x: number, y: number): boolean => {
-      if (x < BOUNDS.min || x > BOUNDS.max || y < BOUNDS.min || y > BOUNDS.max) {
-        return false;
-      }
-
-      // Check obstacles
-      const obstacles = obstaclesRef.current;
-      for (const obstacle of obstacles) {
-        const obstacleLeft = obstacle.x - 2;
-        const obstacleRight = obstacle.x + obstacle.width + 2;
-        const obstacleTop = obstacle.y - 2;
-        const obstacleBottom = obstacle.y + obstacle.height + 2;
-
-        if (x >= obstacleLeft && x <= obstacleRight && y >= obstacleTop && y <= obstacleBottom) {
-          return false;
-        }
-      }
-
-      // Check danger zones
-      for (const avoid of avoidPoints) {
-        const dist = Math.sqrt(Math.pow(x - avoid.x, 2) + Math.pow(y - avoid.y, 2));
-        if (dist < 10) return false;
-      }
-
-      return true;
-    };
-
-    // Helper: Calculate heuristic
-    const heuristic = (a: Position, b: Position): number => {
-      return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
-    };
-
-    // Helper: Get key for position
-    const getKey = (pos: Position): string => {
-      return `${Math.floor(pos.x / GRID_SIZE)},${Math.floor(pos.y / GRID_SIZE)}`;
-    };
-
-    const openSet: PathNode[] = [];
-    const closedSet = new Set<string>();
-
-    const startNode: PathNode = {
-      x: start.x,
-      y: start.y,
-      g: 0,
-      h: heuristic(start, goal),
-      f: heuristic(start, goal),
-      parent: null
-    };
-
-    openSet.push(startNode);
-
-    const directions = [
-      { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 },
-      { x: 0.7, y: 0.7 }, { x: -0.7, y: 0.7 }, { x: 0.7, y: -0.7 }, { x: -0.7, y: -0.7 }
-    ];
-
-    let iterations = 0;
-
-    while (openSet.length > 0 && iterations < MAX_ITERATIONS) {
-      iterations++;
-
-      // Find node with lowest f score
-      openSet.sort((a, b) => a.f - b.f);
-      const current = openSet.shift()!;
-
-      const currentKey = getKey(current);
-      if (closedSet.has(currentKey)) continue;
-      closedSet.add(currentKey);
-
-      // Check if reached goal
-      if (heuristic(current, goal) < GRID_SIZE * 2) {
-        const path: Position[] = [];
-        let node: PathNode | null = current;
-        while (node) {
-          path.unshift({ x: node.x, y: node.y });
-          node = node.parent;
-        }
-        // Simplify path by keeping every 3rd waypoint to navigate around corners
-        const simplifiedPath: Position[] = [];
-        for (let i = 0; i < path.length; i++) {
-          if (i === 0 || i === path.length - 1 || i % 3 === 0) {
-            simplifiedPath.push(path[i]);
-          }
-        }
-        console.log('  ✅ PATH FOUND!');
-        console.log('    Full path length:', path.length);
-        console.log('    Simplified path length:', simplifiedPath.length);
-        console.log('    Iterations used:', iterations);
-        return simplifiedPath;
-      }
-
-      // Explore neighbors
-      for (const dir of directions) {
-        const newX = current.x + dir.x * GRID_SIZE;
-        const newY = current.y + dir.y * GRID_SIZE;
-
-        if (!isWalkable(newX, newY)) continue;
-
-        const neighborKey = getKey({ x: newX, y: newY });
-        if (closedSet.has(neighborKey)) continue;
-
-        const g = current.g + GRID_SIZE;
-        const h = heuristic({ x: newX, y: newY }, goal);
-        const f = g + h;
-
-        const existing = openSet.find(n => getKey(n) === neighborKey);
-        if (!existing || g < existing.g) {
-          const neighbor: PathNode = {
-            x: newX,
-            y: newY,
-            g,
-            h,
-            f,
-            parent: current
-          };
-
-          if (!existing) {
-            openSet.push(neighbor);
-          } else {
-            existing.g = g;
-            existing.f = f;
-            existing.parent = current;
-          }
-        }
-      }
-    }
-
-    // No path found - return direct line
-    console.log('  ⚠️  NO PATH FOUND - Returning direct line');
-    console.log('    Iterations used:', iterations);
-    console.log('    Open set size:', openSet.length);
-    console.log('    Closed set size:', closedSet.size);
-    return [start, goal];
-  }, []);
-
-  // Create particles
-  const createParticles = (x: number, y: number, color: string, count: number = 8, emoji?: string) => {
-    const newParticles: Particle[] = [];
-    for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * 2 * i) / count;
-      newParticles.push({
-        id: particleIdRef.current++,
-        x,
-        y,
-        vx: Math.cos(angle) * (2 + Math.random()),
-        vy: Math.sin(angle) * (2 + Math.random()),
-        life: 1,
-        color,
-        emoji
-      });
-    }
-    setParticles(prev => [...prev, ...newParticles]);
-  };
-
-  // Update particles
+  // Auto-rotate slides every 5 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
-      setParticles(prev =>
-        prev
-          .map(p => ({
-            ...p,
-            x: p.x + p.vx,
-            y: p.y + p.vy,
-            vy: p.vy + 0.2,
-            life: p.life - 0.02
-          }))
-          .filter(p => p.life > 0 && p.x > 0 && p.x < 100 && p.y > 0 && p.y < 100)
-      );
-    }, 30);
-    return () => clearInterval(interval);
-  }, []);
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % featuredItems.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [featuredItems.length]);
 
-  const findValidPosition = useCallback((): Position => {
-    let attempts = 0;
-    while (attempts < 50) {
-      const pos = {
-        x: Math.random() * 90 + 5,
-        y: Math.random() * 90 + 5
-      };
-
-      if (!isInsideObstacle(pos.x, pos.y, 3)) {
-        return pos;
-      }
-      attempts++;
-    }
-    // Fallback to center position (safe in open box)
-    return { x: 50, y: 50 };
-  }, [isInsideObstacle]);
-
-  // Initialize - Only runs once on mount
+  // Auto-rotate quotes every 7 seconds
   useEffect(() => {
-    // Generate maze-like structure with corridors
-    const initialObstacles: Obstacle[] = [];
-    const obstacleColors = ['#8B4513', '#A0522D', '#6B4423', '#8B7355', '#654321'];
-    const wallColor = obstacleColors[0];
-
-    // Outer walls (border)
-    const wallThickness = 2;
-
-    // Top wall
-    initialObstacles.push({
-      id: obstacleIdRef.current++,
-      x: 0,
-      y: 0,
-      width: 100,
-      height: wallThickness,
-      color: wallColor
-    });
-
-    // Bottom wall
-    initialObstacles.push({
-      id: obstacleIdRef.current++,
-      x: 0,
-      y: 98,
-      width: 100,
-      height: wallThickness,
-      color: wallColor
-    });
-
-    // Left wall
-    initialObstacles.push({
-      id: obstacleIdRef.current++,
-      x: 0,
-      y: 0,
-      width: wallThickness,
-      height: 100,
-      color: wallColor
-    });
-
-    // Right wall
-    initialObstacles.push({
-      id: obstacleIdRef.current++,
-      x: 98,
-      y: 0,
-      width: wallThickness,
-      height: 100,
-      color: wallColor
-    });
-
-    // Create maze corridors - vertical and horizontal walls with gaps
-    // REMOVED: Now using simple open box design with only outer walls
-
-    setObstacles(initialObstacles);
-    obstaclesRef.current = initialObstacles;
-
-    // Helper function for this initialization only
-    const getValidPos = (): Position => {
-      let attempts = 0;
-      while (attempts < 50) {
-        const pos = {
-          x: Math.random() * 90 + 5,
-          y: Math.random() * 90 + 5
-        };
-
-        const isInside = initialObstacles.some(obstacle => {
-          const obstacleLeft = obstacle.x - 3;
-          const obstacleRight = obstacle.x + obstacle.width + 3;
-          const obstacleTop = obstacle.y - 3;
-          const obstacleBottom = obstacle.y + obstacle.height + 3;
-
-          return pos.x >= obstacleLeft && pos.x <= obstacleRight &&
-                 pos.y >= obstacleTop && pos.y <= obstacleBottom;
-        });
-
-        if (!isInside) {
-          return pos;
-        }
-        attempts++;
-      }
-      // Fallback to center position (safe in open box)
-      return { x: 50, y: 50 };
-    };
-
-    const initialCakes: Cake[] = [];
-    for (let i = 0; i < 5; i++) { // Reduced from 12 to 5
-      const pos = getValidPos();
-      initialCakes.push({
-        id: cakeIdRef.current++,
-        x: pos.x,
-        y: pos.y,
-        emoji: cakeEmojis[Math.floor(Math.random() * cakeEmojis.length)],
-        isSpecial: false
-      });
-    }
-    setCakes(initialCakes);
-    cakesRef.current = initialCakes; // Sync ref immediately to prevent race condition
-
-    const initialGhosts: Ghost[] = [];
-    const ghostStartPositions = [
-      { x: 10, y: 10 },
-      { x: 90, y: 10 },
-      { x: 90, y: 90 },
-      { x: 10, y: 90 }
-    ];
-
-    for (let i = 0; i < 4; i++) {
-      const pos = ghostStartPositions[i];
-      initialGhosts.push({
-        id: ghostIdRef.current++,
-        x: pos.x,
-        y: pos.y,
-        color: ghostColors[i],
-        direction: { x: (Math.random() - 0.5) * 2, y: (Math.random() - 0.5) * 2 },
-        behavior: 'wander',
-        aggressionTimer: 0,
-        aggressionCooldown: 0,
-        onCooldown: false
-      });
-    }
-    setGhosts(initialGhosts);
-    ghostsRef.current = initialGhosts; // Sync ref immediately to prevent race condition
-
-    // Set Pacman to a random valid position
-    const pacmanStartPos = getValidPos();
-    setPacmanPosition(pacmanStartPos);
-    pacmanPosRef.current = pacmanStartPos;
-    lastPacmanPos.current = pacmanStartPos;
-  }, []); // Only run once on mount
-
-  // Mouth animation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMouthOpen(prev => !prev);
-    }, isEating ? 100 : 200);
-    return () => clearInterval(interval);
-  }, [isEating]);
-
-  // Sync powerMode with ref
-  useEffect(() => {
-    powerModeRef.current = powerMode;
-  }, [powerMode]);
-
-  // Power mode countdown
-  useEffect(() => {
-    if (powerMode && powerTimeLeft > 0) {
-      const timer = setTimeout(() => {
-        setPowerTimeLeft(prev => prev - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (powerTimeLeft === 0 && powerMode) {
-      setPowerMode(false);
-      setPacmanBehavior('cake_hunting');
-      setGhosts(prev => prev.map(ghost => ({ ...ghost, behavior: 'wander' })));
-    }
-  }, [powerMode, powerTimeLeft]);
-
-  // Spawn cakes
-  useEffect(() => {
-    const spawnCake = () => {
-      if (cakes.length < 8) { // Reduced from 15 to 8
-        const isSpecial = Math.random() < 0.15;
-        const pos = findValidPosition();
-        const newCake: Cake = {
-          id: cakeIdRef.current++,
-          x: pos.x,
-          y: pos.y,
-          emoji: isSpecial ? specialCakeEmoji : cakeEmojis[Math.floor(Math.random() * cakeEmojis.length)],
-          isSpecial
-        };
-        setCakes(prev => [...prev, newCake]);
-      }
-    };
-
-    const interval = setInterval(spawnCake, 2000); // Increased from 1500ms to 2000ms
-    return () => clearInterval(interval);
-  }, [cakes.length, findValidPosition]);
-
-  // New Ghost AI - 3 Behaviors: Wander, Scared, Aggression
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setGhosts(prev => prev.map(ghost => {
-        let newX = ghost.x;
-        let newY = ghost.y;
-        let newDirection = { ...ghost.direction };
-        let newBehavior = ghost.behavior;
-        let newAggressionTimer = ghost.aggressionTimer;
-        let newAggressionCooldown = ghost.aggressionCooldown;
-        let newOnCooldown = ghost.onCooldown;
-
-        const pacPos = pacmanPosRef.current;
-        const currentPowerMode = powerModeRef.current;
-
-        const distance = Math.sqrt(
-          Math.pow(ghost.x - pacPos.x, 2) +
-          Math.pow(ghost.y - pacPos.y, 2)
-        );
-
-        // Update cooldown timer
-        if (newAggressionCooldown > 0) {
-          newAggressionCooldown = Math.max(0, newAggressionCooldown - 0.05); // Decrease by 50ms
-          if (newAggressionCooldown === 0) {
-            newOnCooldown = false;
-          }
-        }
-
-        // Behavior transitions
-        if (currentPowerMode) {
-          // When Pacman has star, all ghosts become scared
-          newBehavior = 'scared';
-          newAggressionTimer = 0;
-        } else if (newBehavior === 'scared') {
-          // Power mode ended, return to wander
-          newBehavior = 'wander';
-          newAggressionTimer = 0;
-        } else if (newBehavior === 'aggression') {
-          // In aggression mode, count down timer
-          newAggressionTimer = Math.max(0, newAggressionTimer - 0.05); // Decrease by 50ms
-          if (newAggressionTimer <= 0) {
-            // Aggression timer expired, go on cooldown
-            newBehavior = 'wander';
-            newOnCooldown = true;
-            newAggressionCooldown = 10; // 10 second cooldown
-          }
-        } else if (newBehavior === 'wander' && !newOnCooldown) {
-          // Enter aggression mode if ghost can see Pacman (line of sight)
-          // Much smaller detection range (20 instead of 40)
-          if (distance < 20 && hasLineOfSight({ x: ghost.x, y: ghost.y }, pacPos) && Math.random() < 0.05) {
-            newBehavior = 'aggression';
-            newAggressionTimer = 5; // 5 second aggression
-          }
-        }
-
-        // Execute behavior
-        if (newBehavior === 'scared') {
-          // SCARED BEHAVIOR: Flee from Pacman
-          if (distance < 35) {
-            const fleeX = ghost.x + (ghost.x - pacPos.x) * 2;
-            const fleeY = ghost.y + (ghost.y - pacPos.y) * 2;
-            const clampedFleeX = Math.max(10, Math.min(90, fleeX));
-            const clampedFleeY = Math.max(10, Math.min(90, fleeY));
-
-            const path = findPath({ x: ghost.x, y: ghost.y }, { x: clampedFleeX, y: clampedFleeY });
-            if (path.length > 1) {
-              const nextPos = path[1];
-              const dx = nextPos.x - ghost.x;
-              const dy = nextPos.y - ghost.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              if (dist > 0) {
-                newDirection = { x: dx / dist, y: dy / dist };
-              }
-            }
-          }
-        } else if (newBehavior === 'aggression') {
-          // AGGRESSION BEHAVIOR: Actively pursue Pacman
-          const path = findPath({ x: ghost.x, y: ghost.y }, pacPos);
-          if (path.length > 1) {
-            const nextPos = path[1];
-            const dx = nextPos.x - ghost.x;
-            const dy = nextPos.y - ghost.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > 0) {
-              newDirection = { x: dx / dist, y: dy / dist };
-            }
-          }
-        } else {
-          // WANDER BEHAVIOR: Random wandering (farther distances)
-          // Reduced frequency of direction change to make ghosts wander farther
-          if (Math.random() < 0.01) {
-            const angle = Math.random() * Math.PI * 2;
-            newDirection = { x: Math.cos(angle), y: Math.sin(angle) };
-          }
-        }
-
-        // Movement speed based on behavior (reduced for slower gameplay)
-        const baseSpeed = newBehavior === 'scared' ? 0.25 : newBehavior === 'aggression' ? 0.5 : 0.3;
-        const speed = baseSpeed * (0.9 + Math.random() * 0.2);
-        const testX = ghost.x + newDirection.x * speed;
-        const testY = ghost.y + newDirection.y * speed;
-
-        const wouldHitObstacle = isInsideObstacle(testX, testY, 1);
-
-        if (testX > 5 && testX < 95 && testY > 5 && testY < 95 && !wouldHitObstacle) {
-          newX = testX;
-          newY = testY;
-        } else if (wouldHitObstacle) {
-          const angle = Math.random() * Math.PI * 2;
-          newDirection = { x: Math.cos(angle), y: Math.sin(angle) };
-        }
-
-        return {
-          ...ghost,
-          x: newX,
-          y: newY,
-          direction: newDirection,
-          behavior: newBehavior,
-          aggressionTimer: newAggressionTimer,
-          aggressionCooldown: newAggressionCooldown,
-          onCooldown: newOnCooldown
-        };
-      }));
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [findPath, isInsideObstacle, hasLineOfSight]);
-
-  // New Pacman AI - 3 Behaviors: Cake Hunting, Run, Hunting Ghosts
-  useEffect(() => {
-    const movePacman = () => {
-      let shouldIncrementStuck = false;
-      let shouldResetStuck = false;
-      let newPathToSet: Position[] | null = null;
-      let newDirectionToSet: Position | null = null;
-      let shouldClearPath = false;
-      let newBehaviorToSet: 'cake_hunting' | 'run' | 'hunting_ghosts' | null = null;
-
-      setPacmanPosition(prev => {
-        let newX = prev.x;
-        let newY = prev.y;
-
-        // Get current values from refs
-        const currentCakes = cakesRef.current;
-        const currentGhosts = ghostsRef.current;
-        const currentPowerMode = powerModeRef.current;
-        const currentPath = pacmanPathRef.current;
-        const currentStuckCounter = pacmanStuckCounterRef.current;
-        const currentDirection = pacmanDirRef.current;
-        const currentBehavior = pacmanBehaviorRef.current;
-
-        // Stuck detection
-        if (Math.abs(prev.x - lastPacmanPos.current.x) < 0.1 &&
-            Math.abs(prev.y - lastPacmanPos.current.y) < 0.1) {
-          shouldIncrementStuck = true;
-        } else {
-          shouldResetStuck = true;
-        }
-
-        lastPacmanPos.current = { x: prev.x, y: prev.y };
-
-        // Check for aggressive ghosts pursuing Pacman
-        const aggressiveGhosts = currentGhosts.filter(g => g.behavior === 'aggression');
-        const isBeingPursued = aggressiveGhosts.some(g => {
-          const dist = Math.sqrt(Math.pow(g.x - prev.x, 2) + Math.pow(g.y - prev.y, 2));
-          return dist < 25;
-        });
-
-        // Determine behavior based on game state
-        let desiredBehavior: 'cake_hunting' | 'run' | 'hunting_ghosts';
-        if (currentPowerMode) {
-          // HUNTING GHOSTS: Prioritize eating ghosts when powered up
-          desiredBehavior = 'hunting_ghosts';
-        } else if (isBeingPursued) {
-          // RUN: Flee from aggressive ghosts
-          desiredBehavior = 'run';
-        } else {
-          // CAKE HUNTING: Default behavior
-          desiredBehavior = 'cake_hunting';
-        }
-
-        if (desiredBehavior !== currentBehavior) {
-          newBehaviorToSet = desiredBehavior;
-          shouldClearPath = true; // Clear path when behavior changes
-        }
-
-        // Build target list based on behavior
-        const targets: any[] = [];
-        let avoidPoints: Position[] = [];
-
-        if (desiredBehavior === 'hunting_ghosts') {
-          // Prioritize scared ghosts
-          const scaredGhosts = currentGhosts.filter(g => g.behavior === 'scared');
-          scaredGhosts.forEach(g => {
-            targets.push({
-              x: g.x,
-              y: g.y,
-              type: 'ghost',
-              priority: 5 // Highest priority
-            });
-          });
-
-          // Add cakes as secondary targets
-          currentCakes.forEach(c => {
-            targets.push({
-              ...c,
-              type: 'cake',
-              priority: c.isSpecial ? 3 : 1
-            });
-          });
-        } else if (desiredBehavior === 'run') {
-          // When running, find safe positions away from aggressive ghosts
-          // Don't target anything, just flee
-          avoidPoints = aggressiveGhosts.map(g => ({ x: g.x, y: g.y }));
-        } else {
-          // CAKE HUNTING: Target cakes, avoid aggressive ghosts
-          currentCakes.forEach(c => {
-            targets.push({
-              ...c,
-              type: 'cake',
-              priority: c.isSpecial ? 4 : 1 // Prioritize special cakes
-            });
-          });
-
-          // Avoid ONLY aggressive ghosts (not wandering ones)
-          const dangerGhosts = currentGhosts.filter(g => g.behavior === 'aggression');
-          avoidPoints = dangerGhosts
-            .filter(g => {
-              const dist = Math.sqrt(Math.pow(g.x - prev.x, 2) + Math.pow(g.y - prev.y, 2));
-              return dist < 25;
-            })
-            .map(g => ({ x: g.x, y: g.y }));
-        }
-
-        // Find dangerous ghosts to avoid
-        console.log('\n⚠️  DANGER ANALYSIS:');
-        console.log('  Dangerous Ghosts:', avoidPoints.length);
-        avoidPoints.forEach((pt, i) => {
-          const dist = Math.sqrt(Math.pow(pt.x - prev.x, 2) + Math.pow(pt.y - prev.y, 2));
-          console.log(`    Danger ${i + 1}: Ghost at (${pt.x.toFixed(1)}, ${pt.y.toFixed(1)}) - Distance: ${dist.toFixed(1)}`);
-        });
-
-        // Recalculate path if needed
-        // Reduce random recalculation when fleeing to prevent jittering
-        const recalcChance = desiredBehavior === 'run' ? 0.02 : 0.1;
-        const shouldRecalculate = currentPath.length === 0 || currentStuckCounter > 15 || shouldClearPath || Math.random() < recalcChance;
-
-        if (shouldRecalculate) {
-          if (desiredBehavior === 'run') {
-            // Run away from aggressive ghosts
-            if (aggressiveGhosts.length > 0) {
-              // Find average position of aggressive ghosts
-              const avgX = aggressiveGhosts.reduce((sum, g) => sum + g.x, 0) / aggressiveGhosts.length;
-              const avgY = aggressiveGhosts.reduce((sum, g) => sum + g.y, 0) / aggressiveGhosts.length;
-
-              // Calculate flee direction
-              const fleeAngle = Math.atan2(prev.y - avgY, prev.x - avgX);
-
-              // Try multiple flee points at different angles to find the best escape route
-              const fleeAttempts = [
-                { angle: fleeAngle, distance: 40 },           // Directly away
-                { angle: fleeAngle + 0.5, distance: 40 },    // Slightly right
-                { angle: fleeAngle - 0.5, distance: 40 },    // Slightly left
-                { angle: fleeAngle + 0.8, distance: 35 },    // More right
-                { angle: fleeAngle - 0.8, distance: 35 }     // More left
-              ];
-
-              let bestFleePoint = null;
-              for (const attempt of fleeAttempts) {
-                const fleeX = prev.x + Math.cos(attempt.angle) * attempt.distance;
-                const fleeY = prev.y + Math.sin(attempt.angle) * attempt.distance;
-                const clampedFleeX = Math.max(10, Math.min(90, fleeX));
-                const clampedFleeY = Math.max(10, Math.min(90, fleeY));
-
-                // Check if this flee point is not inside an obstacle
-                if (!isInsideObstacle(clampedFleeX, clampedFleeY, 3)) {
-                  bestFleePoint = { x: clampedFleeX, y: clampedFleeY };
-                  break;
-                }
-              }
-
-              // Use best flee point or default if all blocked
-              const fleeTarget = bestFleePoint || {
-                x: Math.max(10, Math.min(90, prev.x + Math.cos(fleeAngle) * 30)),
-                y: Math.max(10, Math.min(90, prev.y + Math.sin(fleeAngle) * 30))
-              };
-
-              // Don't use avoidPoints when fleeing - we want to path TO the flee point,
-              // not avoid ghosts (that's contradictory and causes jittering)
-              const calculatedPath = findPath(prev, fleeTarget, []);
-              newPathToSet = calculatedPath.length > 1 ? calculatedPath.slice(1) : calculatedPath;
-              shouldResetStuck = true;
-            }
-          } else if (targets.length > 0) {
-            // Find best target based on priority
-            const bestTarget = targets.reduce((best, target) => {
-              const distance = Math.sqrt(
-                Math.pow(target.x - prev.x, 2) + Math.pow(target.y - prev.y, 2)
-              );
-              const score = distance / target.priority;
-              return score < best.score ? { target, score } : best;
-            }, { target: null, score: Infinity });
-
-            if (bestTarget.target && bestTarget.score < 100) {
-              console.log('\n📍 CALCULATING PATH TO TARGET...');
-              console.log('  From:', { x: prev.x.toFixed(1), y: prev.y.toFixed(1) });
-              console.log('  To:', { x: bestTarget.target.x.toFixed(1), y: bestTarget.target.y.toFixed(1) });
-              console.log('  Avoid Points:', avoidPoints.length);
-
-              const calculatedPath = findPath(prev, { x: bestTarget.target.x, y: bestTarget.target.y }, avoidPoints);
-              newPathToSet = calculatedPath.length > 1 ? calculatedPath.slice(1) : calculatedPath;
-              shouldResetStuck = true;
-            }
-          } else if (currentStuckCounter > 10) {
-            // No targets available and stuck - move to random position
-            const randomTarget = {
-              x: Math.random() * 80 + 10,
-              y: Math.random() * 80 + 10
-            };
-            const calculatedPath = findPath(prev, randomTarget, avoidPoints);
-            console.log('  Random Path Length:', calculatedPath.length);
-            newPathToSet = calculatedPath.length > 1 ? calculatedPath.slice(1) : calculatedPath;
-            shouldResetStuck = true;
-          } else {
-            console.log('\n⏸️  NO RECALCULATION NEEDED - Using existing path');
-          }
-        } else {
-          console.log('\n⏸️  SKIPPING PATH RECALCULATION');
-        }
-
-        // Follow the calculated path (use newly calculated path if available)
-        console.log('\n🚶 PATH FOLLOWING:');
-        const pathToFollow = newPathToSet !== null ? newPathToSet : currentPath;
-        console.log('  Using path:', newPathToSet !== null ? 'NEWLY CALCULATED' : 'EXISTING');
-        console.log('  Path length:', pathToFollow.length);
-
-        if (pathToFollow.length > 0) {
-          const nextWaypoint = pathToFollow[0];
-          const dx = nextWaypoint.x - prev.x;
-          const dy = nextWaypoint.y - prev.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          // Adjust waypoint advancement threshold based on behavior
-          // Larger threshold when fleeing to prevent getting stuck/jittering
-          const waypointThreshold = desiredBehavior === 'run' ? 3 : 2;
-          if (dist < waypointThreshold) {
-            newPathToSet = currentPath.slice(1);
-          }
-
-          if (dist > 0) {
-            newDirectionToSet = { x: dx / dist, y: dy / dist };
-          }
-        } else if (desiredBehavior === 'run' && aggressiveGhosts.length > 0) {
-          // Emergency flee if no path
-          const nearestAggro = aggressiveGhosts[0];
-          const dx = prev.x - nearestAggro.x;
-          const dy = prev.y - nearestAggro.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist > 0) {
-            newDirectionToSet = { x: dx / dist, y: dy / dist };
-            console.log('  ➡️  Flee Direction:', { x: newDirectionToSet.x.toFixed(2), y: newDirectionToSet.y.toFixed(2) });
-          }
-        }
-
-        // Apply movement with speed based on behavior (reduced for slower gameplay)
-        let speed = 0.6; // Default - much slower
-        if (desiredBehavior === 'hunting_ghosts') {
-          speed = 0.8; // Faster when powered up
-        } else if (desiredBehavior === 'run') {
-          speed = 0.7; // Faster when fleeing
-        }
-
-        // Use newly calculated direction if available, otherwise use current direction
-        const directionToUse = newDirectionToSet !== null ? newDirectionToSet : currentDirection;
-        const testX = prev.x + directionToUse.x * speed;
-        const testY = prev.y + directionToUse.y * speed;
-
-        const wouldHitObstacle = isInsideObstacle(testX, testY, 1);
-
-        if (testX > 5 && testX < 95 && testY > 5 && testY < 95 && !wouldHitObstacle) {
-          newX = testX;
-          newY = testY;
-          console.log('  ✅ MOVEMENT ALLOWED - Moving to:', { x: newX.toFixed(2), y: newY.toFixed(2) });
-        } else if (!wouldHitObstacle) {
-          if (testX > 5 && testX < 95 && !isInsideObstacle(testX, prev.y, 1)) {
-            newX = testX;
-            console.log('  ➡️  Partial X movement allowed');
-          }
-          if (testY > 5 && testY < 95 && !isInsideObstacle(prev.x, testY, 1)) {
-            newY = testY;
-            console.log('  ⬆️  Partial Y movement allowed');
-          }
-          console.log('  ⚠️  PARTIAL MOVEMENT - New pos:', { x: newX.toFixed(2), y: newY.toFixed(2) });
-        } else {
-          shouldClearPath = true;
-        }
-
-        // Update position ref immediately
-        pacmanPosRef.current = { x: newX, y: newY };
-        console.log('  ✅ POSITION REF UPDATED:', { x: pacmanPosRef.current.x.toFixed(2), y: pacmanPosRef.current.y.toFixed(2) });
-
-        return { x: newX, y: newY };
-      });
-
-      // Apply deferred state updates
-      if (shouldIncrementStuck) {
-        setPacmanStuckCounter(c => c + 1);
-        pacmanStuckCounterRef.current += 1;
-      } else if (shouldResetStuck) {
-        setPacmanStuckCounter(0);
-        pacmanStuckCounterRef.current = 0;
-      }
-
-      if (newPathToSet !== null) {
-        setPacmanPath(newPathToSet);
-        pacmanPathRef.current = newPathToSet; // Update ref immediately
-        console.log('  ✅ REF UPDATED - pacmanPathRef length:', pacmanPathRef.current.length);
-      } else if (shouldClearPath) {
-        setPacmanPath([]);
-        pacmanPathRef.current = [];
-        console.log('  🗑️  REF CLEARED - pacmanPathRef');
-      }
-
-      if (newDirectionToSet !== null) {
-        setPacmanDirection(newDirectionToSet);
-        pacmanDirRef.current = newDirectionToSet; // Update ref immediately
-        console.log('  ✅ REF UPDATED - pacmanDirRef:', { x: pacmanDirRef.current.x.toFixed(2), y: pacmanDirRef.current.y.toFixed(2) });
-      }
-
-      if (newBehaviorToSet !== null) {
-        setPacmanBehavior(newBehaviorToSet);
-      }
-    };
-
-    const interval = setInterval(movePacman, 30);
-    return () => clearInterval(interval);
-  }, [findPath, isInsideObstacle]);
-
-  // Collision detection - cakes
-  useEffect(() => {
-    setCakes(prevCakes => {
-      const remainingCakes = prevCakes.filter(cake => {
-        const distance = Math.sqrt(
-          Math.pow(cake.x - pacmanPosition.x, 2) +
-          Math.pow(cake.y - pacmanPosition.y, 2)
-        );
-
-        if (distance < 3) {
-          if (cake.isSpecial) {
-            setPowerMode(true);
-            setPowerTimeLeft(10);
-            setPacmanBehavior('hunting_ghosts');
-            setGhosts(prev => prev.map(ghost => ({ ...ghost, behavior: 'scared' })));
-            createParticles(cake.x, cake.y, '#FFD700', 12, '✨');
-          } else {
-            createParticles(cake.x, cake.y, '#F9A03F', 6);
-          }
-          setIsEating(true);
-          setTimeout(() => setIsEating(false), 200);
-          setPacmanPath([]);
-          return false;
-        }
-        return true;
-      });
-
-      return remainingCakes;
-    });
-  }, [pacmanPosition]);
-
-  // Collision detection - ghosts
-  useEffect(() => {
-    if (powerMode) {
-      setGhosts(prevGhosts => {
-        const remainingGhosts = prevGhosts.filter(ghost => {
-          const distance = Math.sqrt(
-            Math.pow(ghost.x - pacmanPosition.x, 2) +
-            Math.pow(ghost.y - pacmanPosition.y, 2)
-          );
-
-          if (distance < 6 && ghost.behavior === 'scared') {
-            createParticles(ghost.x, ghost.y, ghost.color, 10, '💯');
-            setIsEating(true);
-            setTimeout(() => setIsEating(false), 200);
-            setPacmanPath([]);
-
-            const ghostData = {
-              color: ghost.color
-            };
-
-            setTimeout(() => {
-              const pos = findValidPosition();
-              setGhosts(prev => [...prev, {
-                id: ghostIdRef.current++,
-                x: pos.x,
-                y: pos.y,
-                color: ghostData.color,
-                direction: { x: (Math.random() - 0.5) * 2, y: (Math.random() - 0.5) * 2 },
-                behavior: powerModeRef.current ? 'scared' : 'wander',
-                aggressionTimer: 0,
-                aggressionCooldown: 0,
-                onCooldown: false
-              }]);
-            }, 4000);
-
-            return false;
-          }
-          return true;
-        });
-
-        return remainingGhosts;
-      });
-    }
-  }, [pacmanPosition, powerMode, findValidPosition]);
-
-  const handleClick = useCallback(() => {
+    const timer = setInterval(() => {
+      setCurrentQuote((prev) => (prev + 1) % quotes.length);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, [quotes.length]);
+
+  // Handle touch to return to menu
+  const handleInteraction = useCallback(() => {
     window.location.href = '/';
   }, []);
 
-  const handleKeyPress = useCallback((event: KeyboardEvent) => {
-    if (event.key === ' ' || event.key === 'Enter') {
-      handleClick();
-    }
-  }, [handleClick]);
-
+  // Handle keyboard
   useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === ' ' || event.key === 'Enter' || event.key === 'Escape') {
+        handleInteraction();
+      }
+    };
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [handleKeyPress]);
-
-  const getRotation = () => {
-    // Use ref for immediate direction updates (not lagging state)
-    const angle = Math.atan2(pacmanDirRef.current.y, pacmanDirRef.current.x) * (180 / Math.PI);
-    return angle;
-  };
+  }, [handleInteraction]);
 
   return (
     <div
-      ref={containerRef}
-      className="fixed inset-0 w-screen h-screen bg-mesh-gradient overflow-hidden cursor-pointer"
-      onClick={handleClick}
+      className="fixed inset-0 w-screen h-screen overflow-hidden cursor-pointer"
+      onClick={handleInteraction}
     >
-      {/* Subtle grid pattern */}
-      <div className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: 'linear-gradient(#D97706 1px, transparent 1px), linear-gradient(90deg, #D97706 1px, transparent 1px)',
-          backgroundSize: '40px 40px'
-        }}
-      />
-
-      {/* Obstacles */}
-      {obstacles.map((obstacle) => (
-        <div
-          key={obstacle.id}
-          className="absolute rounded-xl shadow-lg"
-          style={{
-            left: `${obstacle.x}%`,
-            top: `${obstacle.y}%`,
-            width: `${obstacle.width}%`,
-            height: `${obstacle.height}%`,
-            background: `linear-gradient(135deg, ${obstacle.color} 0%, ${obstacle.color}CC 100%)`,
-            border: '2px solid rgba(139, 69, 19, 0.3)',
-            boxShadow: `
-              inset 0 2px 4px rgba(255, 255, 255, 0.2),
-              inset 0 -2px 4px rgba(0, 0, 0, 0.3),
-              0 4px 12px rgba(139, 69, 19, 0.4)
-            `,
-            zIndex: 5,
-          }}
-        >
-          <div className="absolute inset-0 rounded-xl opacity-20"
-            style={{
-              backgroundImage: `repeating-linear-gradient(
-                90deg,
-                transparent,
-                transparent 2px,
-                rgba(0, 0, 0, 0.1) 2px,
-                rgba(0, 0, 0, 0.1) 4px
-              )`
-            }}
-          />
-        </div>
-      ))}
-
-      {/* Particles */}
-      {particles.map(particle => (
-        <div
-          key={particle.id}
-          className="absolute text-base pointer-events-none"
-          style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            transform: 'translate(-50%, -50%)',
-            opacity: particle.life,
-            zIndex: 20,
-            color: particle.color,
-            filter: `drop-shadow(0 0 10px ${particle.color})`
-          }}
-        >
-          {particle.emoji || '✨'}
-        </div>
-      ))}
-
-      {/* Pacman */}
-      <div
-        className={`absolute transition-all duration-75 ${
-          isEating ? 'scale-125' : 'scale-100'
-        }`}
-        style={{
-          left: `${pacmanPosition.x}%`,
-          top: `${pacmanPosition.y}%`,
-          transform: `translate(-50%, -50%) rotate(${getRotation()}deg)`,
-          zIndex: 15
-        }}
-      >
-        <div
-          className={`w-6 h-6 relative transition-all duration-300`}
-          style={{
-            background: powerMode
-              ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%)'
-              : 'linear-gradient(135deg, #F9A03F 0%, #D97706 100%)',
-            borderRadius: '50%',
-            clipPath: mouthOpen
-              ? 'polygon(100% 70%, 40% 50%, 100% 30%, 100% 0%, 0% 0%, 0% 100%, 100% 100%)'
-              : 'circle(50%)',
-            boxShadow: powerMode
-              ? '0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.4)'
-              : '0 6px 15px rgba(249, 160, 63, 0.4)',
-            filter: powerMode ? 'brightness(1.3)' : 'none'
-          }}
-        >
-          <div className="absolute w-1.5 h-1.5 bg-chocolate-brown rounded-full top-1.5 left-1.5 shadow-inner">
-            <div className="absolute w-0.5 h-0.5 bg-white rounded-full top-0 left-0"></div>
-          </div>
-          {powerMode && (
-            <div className="absolute inset-0 rounded-full bg-golden-orange/30 animate-pulse-slow"></div>
-          )}
-        </div>
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#3A1F0F] via-[#662B35] to-[#7B4B28] animate-gradient-shift">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(234,215,183,0.1)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(217,119,6,0.15)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_80%,rgba(102,43,53,0.15)_0%,transparent_50%)]" />
       </div>
 
-      {/* Ghosts */}
-      {ghosts.map((ghost) => (
-        <div
-          key={ghost.id}
-          className={`absolute transition-all duration-200`}
-          style={{
-            left: `${ghost.x}%`,
-            top: `${ghost.y}%`,
-            transform: 'translate(-50%, -50%)',
-            zIndex: 12
+      {/* Floating bakery elements */}
+      {floatingElements.map((element) => (
+        <motion.div
+          key={element.id}
+          className="absolute text-4xl opacity-20 pointer-events-none"
+          initial={{ x: `${element.x}%`, y: `${element.y}%` }}
+          animate={{
+            x: `${element.x + Math.sin(element.id) * 10}%`,
+            y: `${element.y + Math.cos(element.id) * 10}%`,
+            rotate: [0, 360],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{
+            duration: 20 + element.id * 2,
+            repeat: Infinity,
+            ease: "linear"
           }}
         >
-          <div
-            className={`relative ${ghost.behavior === 'scared' ? 'animate-pulse' : ''}`}
+          {element.emoji}
+        </motion.div>
+      ))}
+
+      {/* Sparkle effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(30)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-[#EAD7B7] rounded-full"
             style={{
-              filter: ghost.behavior === 'scared'
-                ? 'saturate(0.3) brightness(1.8) drop-shadow(0 0 15px rgba(138, 43, 226, 0.6))'
-                : ghost.behavior === 'aggression'
-                ? `drop-shadow(0 0 20px ${ghost.color}) brightness(1.3)`
-                : `drop-shadow(0 4px 12px ${ghost.color}40)`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
             }}
-          >
-            <div
-              className="text-xl"
-              style={{
-                color: ghost.behavior === 'scared' ? '#9CA3AF' : ghost.color,
-              }}
-            >
-              👻
-            </div>
-            {ghost.behavior === 'scared' && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-sm">😱</div>
-              </div>
-            )}
-            {ghost.onCooldown && ghost.behavior === 'wander' && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-lg">😢</div>
-              </div>
-            )}
-            {ghost.behavior === 'aggression' && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-lg">😡</div>
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
+            animate={{
+              opacity: [0, 1, 0],
+              scale: [0, 1, 0],
+            }}
+            transition={{
+              duration: 3,
+              delay: i * 0.1,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
 
-      {/* Cakes */}
-      {cakes.map((cake) => (
-        <div
-          key={cake.id}
-          className="absolute transition-all duration-300"
-          style={{
-            left: `${cake.x}%`,
-            top: `${cake.y}%`,
-            transform: 'translate(-50%, -50%)',
-            zIndex: 10,
-            animation: cake.isSpecial
-              ? 'specialFloat 2s ease-in-out infinite'
-              : 'gentleFloat 3s ease-in-out infinite',
-            filter: cake.isSpecial
-              ? 'drop-shadow(0 0 20px rgba(255, 215, 0, 1)) drop-shadow(0 0 40px rgba(255, 215, 0, 0.5))'
-              : 'drop-shadow(0 4px 10px rgba(217, 119, 6, 0.3))'
-          }}
+      {/* Main content container */}
+      <div className="relative z-10 h-full flex flex-col items-center justify-center p-8">
+
+        {/* Header with logo and tagline */}
+        <motion.div
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1 }}
+          className="text-center mb-12"
         >
-          <div className={`text-lg ${cake.isSpecial ? 'scale-125' : ''}`}>
-            {cake.emoji}
-          </div>
+          <motion.div
+            animate={{ rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="text-9xl mb-4"
+          >
+            🍰
+          </motion.div>
+          <h1 className="text-7xl font-bold text-[#FAF7F2] mb-4 drop-shadow-2xl">
+            Golden Munch
+          </h1>
+          <p className="text-3xl text-[#EAD7B7] font-light tracking-wide">
+            Where Every Bite is Pure Bliss
+          </p>
+        </motion.div>
+
+        {/* Featured Items Carousel */}
+        <div className="w-full max-w-6xl mb-12">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, scale: 0.8, rotateY: 90 }}
+              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+              exit={{ opacity: 0, scale: 0.8, rotateY: -90 }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <div className="bg-gradient-to-br from-[#FAF7F2]/20 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-12 shadow-[0_0_60px_rgba(234,215,183,0.3)] border-2 border-[#EAD7B7]/30">
+                <div className="flex items-center justify-center gap-16">
+                  {/* Item emoji/image */}
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.1, 1],
+                      rotate: [0, 5, -5, 0]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    className="text-[200px] drop-shadow-2xl"
+                  >
+                    {featuredItems[currentSlide].image}
+                  </motion.div>
+
+                  {/* Item details */}
+                  <div className="flex-1 text-left">
+                    <motion.div
+                      initial={{ x: 50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <Star className="w-8 h-8 text-[#D97706] fill-[#D97706]" />
+                        <span className="text-[#EAD7B7] text-2xl font-semibold tracking-wider uppercase">
+                          Featured Special
+                        </span>
+                      </div>
+                      <h2 className="text-6xl font-bold text-[#FAF7F2] mb-6 drop-shadow-lg">
+                        {featuredItems[currentSlide].name}
+                      </h2>
+                      <p className="text-3xl text-[#EAD7B7] mb-8 leading-relaxed">
+                        {featuredItems[currentSlide].description}
+                      </p>
+                      <div className="flex items-center gap-4">
+                        <div className="bg-gradient-to-r from-[#D97706] to-[#7B4B28] text-[#FAF7F2] text-4xl font-bold px-8 py-4 rounded-2xl shadow-2xl">
+                          {featuredItems[currentSlide].price}
+                        </div>
+                        <motion.div
+                          animate={{ x: [0, 10, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          <Sparkles className="w-10 h-10 text-[#D97706]" />
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slide indicators */}
+              <div className="flex justify-center gap-3 mt-8">
+                {featuredItems.map((_, index) => (
+                  <motion.div
+                    key={index}
+                    className={`h-3 rounded-full transition-all duration-500 ${
+                      index === currentSlide
+                        ? 'w-16 bg-[#D97706]'
+                        : 'w-3 bg-[#EAD7B7]/30'
+                    }`}
+                    animate={index === currentSlide ? { scale: [1, 1.2, 1] } : {}}
+                    transition={{ duration: 0.5, repeat: Infinity }}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
-      ))}
 
+        {/* Rotating Quotes Section */}
+        <motion.div
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
+          className="w-full max-w-4xl mb-8"
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuote}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.6 }}
+              className="text-center"
+            >
+              <div className="bg-gradient-to-r from-[#FAF7F2]/10 to-[#EAD7B7]/10 backdrop-blur-lg rounded-2xl p-8 border border-[#EAD7B7]/20 shadow-2xl">
+                <div className="flex justify-center mb-4">
+                  <Heart className="w-8 h-8 text-[#D97706] fill-[#D97706]" />
+                </div>
+                <p className="text-4xl text-[#FAF7F2] font-light italic mb-4 leading-relaxed">
+                  "{quotes[currentQuote].text}"
+                </p>
+                {quotes[currentQuote].author && (
+                  <p className="text-2xl text-[#EAD7B7] font-semibold">
+                    — {quotes[currentQuote].author}
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Call to action */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="inline-block"
+          >
+            <div className="bg-gradient-to-r from-[#FAF7F2]/20 to-[#EAD7B7]/20 backdrop-blur-md text-[#FAF7F2] text-3xl font-semibold px-12 py-6 rounded-full border-2 border-[#EAD7B7]/40 shadow-2xl flex items-center gap-4">
+              <Clock className="w-8 h-8" />
+              <span>Touch screen to start ordering</span>
+              <Cake className="w-8 h-8" />
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Custom CSS for gradient animation */}
       <style jsx>{`
-        @keyframes gentleFloat {
-          0%, 100% { transform: translate(-50%, -50%) translateY(0px) rotate(0deg); }
-          50% { transform: translate(-50%, -50%) translateY(-12px) rotate(5deg); }
-        }
-
-        @keyframes specialFloat {
+        @keyframes gradient-shift {
           0%, 100% {
-            transform: translate(-50%, -50%) translateY(0px) scale(1.25) rotate(0deg);
+            background-position: 0% 50%;
           }
           50% {
-            transform: translate(-50%, -50%) translateY(-15px) scale(1.35) rotate(15deg);
+            background-position: 100% 50%;
           }
+        }
+
+        .animate-gradient-shift {
+          background-size: 200% 200%;
+          animation: gradient-shift 15s ease infinite;
         }
       `}</style>
     </div>
