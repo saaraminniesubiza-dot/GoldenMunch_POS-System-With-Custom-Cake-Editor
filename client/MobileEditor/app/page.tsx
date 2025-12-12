@@ -8,7 +8,7 @@ import { Card, CardBody } from '@nextui-org/card';
 import { Button } from '@nextui-org/button';
 import { Progress } from '@nextui-org/progress';
 import { Spinner } from '@nextui-org/spinner';
-import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon, DevicePhoneMobileIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon, DevicePhoneMobileIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import StepCustomerInfo from '@/components/cake-editor/steps/StepCustomerInfo';
 import StepLayers from '@/components/cake-editor/steps/StepLayers';
 import StepFlavor from '@/components/cake-editor/steps/StepFlavor';
@@ -94,6 +94,9 @@ function CakeEditorContent() {
   const [submitting, setSubmitting] = useState(false);
   const [requestId, setRequestId] = useState<number | null>(null);
   const [isLandscape, setIsLandscape] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Design Options from API
   const [options, setOptions] = useState<any>(null);
@@ -327,6 +330,15 @@ function CakeEditorContent() {
     return screenshots;
   };
 
+  const handleSubmitClick = () => {
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setShowConfirmModal(false);
+    await handleSubmit();
+  };
+
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
@@ -339,9 +351,8 @@ function CakeEditorContent() {
         // Simulate a delay
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        alert(`🔧 DEBUG MODE - Design Preview:\n\nCustomer: ${design.customer_name}\nEmail: ${design.customer_email}\nPhone: ${design.customer_phone}\nLayers: ${design.num_layers}\nFrosting: ${design.frosting_type}\nColor: ${design.frosting_color}\n\n(This is a debug preview - no actual submission occurred)`);
-
         setSubmitting(false);
+        setShowSuccessModal(true);
         return;
       }
 
@@ -395,11 +406,8 @@ function CakeEditorContent() {
 
       const result = await submitResponse.json();
 
-      // Success! Show confirmation
-      alert(`✅ Success! Your custom cake request has been submitted!\n\nRequest ID: ${requestId}\n\nWe'll review your design and contact you at ${design.customer_email} within 24 hours with pricing and availability.`);
-
-      // Optionally redirect to a success page
-      // window.location.href = '/custom-cake/success';
+      // Success! Show confirmation modal
+      setShowSuccessModal(true);
 
     } catch (error: any) {
       console.error('Failed to submit:', error);
@@ -638,111 +646,233 @@ function CakeEditorContent() {
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-pink-50">
-      {/* Debug Mode Banner */}
-      {debugMode && process.env.NODE_ENV !== 'production' && (
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 text-center text-sm font-semibold shadow-lg">
-          🔧 DEBUG MODE ACTIVE - Session validation bypassed | No data will be saved
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">🎂 Custom Cake Designer</h1>
-              <p className="text-sm text-gray-600">Step {currentStep + 1} of {STEPS.length}: {STEPS[currentStep].name}</p>
-            </div>
-            {saving && (
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Spinner size="sm" />
-                <span>Saving...</span>
-              </div>
-            )}
-          </div>
-          <Progress value={progress} color="warning" className="max-w-full" />
-        </div>
+    <div className="fixed inset-0 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 overflow-hidden">
+      {/* Full Screen 3D Canvas */}
+      <div className="absolute inset-0 z-0">
+        <CakeCanvas3D ref={canvasRef} design={design} options={options} />
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-4 lg:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 3D Preview */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="order-2 lg:order-1"
-          >
-            <Card className="sticky top-24">
-              <CardBody className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Live Preview</h3>
-                <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden">
-                  <CakeCanvas3D ref={canvasRef} design={design} options={options} />
-                </div>
-                <div className="mt-4 p-3 bg-amber-50 rounded-lg">
-                  <p className="text-sm font-medium text-amber-900">Estimated Price</p>
-                  <p className="text-2xl font-bold text-amber-600">₱{calculatePrice(design)}</p>
-                </div>
-              </CardBody>
-            </Card>
-          </motion.div>
+      {/* Toggle Controls Button */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        onClick={() => setShowControls(!showControls)}
+        className="fixed top-4 left-4 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all"
+      >
+        {showControls ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+      </motion.button>
 
-          {/* Step Content */}
+      {/* Price Display */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed top-4 right-4 z-50 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 border-2 border-purple-200"
+      >
+        <p className="text-sm font-bold text-black">Estimated Price</p>
+        <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          ₱{calculatePrice(design)}
+        </p>
+      </motion.div>
+
+      {/* Hideable Controls Panel */}
+      <AnimatePresence>
+        {showControls && (
           <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="order-1 lg:order-2"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-white/95 backdrop-blur-xl shadow-2xl z-40 overflow-y-auto"
           >
-            <Card>
-              <CardBody className="p-6">
+            {/* Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 z-10">
+              <h1 className="text-2xl font-bold">🎂 Customize Your Cake</h1>
+              <p className="text-sm opacity-90">Step {currentStep + 1} of {STEPS.length}: {STEPS[currentStep].name}</p>
+              <Progress value={progress} className="mt-3" classNames={{ indicator: 'bg-white' }} />
+              {saving && (
+                <div className="flex items-center gap-2 text-sm mt-2">
+                  <Spinner size="sm" color="white" />
+                  <span>Saving...</span>
+                </div>
+              )}
+            </div>
+
+            {/* Step Content */}
+            <div className="p-6">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
                 <CurrentStepComponent
                   design={design}
                   updateDesign={updateDesign}
                   options={options}
                 />
+              </motion.div>
 
-                {/* Navigation */}
-                <div className="flex gap-3 mt-8">
-                  {currentStep > 0 && (
-                    <Button
-                      variant="flat"
-                      onClick={handlePrevious}
-                      startContent={<ArrowLeftIcon className="w-4 h-4" />}
-                      className="flex-1"
-                    >
-                      Previous
-                    </Button>
-                  )}
-                  {currentStep < STEPS.length - 1 ? (
-                    <Button
-                      color="primary"
-                      onClick={handleNext}
-                      endContent={<ArrowRightIcon className="w-4 h-4" />}
-                      className="flex-1"
-                    >
-                      Next Step
-                    </Button>
-                  ) : (
-                    <Button
-                      color="success"
-                      onClick={handleSubmit}
-                      isLoading={submitting}
-                      endContent={<CheckCircleIcon className="w-5 h-5" />}
-                      className="flex-1"
-                    >
-                      Submit for Review
-                    </Button>
-                  )}
-                </div>
-              </CardBody>
-            </Card>
+              {/* Navigation */}
+              <div className="flex gap-3 mt-8 sticky bottom-0 bg-white pt-4 pb-2 border-t">
+                {currentStep > 0 && (
+                  <Button
+                    onClick={handlePrevious}
+                    startContent={<ArrowLeftIcon className="w-4 h-4" />}
+                    className="flex-1 bg-gray-600 text-white font-bold"
+                  >
+                    Previous
+                  </Button>
+                )}
+                {currentStep < STEPS.length - 1 ? (
+                  <Button
+                    onClick={handleNext}
+                    endContent={<ArrowRightIcon className="w-4 h-4" />}
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold"
+                  >
+                    Next Step
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSubmitClick}
+                    isLoading={submitting}
+                    endContent={<CheckCircleIcon className="w-5 h-5" />}
+                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-lg py-6"
+                  >
+                    Submit for Review
+                  </Button>
+                )}
+              </div>
+            </div>
           </motion.div>
-        </div>
-      </div>
+        )}
+      </AnimatePresence>
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <div className="text-center">
+                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                  <CheckCircleIcon className="w-12 h-12 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold text-black mb-4">Are you sure?</h2>
+                <p className="text-lg text-black/80 mb-8">
+                  Ready to submit your custom cake design for review?
+                </p>
+                <div className="flex gap-4">
+                  <Button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="flex-1 bg-gray-600 text-white font-bold py-6 text-lg"
+                  >
+                    Go Back
+                  </Button>
+                  <Button
+                    onClick={handleConfirmSubmit}
+                    isLoading={submitting}
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-6 text-lg"
+                  >
+                    Yes, Submit!
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl"
+            >
+              <div className="text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", delay: 0.2 }}
+                  className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center"
+                >
+                  <CheckCircleIcon className="w-16 h-16 text-white" />
+                </motion.div>
+
+                <motion.h2
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-4xl font-bold text-black mb-4"
+                >
+                  Success! 🎉
+                </motion.h2>
+
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="space-y-4 mb-8"
+                >
+                  <p className="text-xl text-black font-semibold">
+                    Your cake will be up for checking and verification
+                  </p>
+                  <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 border-2 border-purple-200">
+                    <p className="text-lg text-black font-bold mb-3">📧 What's Next?</p>
+                    <ul className="text-left text-black/80 space-y-2">
+                      <li className="flex items-start gap-3">
+                        <span className="text-xl">✉️</span>
+                        <span className="font-semibold">Check your email for further information about your order</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-xl">⏱️</span>
+                        <span className="font-semibold">Typical response time is a few hours to a day</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-xl">💰</span>
+                        <span className="font-semibold">We'll send you the final pricing and confirmation</span>
+                      </li>
+                    </ul>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <Button
+                    onClick={() => window.location.reload()}
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-6 text-lg"
+                  >
+                    Create Another Cake
+                  </Button>
+                </motion.div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
