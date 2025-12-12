@@ -286,29 +286,29 @@ export default function IdlePage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 1 }}
-              className="w-full max-w-7xl"
+              className="w-full max-w-7xl mx-auto"
             >
               <div className="bg-gradient-to-br from-[#FAF7F2]/20 to-[#EAD7B7]/10 backdrop-blur-xl rounded-3xl p-16 shadow-[0_0_80px_rgba(234,215,183,0.4)] border-2 border-[#EAD7B7]/30">
-                <div className="flex items-center justify-center gap-20">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-20">
                   {/* Item image */}
                   <motion.div
                     key={currentFeaturedIndex}
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="drop-shadow-2xl"
+                    className="drop-shadow-2xl flex-shrink-0"
                   >
                     {featuredItems[currentFeaturedIndex].image.startsWith('http') ? (
                       <img
                         src={featuredItems[currentFeaturedIndex].image}
                         alt={featuredItems[currentFeaturedIndex].name}
-                        className="w-[300px] h-[300px] object-cover rounded-3xl"
+                        className="w-[300px] h-[300px] object-cover rounded-3xl mx-auto"
                       />
                     ) : (
                       <motion.div
                         animate={{ rotate: [0, 10, -10, 0] }}
                         transition={{ duration: 4, repeat: Infinity }}
-                        className="text-[300px]"
+                        className="text-[300px] leading-none flex items-center justify-center"
                       >
                         {featuredItems[currentFeaturedIndex].image}
                       </motion.div>
@@ -316,14 +316,14 @@ export default function IdlePage() {
                   </motion.div>
 
                   {/* Item details */}
-                  <div className="flex-1 text-left">
+                  <div className="flex-1 text-left min-w-0">
                     <div className="flex items-center gap-4 mb-6">
                       <Star className="w-12 h-12 text-[#D97706] fill-[#D97706]" />
                       <span className="text-[#EAD7B7] text-3xl font-semibold tracking-wider uppercase">
                         Featured Special
                       </span>
                     </div>
-                    <h2 className="text-8xl font-bold text-[#FAF7F2] mb-8 drop-shadow-lg">
+                    <h2 className="text-8xl font-bold text-[#FAF7F2] mb-8 drop-shadow-lg break-words">
                       {featuredItems[currentFeaturedIndex].name}
                     </h2>
                     <p className="text-4xl text-[#EAD7B7] mb-10 leading-relaxed">
