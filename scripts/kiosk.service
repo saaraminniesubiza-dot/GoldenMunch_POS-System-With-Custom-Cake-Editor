@@ -9,12 +9,19 @@ User=pi
 Group=pi
 Environment="DISPLAY=:0"
 Environment="XAUTHORITY=/home/pi/.Xauthority"
-Environment="NODE_ENV=production"
+# NOTE: Using development mode to allow dev server operation
+# If you want production mode, first run: npm run build
+# Environment="NODE_ENV=production"
+Environment="NODE_ENV=development"
 WorkingDirectory=/home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor/client/Kiosk
 ExecStartPre=/bin/sleep 10
 ExecStart=/home/pi/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk.sh
 Restart=on-failure
 RestartSec=10
+# Kill entire process group when stopping
+KillMode=control-group
+# Give processes time to clean up
+TimeoutStopSec=15
 
 [Install]
 WantedBy=graphical.target

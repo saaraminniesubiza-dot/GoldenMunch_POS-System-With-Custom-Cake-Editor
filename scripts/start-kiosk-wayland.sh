@@ -7,6 +7,7 @@ exec > >(tee -a "$LOGFILE") 2>&1
 echo "=========================================="
 echo "GoldenMunch Kiosk Starting (Wayland)..."
 echo "Time: $(date)"
+echo "Process ID: $$"
 echo "=========================================="
 
 # Wait for Wayland session to be ready
@@ -67,8 +68,40 @@ fi
 
 echo "Node version: $(node --version)"
 echo "npm version: $(npm --version)"
+echo "NODE_ENV: $NODE_ENV"
+
+# Check network connectivity (non-blocking)
+echo ""
+echo "Checking network connectivity..."
+if ping -c 1 -W 2 8.8.8.8 &> /dev/null; then
+    echo "✓ Network is accessible"
+else
+    echo "⚠ WARNING: Network may not be available"
+    echo "  This could affect npm operations but will continue anyway..."
+fi
+
+# Verify package.json exists
+if [ ! -f "package.json" ]; then
+    echo "ERROR: package.json not found in $KIOSK_DIR"
+    exit 1
+fi
 
 # Start the Electron app
+echo ""
+echo "=========================================="
 echo "Starting Electron app..."
 echo "Command: npm run electron:dev"
+echo "=========================================="
+echo ""
+
+# Set up trap to log exit
+trap 'echo "========================================"; echo "Kiosk process exited at $(date)"; echo "Exit code: $?"; echo "=========================================="' EXIT
+
+# Run with proper error handling
 npm run electron:dev
+
+# Capture exit code
+EXIT_CODE=$?
+echo ""
+echo "npm run electron:dev exited with code: $EXIT_CODE"
+exit $EXIT_CODE

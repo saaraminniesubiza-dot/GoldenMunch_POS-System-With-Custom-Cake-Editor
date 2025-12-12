@@ -5,13 +5,20 @@ PartOf=graphical-session.target
 
 [Service]
 Type=simple
-Environment="NODE_ENV=production"
+# NOTE: Using development mode to allow dev server operation
+# If you want production mode, first run: npm run build
+# Environment="NODE_ENV=production"
+Environment="NODE_ENV=development"
 ExecStartPre=/bin/sleep 5
 ExecStart=%h/GoldenMunch_POS-System-With-Custom-Cake-Editor/scripts/start-kiosk-wayland.sh
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
+# Kill entire process group when stopping
+KillMode=control-group
+# Give processes time to clean up
+TimeoutStopSec=15
 
 [Install]
 WantedBy=default.target
