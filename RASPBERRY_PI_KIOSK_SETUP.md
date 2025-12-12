@@ -1,4 +1,10 @@
-# Raspberry Pi Kiosk Setup Guide
+# Raspberry Pi Kiosk Setup Guide (LXDE/X11)
+
+> **⚠️ Important:** This guide is for **Raspberry Pi OS with LXDE/X11**. If you're running the newer **Raspberry Pi OS with Wayland** (rpd-labwc), please use [`WAYLAND_KIOSK_SETUP.md`](./WAYLAND_KIOSK_SETUP.md) instead.
+>
+> To check your desktop environment, run: `echo $DESKTOP_SESSION`
+> - If it shows `rpd-labwc` or `wayland` → Use [WAYLAND_KIOSK_SETUP.md](./WAYLAND_KIOSK_SETUP.md)
+> - If it shows `LXDE` or `lxde-pi` → Continue with this guide
 
 This guide will help you set up your Raspberry Pi to automatically start the GoldenMunch Kiosk app in portrait mode on boot.
 
